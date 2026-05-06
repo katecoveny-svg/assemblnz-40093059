@@ -284,7 +284,7 @@ const IncidentDetail = ({ incident, onBack }: { incident: Incident; onBack: () =
 
       {/* Escalation Decision */}
       <div className="rounded-xl p-5" style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.12)" }}>
-        <h2 className="mb-2 text-xs font-semibold text-red-400">Escalation Decision</h2>
+        <h2 className="mb-2 text-xs font-semibold text-[#C85A54]">Escalation Decision</h2>
         <p className="text-xs text-white/60">{incident.escalationDecision}</p>
       </div>
 

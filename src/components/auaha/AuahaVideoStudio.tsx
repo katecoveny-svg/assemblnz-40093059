@@ -251,7 +251,7 @@ export default function AuahaVideoStudio() {
               <GlassCard key={i} className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-white/40 text-xs">Scene {i + 1}</span>
-                  {scenes.length > 1 && <button onClick={() => removeScene(i)} className="text-white/20 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>}
+                  {scenes.length > 1 && <button onClick={() => removeScene(i)} className="text-white/20 hover:text-[#C85A54]"><Trash2 className="w-3.5 h-3.5" /></button>}
                 </div>
                 <div className="space-y-3">
                   <textarea value={scene.text} onChange={(e) => updateScene(i, "text", e.target.value)}

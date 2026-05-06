@@ -790,12 +790,12 @@ const teKahuiReoAgents: Agent[] = [
 ];
 
 // ═══════════════════════════════════════
-// KETE 9: TŌROA — Family Navigator (1 agent)
+// KETE 9: TORO — Family Navigator (1 agent)
 // ═══════════════════════════════════════
 
 const toroaAgents: Agent[] = [
   {
-    id: "toroa", name: "TŌROA", designation: "TOR-001",
+    id: "toroa", name: "TORO", designation: "TOR-001",
     role: "Family SMS Navigator",
     tagline: "SMS-first AI family navigator — school notices, meals, budgets, reminders, learning, transport",
     color: "#D4A843", sector: "Family", pack: "toroa", primaryModel: "gemini",

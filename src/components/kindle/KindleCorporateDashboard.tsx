@@ -38,10 +38,10 @@ const sponsorships = [
 ];
 
 const statusIcon: Record<DeliverableStatus, { Icon: typeof CheckCircle2; cls: string }> = {
-  complete: { Icon: CheckCircle2, cls: "text-green-400" },
+  complete: { Icon: CheckCircle2, cls: "text-[#5AADA0]" },
   in_progress: { Icon: Clock, cls: "text-blue-400" },
   pending: { Icon: Clock, cls: "text-muted-foreground" },
-  overdue: { Icon: AlertCircle, cls: "text-red-400" },
+  overdue: { Icon: AlertCircle, cls: "text-[#C85A54]" },
 };
 
 interface Props {
@@ -139,8 +139,8 @@ const KindleCorporateDashboard = ({ onSendToChat }: Props) => {
               <p className="text-[10px] text-muted-foreground">{m.label}</p>
               <p className="text-sm font-bold tabular-nums text-foreground">{m.value}</p>
               <div className="flex items-center gap-1 mt-0.5">
-                {m.trend === "up" ? <TrendingUp size={10} className="text-green-400" /> : <TrendingDown size={10} className="text-green-400" />}
-                <span className="text-[10px] font-medium text-green-400">{m.change} YoY</span>
+                {m.trend === "up" ? <TrendingUp size={10} className="text-[#5AADA0]" /> : <TrendingDown size={10} className="text-[#5AADA0]" />}
+                <span className="text-[10px] font-medium text-[#5AADA0]">{m.change} YoY</span>
               </div>
             </div>
           ))}

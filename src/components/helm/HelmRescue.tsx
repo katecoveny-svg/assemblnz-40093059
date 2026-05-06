@@ -57,9 +57,9 @@ export default function HelmRescue() {
 
   const statusBadge = (status: string) => {
     const map: Record<string, { icon: any; color: string; bg: string }> = {
-      requested: { icon: Clock, color: "text-amber-400", bg: "bg-amber-500/10" },
-      picked_up: { icon: Truck, color: "text-blue-400", bg: "bg-blue-500/10" },
-      delivered: { icon: CheckCircle, color: "text-green-400", bg: "bg-green-500/10" },
+      requested: { icon: Clock, color: "text-[#D4A843]", bg: "bg-amber-500/10" },
+      picked_up: { icon: Truck, color: "text-blue-400", bg: "bg-[#1A3A5C]/10" },
+      delivered: { icon: CheckCircle, color: "text-[#5AADA0]", bg: "bg-[#5AADA0]/10" },
     };
     const s = map[status] || map.requested;
     const Icon = s.icon;
@@ -75,8 +75,8 @@ export default function HelmRescue() {
 
       <div className="rounded-lg p-3" style={{ background: "rgba(239,83,80,0.08)", border: "1px solid rgba(239,83,80,0.15)" }}>
         <div className="flex items-start gap-2">
-          <AlertTriangle size={14} className="text-red-400 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-white/60">Forgot something at home? TŌROA can arrange delivery to school. Currently in demo mode — Uber Direct integration coming soon.</p>
+          <AlertTriangle size={14} className="text-[#C85A54] mt-0.5 shrink-0" />
+          <p className="text-[11px] text-white/60">Forgot something at home? TORO can arrange delivery to school. Currently in demo mode — Uber Direct integration coming soon.</p>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 // ToroaApp — family navigator app (formerly HelmApp)
-// Re-exports the Tōroa dashboard as the app entry point
+// Re-exports the Toro dashboard as the app entry point
 
 import ToroaDashboard from "@/components/toroa/ToroaDashboard";
 

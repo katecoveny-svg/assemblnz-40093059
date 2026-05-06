@@ -20,8 +20,8 @@ export const ELEVENLABS_AGENT_IDS: Record<string, string> = {
   automotive: "agent_9801kmedekfdfq29kcz3hgzk3ewx",  // FORGE
   customs: "agent_1801kmek0yy6f9a8y8dvht8cq5kb",     // NEXUS
 
-  // ── Tōroa (Family) ──
-  operations: "agent_4301kmegw0b3fy49dt2cpf0qx6tw",  // TŌROA
+  // ── Toro (Family) ──
+  operations: "agent_4301kmegw0b3fy49dt2cpf0qx6tw",  // TORO
 
   // ── Hauora (Health/Sport) ──
   sports: "agent_7601kmkv45zqe1rtffqnmt2jdfgh",      // TURF
@@ -128,8 +128,8 @@ export const AGENT_VOICE_STYLES: Record<string, KiwiVoiceStyle> = {
   whakaaro: "warm-kiwi",
   hiringa: "warm-kiwi",
 
-  // ── Tōroa (Family) ──
-  operations: "casual-kiwi",       // TŌROA
+  // ── Toro (Family) ──
+  operations: "casual-kiwi",       // TORO
   family: "casual-kiwi",
 
   // ── Hauora (Health/Sport) ──

@@ -1,10 +1,16 @@
-import { TrendingUp, TrendingDown, Eye, Heart, FileText, DollarSign, Palette, PenTool, Image, Video, Mic, Megaphone, Calendar, BarChart3, Pipette, Timer, ArrowRight, CreditCard, Zap, Sparkles, Activity } from "lucide-react";
+import { TrendingUp, TrendingDown, Eye, Heart, FileText, DollarSign, Palette, PenTool, Image, Video, Mic, Megaphone, Calendar, BarChart3, Pipette, Timer, ArrowRight, CreditCard, Zap, Sparkles, Activity, MonitorPlay } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import KeteBrainChat from "@/components/KeteBrainChat";
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
 import { motion } from "framer-motion";
 import KeteDashboardShell from "@/components/kete/KeteDashboardShell";
 import DashboardGlassCard from "@/components/kete/DashboardGlassCard";
+import { useAuahaDashboardMetrics, useRecentContentItems, useAuahaCampaigns } from "@/hooks/useAuahaData";
+import SovereigntyPanel from "@/components/sovereignty/SovereigntyPanel";
+import SovereigntySimulator from "@/components/sovereignty/SovereigntySimulator";
+import KeteDocUpload from "@/components/shared/KeteDocUpload";
+import KeteEvidencePackPanel from "@/components/shared/KeteEvidencePackPanel";
+import { formatDistanceToNow } from "date-fns";
 
 const ACCENT = "#F0D078";
 const TEAL = "#5AADA0";
@@ -14,52 +20,38 @@ const sparkData = [
   { d: "Thu", v: 16500 }, { d: "Fri", v: 18200 }, { d: "Sat", v: 22100 }, { d: "Sun", v: 19800 },
 ];
 
-const METRICS = [
-  { label: "Total Reach", value: "114,800", change: "+12.4%", up: true, icon: Eye, gradient: "from-amber-500/20 to-orange-500/10" },
-  { label: "Engagement Rate", value: "4.7%", change: "+0.3%", up: true, icon: Heart, gradient: "from-rose-500/20 to-pink-500/10" },
-  { label: "Content Published", value: "23/30", change: "77%", up: true, icon: FileText, gradient: "from-emerald-500/20 to-teal-500/10" },
-  { label: "Ad Spend", value: "$2,340", change: "$1,660 left", up: false, icon: DollarSign, gradient: "from-blue-500/20 to-indigo-500/10" },
-];
-
-const PIPELINE_STEPS = [
-  { label: "Brief", count: 3, color: "#F0D078", agent: "MUSE" },
-  { label: "Copy", count: 5, color: "#D4A843", agent: "MUSE + VERSE" },
-  { label: "Design", count: 4, color: "#5AADA0", agent: "PIXEL + CHROMATIC" },
-  { label: "Video", count: 2, color: "#3A7D6E", agent: "ECHO + FLUX" },
-  { label: "Schedule", count: 6, color: "#3A6A9C", agent: "RHYTHM" },
-  { label: "Publish", count: 8, color: "#1A3A5C", agent: "RHYTHM" },
-  { label: "Analyse", count: 12, color: "#F0D078", agent: "MUSE + RHYTHM" },
-  { label: "Iterate", count: 1, color: "#D4A843", agent: "All" },
+const PIPELINE_STAGES = [
+  { key: "brief", label: "Brief", color: "#F0D078", agent: "Rautaki" },
+  { key: "copy", label: "Copy", color: "#D4A843", agent: "Kōrero" },
+  { key: "compliance", label: "Compliance", color: "#5AADA0", agent: "Mana Kupu" },
+  { key: "design", label: "Design", color: "#3A7D6E", agent: "Toi" },
+  { key: "schedule", label: "Schedule", color: "#3A6A9C", agent: "Whakahaere" },
+  { key: "approve", label: "Approve", color: "#1A3A5C", agent: "Studio Director" },
+  { key: "analyse", label: "Analyse", color: "#F0D078", agent: "Aro" },
 ];
 
 const QUICK_LAUNCH = [
-  { label: "Campaign Builder", desc: "Brief → publish in one flow", icon: Megaphone, route: "/auaha/campaign" },
-  { label: "Copy Studio", desc: "MUSE writes sharp copy", icon: PenTool, route: "/auaha/copy" },
-  { label: "Image Studio", desc: "PIXEL + Fal.ai + Runway", icon: Image, route: "/auaha/images" },
-  { label: "Video Studio", desc: "Kling & Gen-3 Alpha", icon: Video, route: "/auaha/video" },
+  { label: "Campaign Brief", desc: "Rautaki sequences the team", icon: Megaphone, route: "/auaha/campaign" },
+  { label: "Copy Studio", desc: "Kōrero drafts sharp copy", icon: PenTool, route: "/auaha/copy" },
+  { label: "Image Studio", desc: "Toi + Fal.ai + Runway", icon: Image, route: "/auaha/images" },
+  { label: "Video Studio", desc: "Toi visual production", icon: Video, route: "/auaha/video" },
+  { label: "Loom Studio", desc: "Record & embed walkthroughs", icon: MonitorPlay, route: "/auaha/loom" },
   { label: "Podcast Studio", desc: "Record with AI co-host", icon: Mic, route: "/auaha/podcast" },
-  { label: "Ad Manager", desc: "Meta + TikTok + Loop", icon: Megaphone, route: "/auaha/ads" },
-  { label: "Content Calendar", desc: "Schedule via Buffer", icon: Calendar, route: "/auaha/calendar" },
-  { label: "Analytics Hub", desc: "All platforms unified", icon: BarChart3, route: "/auaha/analytics" },
+  { label: "Ad Manager", desc: "Read-only connectors at pilot", icon: Megaphone, route: "/auaha/ads" },
+  { label: "Content Calendar", desc: "Whakahaere schedules drafts", icon: Calendar, route: "/auaha/calendar" },
+  { label: "Analytics Hub", desc: "Aro closes the loop", icon: BarChart3, route: "/auaha/analytics" },
 ];
 
 const AGENTS = [
-  { name: "PRISM", role: "Brand", icon: Palette, status: "monitoring" },
-  { name: "MUSE", role: "Content", icon: PenTool, status: "active" },
-  { name: "PIXEL", role: "Design", icon: Image, status: "active" },
-  { name: "VERSE", role: "Audio", icon: Mic, status: "standby" },
-  { name: "ECHO", role: "Video", icon: Video, status: "active" },
-  { name: "FLUX", role: "Animation", icon: Video, status: "standby" },
-  { name: "CHROMATIC", role: "Colour", icon: Pipette, status: "monitoring" },
-  { name: "RHYTHM", role: "Production", icon: Timer, status: "active" },
-];
-
-const RECENT = [
-  { time: "2 min ago", action: "MUSE drafted 4 LinkedIn posts for Q2 campaign", agents: ["MUSE"], flow: "copy" },
-  { time: "15 min ago", action: "PIXEL generated hero image via Fal.ai Flux Pro", agents: ["PIXEL", "CHROMATIC"], flow: "image" },
-  { time: "1 hr ago", action: "ECHO completed TikTok video via Runway Gen-3", agents: ["ECHO", "FLUX"], flow: "video" },
-  { time: "3 hrs ago", action: "RHYTHM scheduled 12 posts across 4 platforms", agents: ["RHYTHM"], flow: "schedule" },
-  { time: "Yesterday", action: "PRISM flagged off-brand colour usage — CHROMATIC corrected", agents: ["PRISM", "CHROMATIC"], flow: "brand" },
+  { name: "Studio Director", role: "Orchestrator", icon: Zap, status: "active" },
+  { name: "Rautaki", role: "Strategy", icon: Megaphone, status: "active" },
+  { name: "Kōrero", role: "Content", icon: PenTool, status: "active" },
+  { name: "Mana Kupu", role: "Compliance", icon: Palette, status: "monitoring" },
+  { name: "Toi", role: "Creative", icon: Image, status: "active" },
+  { name: "Whakahaere", role: "Campaigns", icon: Calendar, status: "active" },
+  { name: "Whaikōrero-Ā-Hoko", role: "Lead gen", icon: Activity, status: "standby" },
+  { name: "Aro", role: "Analytics", icon: BarChart3, status: "monitoring" },
+  { name: "Reo Whare", role: "Internal comms", icon: Timer, status: "standby" },
 ];
 
 const usageData = [
@@ -80,10 +72,11 @@ function GlassCard({ children, className = "", accent = false, onClick, glow = f
     <div onClick={onClick}
       className={`relative rounded-2xl border backdrop-blur-xl transition-all duration-300 ${onClick ? "cursor-pointer hover:scale-[1.02] hover:shadow-lg" : ""} ${className}`}
       style={{
-        background: "rgba(15, 15, 26, 0.65)",
-        borderColor: accent ? `${ACCENT}33` : "rgba(255,255,255,0.08)",
-        boxShadow: glow ? `0 0 40px ${ACCENT}08, inset 0 1px 0 rgba(255,255,255,0.05)` : "inset 0 1px 0 rgba(255,255,255,0.05)",
+        background: "linear-gradient(135deg, rgba(22, 22, 38, 0.85), rgba(18, 18, 30, 0.7))",
+        borderColor: accent ? `${ACCENT}40` : glow ? `${ACCENT}30` : "rgba(255,255,255,0.1)",
+        boxShadow: glow ? `0 0 40px ${ACCENT}0A, 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)` : "0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)",
       }}>
+      {glow && <div className="absolute top-0 left-4 right-4 h-px rounded-full" style={{ background: `linear-gradient(90deg, transparent, ${ACCENT}60, transparent)` }} />}
       {children}
     </div>
   );
@@ -91,6 +84,21 @@ function GlassCard({ children, className = "", accent = false, onClick, glow = f
 
 export default function AuahaDashboard() {
   const navigate = useNavigate();
+  const { data: metrics } = useAuahaDashboardMetrics();
+  const { data: recentItems } = useRecentContentItems(5);
+  const { data: campaigns } = useAuahaCampaigns();
+
+  const pipelineCounts = metrics?.pipelineCounts || {};
+  const totalContent = metrics?.contentCount || 0;
+  const totalCampaigns = metrics?.campaignCount || 0;
+  const totalAssets = metrics?.assetCount || 0;
+
+  const METRICS = [
+    { label: "Content Items", value: String(totalContent), change: totalContent > 0 ? "live" : "—", up: totalContent > 0, icon: FileText, gradient: "from-[#3A7D6E]/20 to-[#5AADA0]/10" },
+    { label: "Campaigns", value: String(totalCampaigns), change: totalCampaigns > 0 ? "active" : "—", up: totalCampaigns > 0, icon: Megaphone, gradient: "from-[#D4A843]/20 to-[#C85A54]/10" },
+    { label: "Creative Assets", value: String(totalAssets), change: totalAssets > 0 ? "generated" : "—", up: totalAssets > 0, icon: Image, gradient: "from-[#C85A54]/20 to-[#C85A54]/10" },
+    { label: "Pipeline Items", value: String(Object.values(pipelineCounts).reduce((a, b) => a + b, 0)), change: "across stages", up: true, icon: Activity, gradient: "from-[#1A3A5C]/20 to-[#1A3A5C]/10" },
+  ];
 
   return (
     <KeteDashboardShell name="Auaha" subtitle="Creative & Media Intelligence" accentColor={ACCENT} accentLight="#FFE866" variant="standard">
@@ -101,7 +109,6 @@ export default function AuahaDashboard() {
           background: "linear-gradient(135deg, rgba(240,208,120,0.08) 0%, rgba(15,15,26,0.9) 40%, rgba(90,173,160,0.06) 100%)",
           border: "1px solid rgba(240,208,120,0.12)",
         }}>
-        {/* Decorative orbs */}
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20 blur-[80px]" style={{ background: ACCENT }} />
         <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full opacity-10 blur-[60px]" style={{ background: TEAL }} />
 
@@ -117,20 +124,20 @@ export default function AuahaDashboard() {
               Creative Command Centre
             </h1>
             <p className="text-white/45 text-sm max-w-lg" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-              8 symbiotic agents orchestrating your creative pipeline — from brief to publish, powered by Lovable AI, Fal.ai & Runway.
+              9 symbiotic agents orchestrating your creative pipeline — from brief to publish, powered by Lovable AI, Fal.ai & Runway.
             </p>
           </div>
           <div className="hidden lg:flex flex-col items-end gap-2">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)" }}>
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-emerald-400/80 text-xs font-medium">All systems live</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: "rgba(90,173,160,0.1)", border: "1px solid rgba(90,173,160,0.2)" }}>
+              <div className="w-2 h-2 rounded-full bg-[#5AADA0] animate-pulse" />
+              <span className="text-[#5AADA0]/80 text-xs font-medium">All systems live</span>
             </div>
-            <span className="text-white/25 text-[10px] font-mono">4 agents active • 2 monitoring</span>
+            <span className="text-white/25 text-[10px] font-mono">{totalContent} items • {totalCampaigns} campaigns</span>
           </div>
         </div>
       </motion.div>
 
-      {/* Row 1 — Metrics */}
+      {/* Row 1 — Metrics (LIVE) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {METRICS.map((m, i) => (
           <motion.div key={m.label} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
@@ -141,8 +148,8 @@ export default function AuahaDashboard() {
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${ACCENT}12` }}>
                     <m.icon className="w-4 h-4 text-white/50" />
                   </div>
-                  <span className={`text-xs flex items-center gap-1 px-2 py-0.5 rounded-full ${m.up ? 'text-emerald-400 bg-emerald-400/10' : 'text-white/40 bg-white/5'}`}>
-                    {m.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  <span className={`text-xs flex items-center gap-1 px-2 py-0.5 rounded-full ${m.up ? 'text-[#5AADA0] bg-[#5AADA0]/10' : 'text-white/40 bg-white/5'}`}>
+                    {m.up ? <TrendingUp className="w-3 h-3" /> : null}
                     {m.change}
                   </span>
                 </div>
@@ -154,7 +161,7 @@ export default function AuahaDashboard() {
         ))}
       </div>
 
-      {/* Row 2 — Pipeline */}
+      {/* Row 2 — Pipeline (LIVE counts) */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
         <GlassCard glow className="p-6 lg:p-8">
           <div className="flex items-center justify-between mb-6">
@@ -162,18 +169,17 @@ export default function AuahaDashboard() {
               <Activity className="w-4 h-4" style={{ color: ACCENT }} />
               <h3 className="text-white/70 text-xs uppercase tracking-[3px] font-medium" style={{ fontFamily: 'Lato, sans-serif' }}>Creative Pipeline</h3>
             </div>
-            <span className="text-[10px] text-white/25 bg-white/5 px-3 py-1 rounded-full">Content flows automatically through each stage</span>
+            <span className="text-[10px] text-white/25 bg-white/5 px-3 py-1 rounded-full">Live counts from your content items</span>
           </div>
-          {/* Pipeline connector line */}
           <div className="relative">
             <div className="absolute top-[22px] left-[40px] right-[40px] h-px" style={{ background: `linear-gradient(90deg, ${ACCENT}30, ${TEAL}30, ${ACCENT}30)` }} />
             <div className="flex items-center justify-between overflow-x-auto pb-2">
-              {PIPELINE_STEPS.map((step, i) => (
+              {PIPELINE_STAGES.map((step, i) => (
                 <motion.div key={step.label} custom={i} initial="hidden" animate="visible" variants={fadeUp}
                   className="flex flex-col items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-white/5 min-w-[80px] relative">
                   <div className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold relative z-10"
                     style={{ background: `${step.color}18`, color: step.color, border: `2px solid ${step.color}40`, boxShadow: `0 0 20px ${step.color}10` }}>
-                    {step.count}
+                    {pipelineCounts[step.key] || 0}
                   </div>
                   <span className="text-white/60 text-[10px] uppercase tracking-wider font-medium">{step.label}</span>
                   <span className="text-[8px] text-white/20 font-mono">{step.agent}</span>
@@ -209,13 +215,13 @@ export default function AuahaDashboard() {
         </div>
       </div>
 
-      {/* Row 4 — Charts + Activity */}
+      {/* Row 4 — Charts + Recent Activity (LIVE) */}
       <div className="grid lg:grid-cols-6 gap-4">
         {/* Reach chart */}
         <GlassCard className="lg:col-span-3 p-6">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-white/60 text-xs uppercase tracking-[3px] font-medium" style={{ fontFamily: 'Lato, sans-serif' }}>Weekly Reach</h3>
-            <span className="text-white/20 text-[10px] font-mono">+12.4% vs last week</span>
+            <span className="text-white/20 text-[10px] font-mono">Sample data — connect analytics</span>
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={sparkData}>
@@ -262,29 +268,39 @@ export default function AuahaDashboard() {
           </div>
         </GlassCard>
 
-        {/* Recent Activity */}
+        {/* Recent Activity — LIVE from content_items */}
         <GlassCard className="lg:col-span-2 p-6">
           <h3 className="text-white/60 text-xs uppercase tracking-[3px] font-medium mb-5" style={{ fontFamily: 'Lato, sans-serif' }}>Recent Activity</h3>
           <div className="space-y-4">
-            {RECENT.map((r, i) => (
-              <motion.div key={i} custom={i} initial="hidden" animate="visible" variants={fadeUp}
-                className="flex gap-3 group">
-                <div className="flex flex-col items-center">
-                  <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: ACCENT, opacity: 0.5 }} />
-                  {i < RECENT.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: `${ACCENT}15` }} />}
-                </div>
-                <div className="pb-1">
-                  <p className="text-white/65 text-xs leading-relaxed group-hover:text-white/80 transition-colors">{r.action}</p>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-white/20 text-[10px] font-mono">{r.time}</span>
-                    {r.agents.map((a) => (
-                      <span key={a} className="text-[9px] px-2 py-0.5 rounded-full font-medium"
-                        style={{ background: `${ACCENT}10`, color: `${ACCENT}BB`, border: `1px solid ${ACCENT}15` }}>{a}</span>
-                    ))}
+            {recentItems && recentItems.length > 0 ? (
+              recentItems.map((item: any, i: number) => (
+                <motion.div key={item.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}
+                  className="flex gap-3 group">
+                  <div className="flex flex-col items-center">
+                    <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: ACCENT, opacity: 0.5 }} />
+                    {i < (recentItems?.length || 0) - 1 && <div className="w-px flex-1 mt-1" style={{ background: `${ACCENT}15` }} />}
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="pb-1">
+                    <p className="text-white/65 text-xs leading-relaxed group-hover:text-white/80 transition-colors">{item.title}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-white/20 text-[10px] font-mono">
+                        {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                      </span>
+                      {item.agent_attribution && (
+                        <span className="text-[9px] px-2 py-0.5 rounded-full font-medium"
+                          style={{ background: `${ACCENT}10`, color: `${ACCENT}BB`, border: `1px solid ${ACCENT}15` }}>{item.agent_attribution}</span>
+                      )}
+                      <span className="text-[9px] px-2 py-0.5 rounded-full text-white/30 bg-white/5">{item.pipeline_stage}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-white/25 text-xs">No activity yet</p>
+                <p className="text-white/15 text-[10px] mt-1">Create content in Copy Studio or Campaign Builder</p>
+              </div>
+            )}
           </div>
         </GlassCard>
       </div>
@@ -312,7 +328,7 @@ export default function AuahaDashboard() {
                   <a.icon className="w-5 h-5 transition-colors" style={{ color: a.status === 'active' ? ACCENT : `${ACCENT}66` }} />
                 </div>
                 <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#0F0F1A] ${
-                  a.status === 'active' ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.4)]' : a.status === 'monitoring' ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.3)]' : 'bg-white/20'
+                  a.status === 'active' ? 'bg-[#5AADA0] shadow-[0_0_6px_rgba(90,173,160,0.4)]' : a.status === 'monitoring' ? 'bg-[#D4A843] shadow-[0_0_6px_rgba(251,191,36,0.3)]' : 'bg-white/20'
                 }`} />
               </div>
               <span className="text-white/80 text-[10px] font-semibold tracking-widest">{a.name}</span>
@@ -321,6 +337,39 @@ export default function AuahaDashboard() {
           ))}
         </div>
       </GlassCard>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <SovereigntyPanel kete="auaha" accentColor="#F0D078" />
+        <SovereigntySimulator kete="auaha" accentColor="#F0D078" />
+      </div>
+
+      <KeteEvidencePackPanel
+        keteSlug="auaha"
+        keteName="Auaha — Creative & Media"
+        accentColor="#F0D078"
+        agentId="prism"
+        agentName="PRISM"
+        packTemplates={[
+          { label: "Brand Compliance Pack", description: "Brand guideline adherence evidence", packType: "brand-compliance-pack", complianceChecks: [
+            { check: "Brand voice consistency verified", status: "pass" },
+            { check: "Colour palette compliance", status: "pass" },
+            { check: "ASA advertising standards", status: "pass" },
+          ]},
+          { label: "Content Audit Pack", description: "FTA 1986 · advertising claims audit", packType: "content-audit-pack", complianceChecks: [
+            { check: "FTA 1986 — no misleading claims", status: "pass" },
+            { check: "Cultural sensitivity (Kahu) reviewed", status: "pass" },
+            { check: "Tā audit trail complete", status: "pass" },
+          ]},
+          { label: "Campaign Evidence Pack", description: "Full campaign compliance trail", packType: "campaign-evidence-pack", complianceChecks: [
+            { check: "Privacy Act 2020 — consent for data use", status: "pass" },
+            { check: "GDPR/Spam Act compliance", status: "pass" },
+            { check: "Performance metrics documented", status: "pass" },
+          ]},
+        ]}
+      />
+
+      <KeteDocUpload keteSlug="auaha" keteColor="#F0D078" keteName="Auaha — Creative & Media"
+        docContext="Expect brand guidelines, creative briefs, media plans, campaign reports, analytics exports, and content calendars. Extract brand voice, colour palettes, and performance metrics." />
 
       <KeteBrainChat keteId="auaha" keteName="Auaha" keteNameEn="Creative" accentColor="#F0D078" />
     </KeteDashboardShell>

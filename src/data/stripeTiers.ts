@@ -29,7 +29,7 @@ export const STRIPE_TIERS = {
     price_id: "price_1TILj8PXAX9ohARRZqtNCzRW",
     product_id: "prod_UGtW4B1N1JxWUM",
     role: "essentials" as const,
-    label: "Tōroa — $29/mo",
+    label: "Toro — $29/mo",
   },
 
   // --- Legacy aliases for grandfathered customers ---

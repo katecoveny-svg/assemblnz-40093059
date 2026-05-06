@@ -3,9 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { agents } from "@/data/agents";
-import { assemblMark } from "@/assets/brand";
 import AgentAvatar from "@/components/AgentAvatar";
-import BrandFooter from "@/components/BrandFooter";
+import AdminShell from "@/components/admin/AdminShell";
 import {
   Users, MessageSquare, DollarSign, TrendingUp, Shield,
   Trash2, RefreshCw, ChevronDown, ExternalLink, Mail, Eye, EyeOff,
@@ -13,6 +12,9 @@ import {
   BarChart3, Clock, Star, AlertTriangle, CheckCircle2,
 } from "lucide-react";
 import AgentTestResultsTab from "@/components/admin/AgentTestResultsTab";
+import AdminPipelineTab from "@/components/admin/AdminPipelineTab";
+import AdminVideoGenTab from "@/components/admin/AdminVideoGenTab";
+import MemoryPanel from "@/components/memory/MemoryPanel";
 
 interface Metrics {
   totalUsers: number;
@@ -58,7 +60,7 @@ const LEAD_COLORS: Record<string, string> = { new: "#3A6A9C", contacted: "#3A6A9
 const AdminDashboard = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"overview" | "users" | "agents" | "activity" | "leads" | "documents" | "test" | "test-results">("overview");
+  const [tab, setTab] = useState<"overview" | "users" | "agents" | "activity" | "leads" | "documents" | "test" | "test-results" | "pipeline" | "videos" | "memory">("overview");
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([]);
@@ -180,37 +182,43 @@ const AdminDashboard = () => {
   const getAgentInfo = (id: string) => agents.find(a => a.id === id);
   const getStatus = (id: string) => agentStatuses.find(a => a.agent_id === id);
 
-  const tabs = ["overview", "users", "agents", "activity", "leads", "documents", "test", "test-results"] as const;
+  const tabs = ["overview", "users", "agents", "activity", "leads", "documents", "pipeline", "videos", "memory", "test", "test-results"] as const;
 
   return (
-    <div className="min-h-screen star-field flex flex-col">
-      {/* Header */}
-      <header className="flex items-center gap-3 px-6 py-4 border-b border-border">
-        <Link to="/" className="flex items-center gap-3">
-          <img src={assemblMark} alt="Assembl" className="w-7 h-7 object-contain drop-shadow-[0_0_12px_rgba(212,168,67,0.25)]" />
-          <span className="font-display font-light tracking-[3px] uppercase text-foreground text-sm">ASSEMBL</span>
-        </Link>
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: 'hsl(0 84% 60% / 0.15)', color: 'hsl(0 84% 60%)' }}>
-          <Shield size={10} /> ADMIN
+    <AdminShell
+      title="Dashboard"
+      subtitle="Platform overview & management"
+      icon={<Shield size={18} style={{ color: "#D4A843" }} />}
+      actions={
+        <div className="flex items-center gap-3">
+          <button onClick={loadData} className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground" title="Refresh">
+            <RefreshCw size={16} className={loadingData ? "animate-spin" : ""} />
+          </button>
+          <button onClick={() => { signOut(); navigate("/"); }}
+            className="text-xs text-destructive/70 hover:text-destructive transition-colors"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Sign out</button>
         </div>
-        <div className="flex-1" />
-        <button onClick={loadData} className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground" title="Refresh">
-          <RefreshCw size={16} className={loadingData ? "animate-spin" : ""} />
-        </button>
-        <button onClick={() => { signOut(); navigate("/"); }} className="text-xs text-destructive/70 hover:text-destructive transition-colors">Sign out</button>
-      </header>
-
+      }
+    >
       {/* Tabs */}
-      <div className="flex gap-1 px-6 pt-4 border-b border-border overflow-x-auto">
+      <div className="flex gap-1 mb-6 border-b border-border overflow-x-auto items-center">
         {tabs.map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2.5 text-xs font-medium capitalize border-b-2 transition-colors ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
             {t === "leads" ? "Leads" : t === "documents" ? <span className="flex items-center gap-1.5"><FolderOpen size={12} />Documents</span> : t}
           </button>
         ))}
+        <div className="ml-auto pl-4">
+          <button onClick={() => navigate("/admin/test-lab")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all hover:scale-105"
+            style={{ background: "rgba(212,168,67,0.15)", border: "1px solid rgba(212,168,67,0.3)", color: "#D4A843" }}>
+            <Zap size={14} />
+            Agent Testing Lab
+          </button>
+        </div>
       </div>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
+      <div className="space-y-6">
         {/* OVERVIEW */}
         {tab === "overview" && (
           <>
@@ -298,7 +306,7 @@ const AdminDashboard = () => {
                           <span className="text-[11px] text-foreground flex-1">{svc.name}</span>
                           {svc.responseTime && <span className="text-[9px] text-muted-foreground tabular-nums">{svc.responseTime}ms</span>}
                           <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full ${svc.status === "ok" ? "text-pounamu-light" : svc.status === "degraded" ? "text-amber-400" : "text-red-400"}`}
-                            style={{ background: svc.status === "ok" ? "rgba(0,255,136,0.1)" : svc.status === "degraded" ? "rgba(255,184,0,0.1)" : "rgba(255,77,106,0.1)" }}>
+                            style={{ background: svc.status === "ok" ? "rgba(58,125,110,0.12)" : svc.status === "degraded" ? "rgba(255,184,0,0.1)" : "rgba(255,77,106,0.1)" }}>
                             {svc.status}
                           </span>
                         </div>
@@ -375,7 +383,7 @@ const AdminDashboard = () => {
                               <span className="text-[9px] text-muted-foreground shrink-0">{p.time}</span>
                               <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full shrink-0`}
                                 style={{
-                                  background: p.status === "published" ? "rgba(0,255,136,0.1)" : p.status === "scheduled" ? "rgba(212,168,67,0.1)" : "rgba(255,184,0,0.1)",
+                                  background: p.status === "published" ? "rgba(58,125,110,0.12)" : p.status === "scheduled" ? "rgba(212,168,67,0.1)" : "rgba(255,184,0,0.1)",
                                   color: p.status === "published" ? "#5AADA0" : p.status === "scheduled" ? "#3A6A9C" : "#FFB800",
                                 }}>{p.status}</span>
                             </div>
@@ -656,7 +664,7 @@ const AdminDashboard = () => {
                               <span className="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400">📞 {(sub as any).phone}</span>
                             )}
                             {(sub as any).website && (
-                              <a href={(sub as any).website} target="_blank" rel="noopener noreferrer" className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 hover:underline">🌐 {(sub as any).website}</a>
+                              <a href={(sub as any).website} target="_blank" rel="noopener noreferrer" className="text-[9px] px-2 py-0.5 rounded-full bg-pounamu/10 text-pounamu hover:underline">🌐 {(sub as any).website}</a>
                             )}
                           </div>
                         )}
@@ -753,6 +761,20 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* PIPELINE TAB */}
+        {tab === "pipeline" && <AdminPipelineTab />}
+
+        {/* VIDEOS TAB */}
+        {tab === "videos" && <AdminVideoGenTab />}
+        {tab === "memory" && (
+          <div className={glassCard} style={glassStyle}>
+            <TopGlow color="#5AADA0" />
+            <div className="p-6">
+              <MemoryPanel />
+            </div>
+          </div>
+        )}
+
         {/* TEST TAB */}
         {tab === "test" && (
           <div>
@@ -779,9 +801,8 @@ const AdminDashboard = () => {
         {tab === "test-results" && (
           <AgentTestResultsTab />
         )}
-      </main>
-      <BrandFooter />
-    </div>
+      </div>
+    </AdminShell>
   );
 };
 

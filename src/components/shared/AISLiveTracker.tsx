@@ -187,8 +187,8 @@ export default function AISLiveTracker({ agentColor, onSendToChat }: Props) {
           <Ship size={14} style={{ color: agentColor }} />
           <h3 className="text-xs font-semibold text-foreground">Live AIS Vessel Tracking</h3>
           {connected && (
-            <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-500">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-[#5AADA0]/10 text-[#5AADA0]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5AADA0] animate-pulse" />
               Live
             </span>
           )}

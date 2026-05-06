@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { assemblMark } from "@/assets/brand";
 import {
   MessageSquare, Send, Phone, Check, CheckCheck, AlertCircle,
-  Image as ImageIcon, FileText, ArrowLeft, Search, Filter,
+  Image as ImageIcon, FileText, Search, Filter,
 } from "lucide-react";
+import AdminShell from "@/components/admin/AdminShell";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
@@ -185,18 +185,12 @@ export default function AdminMessagesPage() {
   if (authLoading) return null;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/40 px-4 py-3 flex items-center gap-3" style={glassStyle}>
-        <button onClick={() => navigate("/admin/dashboard")} className="p-2 hover:bg-accent/10 rounded-lg">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <img src={assemblMark} alt="Assembl" className="h-7" />
-        <h1 className="text-lg font-bold flex-1">Messages</h1>
-        <Badge variant="outline" className="text-xs">
-          {conversations.length} conversations
-        </Badge>
-      </header>
+    <AdminShell
+      title="Messages"
+      subtitle={`${conversations.length} conversations`}
+      icon={<MessageSquare size={18} style={{ color: "#3A7D6E" }} />}
+      backTo="/admin/dashboard"
+    >
 
       <div className="flex h-[calc(100vh-57px)]">
         {/* Sidebar — conversation list */}
@@ -346,6 +340,6 @@ export default function AdminMessagesPage() {
           )}
         </div>
       </div>
-    </div>
+    </AdminShell>
   );
 }

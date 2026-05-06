@@ -55,7 +55,7 @@ export default function HangarauDashboard() {
               <span className="text-[10px] text-white/40 uppercase tracking-wider">{m.label}</span>
             </div>
             <div className="text-xl font-bold text-white/90" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{m.value}</div>
-            <span className="text-[10px] text-emerald-400">{m.trend}</span>
+            <span className="text-[10px] text-[#5AADA0]">{m.trend}</span>
           </DashboardGlassCard>
         ))}
       </div>
@@ -95,7 +95,7 @@ export default function HangarauDashboard() {
                 <div className="text-xs font-bold text-white/80">{a.name}</div>
                 <div className="text-[9px] text-white/35">{a.desc}</div>
               </div>
-              <div className={`ml-auto w-2 h-2 rounded-full ${a.status === "online" ? "bg-emerald-400" : "bg-amber-400"}`} />
+              <div className={`ml-auto w-2 h-2 rounded-full ${a.status === "online" ? "bg-[#5AADA0]" : "bg-[#D4A843]"}`} />
             </div>
           ))}
         </div>

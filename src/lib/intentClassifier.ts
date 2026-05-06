@@ -122,8 +122,8 @@ const AGENT_REGISTRY: AgentEntry[] = [
   { id: 'whakaaro', name: 'WHAKAARO', keteId: 'te-kahui-reo', keywords: ['strategy', 'think', 'plan', 'vision', 'future'], specialisation: 'Strategic Thinking', performanceScore: 83 },
   { id: 'hiringa', name: 'HIRINGA', keteId: 'te-kahui-reo', keywords: ['innovation', 'enterprise', 'startup', 'māori business'], specialisation: 'Māori Enterprise', performanceScore: 85 },
 
-  // TŌROA
-  { id: 'toroa', name: 'TŌROA', keteId: 'toroa', keywords: ['family', 'whānau', 'schedule', 'school', 'kids', 'meal', 'grocery', 'smart home', 'alexa', 'traffic'], specialisation: 'Family AI Navigator', performanceScore: 95 },
+  // TORO
+  { id: 'toroa', name: 'TORO', keteId: 'toroa', keywords: ['family', 'whānau', 'schedule', 'school', 'kids', 'meal', 'grocery', 'smart home', 'alexa', 'traffic'], specialisation: 'Family AI Navigator', performanceScore: 95 },
 
   // HAUORA
   { id: 'turf', name: 'TURF', keteId: 'hauora', keywords: ['sport', 'fitness', 'team', 'game', 'league', 'training', 'competition'], specialisation: 'Sports & Fitness', performanceScore: 88 },
@@ -363,8 +363,8 @@ export const DEMO_QUERIES: { query: string; result: IntentMatch }[] = [
     query: "Plan a whānau reunion",
     result: {
       query: "Plan a whānau reunion",
-      keteId: 'toroa', keteName: 'TŌROA', keteAccent: '#E8D5B7',
-      agentId: 'toroa', agentName: 'TŌROA', specialisation: 'Family AI Navigator',
+      keteId: 'toroa', keteName: 'TORO', keteAccent: '#E8D5B7',
+      agentId: 'toroa', agentName: 'TORO', specialisation: 'Family AI Navigator',
       confidence: 95,
       reasoning: ['Intent: family', 'Match: whānau specialisation', 'Performance: 95%'],
       matchedIntents: ['family'],

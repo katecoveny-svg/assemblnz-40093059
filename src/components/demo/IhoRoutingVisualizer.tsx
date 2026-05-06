@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Layers, Shield, Zap, ArrowRight, Search, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Layers, Shield, Zap, ArrowRight, Search, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useIhoRouter } from "@/hooks/useIhoRouter";
 import type { RoutingResult } from "@/data/agentSkillConfig";
 
@@ -151,7 +151,7 @@ const IhoRoutingVisualizer = () => {
             exit={{ opacity: 0 }}
           >
             {steps.map((s, i) => {
-              const icons = [Search, Brain, Layers, Zap, Brain, Shield, ArrowRight];
+              const icons = [Search, Layers, Layers, Zap, Layers, Shield, ArrowRight];
               const Icon = icons[i] ?? Zap;
               const accent = s.active ? '#3A7D6E' : s.complete ? '#22C55E' : 'rgba(255,255,255,0.2)';
 

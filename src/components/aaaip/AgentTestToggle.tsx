@@ -46,8 +46,8 @@ interface TestResult {
 }
 
 function VerdictBadge({ verdict }: { verdict: string }) {
-  if (verdict === "pass") return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30"><CheckCircle2 className="w-3 h-3 mr-1" />Pass</Badge>;
-  if (verdict === "fail") return <Badge className="bg-red-500/20 text-red-400 border-red-500/30"><XCircle className="w-3 h-3 mr-1" />Fail</Badge>;
+  if (verdict === "pass") return <Badge className="bg-[#3A7D6E]/20 text-[#5AADA0] border-emerald-500/30"><CheckCircle2 className="w-3 h-3 mr-1" />Pass</Badge>;
+  if (verdict === "fail") return <Badge className="bg-[#C85A54]/20 text-[#C85A54] border-red-500/30"><XCircle className="w-3 h-3 mr-1" />Fail</Badge>;
   if (verdict === "warn") return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30"><AlertTriangle className="w-3 h-3 mr-1" />Warn</Badge>;
   return <Badge variant="outline" className="text-muted-foreground">Pending</Badge>;
 }

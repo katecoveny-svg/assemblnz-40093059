@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Calendar, Brain, Mic } from "lucide-react";
+import { ArrowRight, Calendar, Layers, Mic } from "lucide-react";
 import { useCallback, useState } from "react";
 import AgentAvatar from "./AgentAvatar";
 import VoiceAgentModal from "./VoiceAgentModal";
@@ -53,7 +53,7 @@ const HelmSection = () => {
             <div className="text-center lg:text-left">
               <div className="flex items-center gap-2 justify-center lg:justify-start mb-3">
                 <Calendar size={18} style={{ color: TOROA_COLOR }} />
-                <Brain size={14} style={{ color: TOROA_COLOR }} />
+                <Layers size={14} style={{ color: TOROA_COLOR }} />
                 <span
                   className="text-[9px] font-mono-jb px-2 py-0.5 rounded-full"
                   style={{
@@ -83,7 +83,7 @@ const HelmSection = () => {
                   textShadow: `0 0 20px ${TOROA_COLOR}40, 0 0 60px ${TOROA_COLOR}15`,
                 }}
               >
-                Meet TŌROA
+                Meet TORO
               </h2>
               <p className="font-mono-jb text-[10px] mb-4" style={{ color: `${TOROA_COLOR}30` }}>
                 ASM-013 · Family Command Centre
@@ -95,7 +95,7 @@ const HelmSection = () => {
                 Your family&apos;s intelligent navigator.
               </h3>
               <p className="text-sm font-body leading-relaxed mb-4 max-w-lg" style={{ color: "rgba(255,255,255,0.4)" }}>
-                TŌROA reads school notices, builds weekly schedules, tracks live bus positions,
+                TORO reads school notices, builds weekly schedules, tracks live bus positions,
                 and manages meal plans — all powered by AI that understands NZ school life.
                 One parent said it saved them 4 hours a week.
               </p>
@@ -122,7 +122,7 @@ const HelmSection = () => {
                     boxShadow: `0 0 20px ${TOROA_COLOR}20`,
                   }}
                 >
-                  Try TŌROA <ArrowRight size={14} />
+                  Try TORO <ArrowRight size={14} />
                 </Link>
                 <button
                   onClick={() => setShowVoice(true)}
@@ -134,7 +134,7 @@ const HelmSection = () => {
                     boxShadow: `0 0 20px ${TOROA_COLOR}10`,
                   }}
                 >
-                  <Mic size={14} /> Talk to TŌROA
+                  <Mic size={14} /> Talk to TORO
                 </button>
               </div>
             </div>
@@ -168,7 +168,7 @@ const HelmSection = () => {
 
       <VoiceAgentModal
         open={showVoice}
-        agentName="TŌROA"
+        agentName="TORO"
         agentId="operations"
         agentColor={TOROA_COLOR}
         elevenLabsAgentId={getElevenLabsAgentId("operations")}

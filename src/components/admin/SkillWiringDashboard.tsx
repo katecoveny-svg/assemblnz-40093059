@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Clock, Plug, ChevronDown, ChevronUp, Download, Layers, Brain } from "lucide-react";
+import { CheckCircle2, Clock, Plug, ChevronDown, ChevronUp, Download, Layers } from "lucide-react";
 import { KETE_SKILL_DATA, SHARED_FOUNDATION, SHARED_CORE_AGENTS, getGlobalSkillStats, getSkillCoverage, getFoundationSkills } from "@/data/agentSkillConfig";
 import { Button } from "@/components/ui/button";
+import AdminShell from "@/components/admin/AdminShell";
 
 const SkillWiringDashboard = () => {
   const [expandedKete, setExpandedKete] = useState<string | null>(null);
@@ -28,23 +29,22 @@ const SkillWiringDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-8" style={{ background: '#09090F' }}>
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-          <div>
-            <h1 className="font-display font-light text-3xl" style={{ color: 'hsl(var(--foreground))' }}>Skill Wiring Dashboard</h1>
-            <p className="font-body text-sm mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>Agent capability coverage across the Assembl network</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
-            <Download size={14} /> Export JSON
-          </Button>
-        </div>
+    <AdminShell
+      title="Skill Wiring"
+      subtitle="Agent capability coverage across the Assembl network"
+      icon={<Layers size={18} style={{ color: "#D4A843" }} />}
+      backTo="/admin/dashboard"
+      actions={
+        <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
+          <Download size={14} /> Export JSON
+        </Button>
+      }
+    >
 
         {/* Global Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
           {[
-            { label: 'Total Agents', value: stats.totalAgents, icon: Brain },
+            { label: 'Total Agents', value: stats.totalAgents, icon: Layers },
             { label: 'Total Skills', value: stats.totalSkills, icon: Layers },
             { label: 'Wired', value: stats.wired, icon: CheckCircle2, color: '#22C55E' },
             { label: 'Gaps', value: stats.gap, icon: Clock, color: '#EAB308' },
@@ -206,8 +206,7 @@ const SkillWiringDashboard = () => {
             );
           })}
         </div>
-      </div>
-    </div>
+    </AdminShell>
   );
 };
 

@@ -63,11 +63,11 @@ const KETE = [
   { name: "Waihanga", sub: "Construction", color: C.teal, accentLight: C.tealLight, to: "/waihanga",
     desc: "Site to sign-off. H&S, consenting, project programmes, quality records. WorkSafe-aligned.",
     agents: ["ĀRAI", "KAUPAPA", "ATA", "RAWA"] },
-  { name: "Auaha", sub: "Creative", color: "#F0D078", accentLight: "#FFE866", to: "/packs/auaha",
-    desc: "Brief to published. Copy, image, video, podcast, ads, analytics — the full creative pipeline.",
-    agents: ["PRISM", "MUSE", "PIXEL", "VERSE"] },
-  { name: "Arataki", sub: "Business Operations", color: C.navy, accentLight: "#4A7AB5", to: "/contact",
-    desc: "Dealership compliance, finance disclosure, and customer enquiry — the showroom back office handled.",
+  { name: "Auaha", sub: "Creative & Media", color: "#F0D078", accentLight: "#FFE866", to: "/packs/auaha",
+    desc: "Strategy, content, brand voice, design, campaigns, lead formation, analytics — one coordinated studio, not six tools and a freelancer.",
+    agents: ["Rautaki", "Kōrero", "Mana Kupu", "Toi"] },
+  { name: "Arataki", sub: "Automotive", color: C.navy, accentLight: "#4A7AB5", to: "/arataki",
+    desc: "Enquiry → test drive → sale → delivery → service → loyalty. Warranty claims, loan cars, workshop booking — the dealership relay race handled.",
     agents: ["Coming Q3 2026"] },
   { name: "Pikau", sub: "Freight & Customs", color: "#5AADA0", accentLight: "#7ECFC2", to: "/contact",
     desc: "Route optimisation, declarations, broker hand-off, customs compliance. Cross-border ready.",
@@ -118,7 +118,7 @@ const HowItWorksPage = () => (
   <div className="min-h-screen flex flex-col relative" style={{ background: C.bg, color: "#FFFFFF" }}>
     <SEO
       title="How Assembl Works — Specialist operational workflows for NZ business"
-      description="Five industry kete — Manaaki, Waihanga, Auaha, Arataki, Pikau. Five-stage compliance pipeline. Built around NZ law. From $590/mo NZD ex GST."
+      description="Five industry kete — Manaaki, Waihanga, Auaha, Arataki, Pikau. Five-stage compliance pipeline. Built around NZ law."
       path="/how-it-works"
     />
     <BrandNav />
@@ -345,7 +345,7 @@ const HowItWorksPage = () => (
             Pricing that fits an NZ small business.
           </h2>
           <p className="text-sm leading-relaxed mb-8" style={{ fontFamily: FONT.body, color: C.textSec }}>
-            Plans from NZ$590/mo + $1,490 setup (NZD ex GST). Family plan from $29/mo. Setup fees can be split across the first 3 invoices on request.
+            Priced by the kete you need each month. Setup fees can be split across the first 3 invoices on request.
           </p>
           <Link
             to="/pricing"

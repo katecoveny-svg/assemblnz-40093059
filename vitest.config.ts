@@ -8,6 +8,9 @@ export default defineConfig({
     projects: [
       {
         plugins: [react()],
+        resolve: {
+          alias: { "@": path.resolve(__dirname, "./src") },
+        },
         test: {
           name: "app",
           environment: "jsdom",

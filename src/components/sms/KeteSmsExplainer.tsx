@@ -67,8 +67,8 @@ export default function KeteSmsExplainer({
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            {smsConnected && <span className="text-[8px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">SMS LIVE</span>}
-            {whatsappConnected && <span className="text-[8px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">WA LIVE</span>}
+            {smsConnected && <span className="text-[8px] px-2 py-0.5 rounded-full bg-[#5AADA0]/10 text-[#5AADA0] border border-green-500/20">SMS LIVE</span>}
+            {whatsappConnected && <span className="text-[8px] px-2 py-0.5 rounded-full bg-[#5AADA0]/10 text-[#5AADA0] border border-green-500/20">WA LIVE</span>}
           </div>
           {expanded ? <ChevronUp size={16} className="text-white/30" /> : <ChevronDown size={16} className="text-white/30" />}
         </div>

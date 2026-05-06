@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { AlertTriangle, Clock, Shield, RefreshCw, Wrench, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
-const HAVEN_PINK = "#FF80AB";
+const HAVEN_PINK = "#D4A843";
 const STATUS_LABELS: Record<string, string> = {
   reported: "Reported", contacted: "Contacted", scheduled: "Scheduled",
   in_progress: "In Progress", completed: "Completed", invoice_uploaded: "Invoice Uploaded",

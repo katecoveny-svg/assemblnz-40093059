@@ -12,7 +12,7 @@ interface Props {
   onAddReminder: (text: string) => void;
 }
 
-const TŌROA = "#3A6A9C";
+const TORO = "#3A6A9C";
 
 const HelmDashboard = ({ items, onAddReminder }: Props) => {
   const [quickAdd, setQuickAdd] = useState("");
@@ -36,7 +36,7 @@ const HelmDashboard = ({ items, onAddReminder }: Props) => {
       className="rounded-xl p-4"
       style={{ background: "#0F0F1C", border: "1px solid #3A6A9C15" }}
     >
-      <h3 className="text-xs font-bold mb-2 flex items-center gap-1.5" style={{ color: TŌROA }}>
+      <h3 className="text-xs font-bold mb-2 flex items-center gap-1.5" style={{ color: TORO }}>
         {icon} {title}
       </h3>
       {items.length === 0 ? (
@@ -49,7 +49,7 @@ const HelmDashboard = ({ items, onAddReminder }: Props) => {
 
   return (
     <div className="space-y-3 p-4 max-w-2xl mx-auto">
-      <Section title="Upcoming (7 days)" icon={<NeonCalendar size={14} color={TŌROA} />} empty="No upcoming events yet. Chat with TŌROA to extract dates from documents.">
+      <Section title="Upcoming (7 days)" icon={<NeonCalendar size={14} color={TORO} />} empty="No upcoming events yet. Chat with TORO to extract dates from documents.">
         {events.map((e, i) => (
           <div key={i} className="flex justify-between text-xs py-1 border-b border-[#3A6A9C08] last:border-0">
             <span className="text-foreground/70">{e.text}</span>
@@ -58,13 +58,13 @@ const HelmDashboard = ({ items, onAddReminder }: Props) => {
         ))}
       </Section>
 
-      <Section title="This Week's Meals" icon={<NeonFork size={14} />} empty="No meal plan yet. Ask TŌROA to create one.">
+      <Section title="This Week's Meals" icon={<NeonFork size={14} />} empty="No meal plan yet. Ask TORO to create one.">
         {meals.map((m, i) => (
           <p key={i} className="text-xs text-foreground/70 py-0.5">{m.text}</p>
         ))}
       </Section>
 
-      <Section title="Reminders" icon={<NeonBell size={14} color={TŌROA} />} empty="No reminders yet. TŌROA will track birthdays, vet visits, WoF dates, and more.">
+      <Section title="Reminders" icon={<NeonBell size={14} color={TORO} />} empty="No reminders yet. TORO will track birthdays, vet visits, WoF dates, and more.">
         {reminders.map((r, i) => (
           <p key={i} className="text-xs text-foreground/70 py-0.5">{r.text}</p>
         ))}

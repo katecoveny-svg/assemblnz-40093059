@@ -198,8 +198,8 @@ export default function HelmBusTracker() {
       </div>
 
       {error && (
-        <div className="mx-3 mt-2 rounded-lg p-2 flex items-center gap-2 bg-red-500/10 border border-red-500/20">
-          <AlertTriangle size={12} className="text-red-400" />
+        <div className="mx-3 mt-2 rounded-lg p-2 flex items-center gap-2 bg-[#C85A54]/10 border border-red-500/20">
+          <AlertTriangle size={12} className="text-[#C85A54]" />
           <span className="text-xs text-red-300">{error}</span>
         </div>
       )}

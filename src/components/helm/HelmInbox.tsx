@@ -61,8 +61,8 @@ export default function HelmInbox({ onSendToChat }: { onSendToChat?: (msg: strin
 
   const statusIcon = (status: string) => {
     switch (status) {
-      case "parsed": return <CheckCircle size={12} className="text-green-400" />;
-      case "pending": return <Clock size={12} className="text-amber-400" />;
+      case "parsed": return <CheckCircle size={12} className="text-[#5AADA0]" />;
+      case "pending": return <Clock size={12} className="text-[#D4A843]" />;
       default: return <AlertCircle size={12} className="text-white/30" />;
     }
   };
@@ -82,7 +82,7 @@ export default function HelmInbox({ onSendToChat }: { onSendToChat?: (msg: strin
       <input ref={fileRef} type="file" accept=".pdf,.txt,.md,.jpg,.jpeg,.png,.webp" onChange={handleUpload} className="hidden" />
 
       <div className="rounded-lg p-3" style={{ background: HELM_COLOR + "08", border: `1px solid ${HELM_COLOR}15` }}>
-        <p className="text-[11px] text-white/60">Upload school newsletters, notices, or emails. TŌROA's AI will extract events, tasks, and deadlines automatically.</p>
+        <p className="text-[11px] text-white/60">Upload school newsletters, notices, or emails. TORO's AI will extract events, tasks, and deadlines automatically.</p>
         <p className="text-[10px] text-white/30 mt-1">Supports: PDF, TXT, JPG, PNG, WEBP</p>
       </div>
 

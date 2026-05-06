@@ -182,8 +182,8 @@ export default function HelmTimetable({ onSendToChat }: { onSendToChat?: (msg: s
                     ))}
                   </div>
                 </div>
-                <button onClick={() => deleteGearRule(rule.id)} className="p-1 rounded hover:bg-red-500/20 transition shrink-0">
-                  <X size={10} className="text-red-400/50" />
+                <button onClick={() => deleteGearRule(rule.id)} className="p-1 rounded hover:bg-[#C85A54]/20 transition shrink-0">
+                  <X size={10} className="text-[#C85A54]/50" />
                 </button>
               </div>
             ))

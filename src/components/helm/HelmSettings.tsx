@@ -70,29 +70,29 @@ export default function HelmSettings() {
         toast.error("Your session has expired. Please sign in again.");
         return;
       }
-      console.log("[TŌROA] Creating family:", familyName, region, "uid:", sessionData.session.user.id);
+      console.log("[TORO] Creating family:", familyName, region, "uid:", sessionData.session.user.id);
       const { data: fam, error: famError } = await supabase.from("families").insert({ name: familyName, nz_region: region, created_by: sessionData.session.user.id }).select().single();
-      if (famError) { console.error("[TŌROA] Family insert error:", famError); toast.error("Failed to create family: " + famError.message); return; }
+      if (famError) { console.error("[TORO] Family insert error:", famError); toast.error("Failed to create family: " + famError.message); return; }
       if (fam) {
-        console.log("[TŌROA] Family created, adding member:", fam.id);
+        console.log("[TORO] Family created, adding member:", fam.id);
         const { error: memError } = await supabase.from("family_members").insert({ family_id: fam.id, user_id: user.id, role: "admin" });
-        if (memError) { console.error("[TŌROA] Member insert error:", memError); toast.error("Failed to add you as family member: " + memError.message); return; }
+        if (memError) { console.error("[TORO] Member insert error:", memError); toast.error("Failed to add you as family member: " + memError.message); return; }
         // Invite is optional, don't block on failure
         const { error: invErr } = await supabase.from("family_invites").insert({ family_id: fam.id, created_by: user.id });
-        if (invErr) console.warn("[TŌROA] Invite creation failed (non-blocking):", invErr);
+        if (invErr) console.warn("[TORO] Invite creation failed (non-blocking):", invErr);
         toast.success("Family created successfully!");
         setShowSetup(false);
         await loadData();
       }
     } catch (e: any) {
-      console.error("[TŌROA] createFamily error:", e);
+      console.error("[TORO] createFamily error:", e);
       toast.error("Error: " + e.message);
     }
   };
 
   const addChild = async () => {
     if (!family || !childName.trim()) return;
-    const colors = ["#3A6A9C", "#FF80AB", "#80D8FF", "#A5D6A7", "#FFD54F", "#FF8A65"];
+    const colors = ["#3A6A9C", "#D4A843", "#80D8FF", "#A5D6A7", "#FFD54F", "#FF8A65"];
     const color = colors[children.length % colors.length];
     const { error } = await supabase.from("children").insert({
       family_id: family.id, name: childName, year_level: yearLevel || null,
@@ -132,7 +132,7 @@ export default function HelmSettings() {
           <div className="text-center mb-6">
             <Users size={32} style={{ color: HELM_COLOR }} className="mx-auto mb-3" />
             <h2 className="text-lg font-semibold text-white/90">Set Up Your Family</h2>
-            <p className="text-xs text-white/40 mt-1">TŌROA needs to know about your family to help manage your schedule</p>
+            <p className="text-xs text-white/40 mt-1">TORO needs to know about your family to help manage your schedule</p>
           </div>
           <input value={familyName} onChange={e => setFamilyName(e.target.value)} placeholder="Family name (e.g. The Smiths)"
             className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white/80 placeholder:text-white/25 focus:outline-none focus:border-white/20" />
@@ -210,7 +210,7 @@ export default function HelmSettings() {
                 <p className="text-[10px] text-white/30">{child.year_level ? `Year ${child.year_level}` : ""} {child.school ? `· ${child.school}` : ""}</p>
                 {child.bus_route_id && <p className="text-[9px] text-white/20 font-mono">Bus: {child.bus_route_id}</p>}
               </div>
-              <button onClick={() => removeChild(child.id)} className="p-1 rounded hover:bg-red-500/20 transition"><X size={12} className="text-red-400/50" /></button>
+              <button onClick={() => removeChild(child.id)} className="p-1 rounded hover:bg-[#C85A54]/20 transition"><X size={12} className="text-[#C85A54]/50" /></button>
             </div>
           ))}
           {children.length === 0 && <p className="text-xs text-white/25 py-4 text-center">No children added yet</p>}

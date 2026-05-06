@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import BrandNav from "@/components/BrandNav";
-import { Phone, MessageSquare, Plus, ToggleLeft, ToggleRight, ArrowLeft, Send, ChevronRight } from "lucide-react";
+import AdminShell from "@/components/admin/AdminShell";
+import { Phone, MessageSquare, Plus, ToggleLeft, ToggleRight, Send, ChevronRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { agents, echoAgent, pilotAgent } from "@/data/agents";
 import { motion, AnimatePresence } from "framer-motion";
@@ -112,22 +112,12 @@ const AdminSmsPage = () => {
   const agentForId = (id: string) => ALL_AGENTS.find(a => a.id === id);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
-      <BrandNav />
-
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 pt-20 pb-16">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <Link to="/admin/dashboard" className="inline-flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground mb-2 transition-colors">
-              <ArrowLeft size={12} /> Admin
-            </Link>
-            <h1 className="text-xl font-display font-light uppercase tracking-[0.06em] text-foreground flex items-center gap-3">
-              <Phone size={20} className="text-primary" />
-              SMS Management
-            </h1>
-          </div>
-        </div>
+    <AdminShell
+      title="SMS Management"
+      subtitle="Phone number routing & conversation management"
+      icon={<Phone size={18} className="text-primary" />}
+      backTo="/admin/dashboard"
+    >
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 rounded-full border border-border bg-card p-1 w-fit">
@@ -196,7 +186,7 @@ const AdminSmsPage = () => {
                       </select>
                     </div>
                   </div>
-                  <button onClick={addPhoneNumber} className="cta-glass-green px-5 py-2 text-xs">Save</button>
+                  <button onClick={addPhoneNumber} className="cta-glass-gold px-5 py-2 text-xs">Save</button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -315,8 +305,7 @@ const AdminSmsPage = () => {
             </div>
           </div>
         )}
-      </main>
-    </div>
+    </AdminShell>
   );
 };
 

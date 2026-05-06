@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
-import BrandNav from "@/components/BrandNav";
-import ParticleField from "@/components/ParticleField";
+import AdminShell from "@/components/admin/AdminShell";
+import AdminGlassCard from "@/components/admin/AdminGlassCard";
 import { motion } from "framer-motion";
 import { Download, BarChart3, Users, TrendingUp, Layers, Filter } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, FunnelChart, Funnel, LabelList } from "recharts";
@@ -215,48 +215,40 @@ const AdminPackAnalytics = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ background: "#09090F" }}>
-      <ParticleField />
-      <BrandNav />
-      <main className="flex-1 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, letterSpacing: "0.1em", textTransform: "uppercase", fontSize: "1.5rem", color: "#FFFFFF" }}>
-              Pack Analytics
-            </h1>
-            <p className="text-xs mt-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: "rgba(255,255,255,0.4)" }}>
-              Track engagement, conversions, and agent performance
-            </p>
+    <AdminShell
+      title="Pack Analytics"
+      subtitle="Track engagement, conversions, and agent performance"
+      icon={<BarChart3 size={18} style={{ color: "#D4A843" }} />}
+      backTo="/admin/dashboard"
+      actions={
+        <div className="flex items-center gap-3">
+          <div className="flex rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+            {(["7d", "30d", "90d"] as DateRange[]).map(r => (
+              <button
+                key={r}
+                onClick={() => setDateRange(r)}
+                className="px-3 py-1.5 text-[10px] font-bold uppercase transition-colors"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  background: dateRange === r ? "rgba(212,168,67,0.15)" : "transparent",
+                  color: dateRange === r ? "#D4A843" : "rgba(255,255,255,0.4)",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                {r}
+              </button>
+            ))}
           </div>
-          <div className="flex items-center gap-3">
-            {/* Date range selector */}
-            <div className="flex rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
-              {(["7d", "30d", "90d"] as DateRange[]).map(r => (
-                <button
-                  key={r}
-                  onClick={() => setDateRange(r)}
-                  className="px-3 py-1.5 text-[10px] font-bold uppercase transition-colors"
-                  style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    background: dateRange === r ? "rgba(212,168,67,0.15)" : "transparent",
-                    color: dateRange === r ? "#D4A843" : "rgba(255,255,255,0.4)",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  {r}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={exportCSV}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all hover:scale-105"
-              style={{ fontFamily: "'Lato', sans-serif", background: "#D4A843", color: "#09090F", letterSpacing: "0.08em" }}
-            >
-              <Download size={12} /> CSV Export
-            </button>
-          </div>
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all hover:scale-105"
+            style={{ fontFamily: "'Lato', sans-serif", background: "#D4A843", color: "#09090F", letterSpacing: "0.08em" }}
+          >
+            <Download size={12} /> CSV Export
+          </button>
         </div>
+      }
+    >
 
         {/* Tabs */}
         <div className="flex gap-1 mb-8 rounded-xl p-1" style={{ background: "rgba(15,15,26,0.5)", border: "1px solid rgba(255,255,255,0.04)" }}>
@@ -496,8 +488,7 @@ const AdminPackAnalytics = () => {
             )}
           </>
         )}
-      </main>
-    </div>
+    </AdminShell>
   );
 };
 

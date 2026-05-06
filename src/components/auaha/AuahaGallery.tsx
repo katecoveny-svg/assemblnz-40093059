@@ -1,0 +1,114 @@
+import { useState } from "react";
+import { Image, Video, Filter, Download, Eye, Clock, Shield, Search } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
+
+const ACCENT = "#F0D078";
+
+function GlassCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`rounded-xl border backdrop-blur-xl ${className}`}
+      style={{ background: "rgba(15,15,26,0.7)", borderColor: "rgba(255,255,255,0.1)" }}>
+      {children}
+    </div>
+  );
+}
+
+export default function AuahaGallery() {
+  const [filter, setFilter] = useState<"all" | "image" | "video">("all");
+  const [search, setSearch] = useState("");
+
+  const { data: assets = [] } = useQuery({
+    queryKey: ["auaha-gallery"],
+    queryFn: async () => {
+      const { data } = await supabase.from("creative_assets").select("*").order("created_at", { ascending: false }).limit(100);
+      return data || [];
+    },
+  });
+
+  const filtered = assets.filter((a: any) => {
+    if (filter !== "all" && a.asset_type !== filter) return false;
+    if (search && !a.prompt?.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  return (
+    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
+      <div>
+        <p className="text-white/40 text-xs uppercase tracking-[3px] mb-1">Auaha &gt; Gallery</p>
+        <h1 className="text-white text-2xl font-light uppercase tracking-[4px]" style={{ fontFamily: 'Lato, sans-serif' }}>Gallery</h1>
+        <p className="text-white/50 text-sm mt-1">All generated assets with provider metadata and Kahu status</p>
+      </div>
+
+      {/* Filters */}
+      <GlassCard className="p-4">
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex gap-2">
+            {(["all", "image", "video"] as const).map(f => (
+              <button key={f} onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-lg text-xs transition-all ${f === filter ? "text-black font-medium" : "text-white/50 bg-white/5"}`}
+                style={f === filter ? { background: ACCENT } : {}}>
+                {f === "all" ? "All" : f === "image" ? "Images" : "Videos"}
+              </button>
+            ))}
+          </div>
+          <div className="flex-1 relative">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/20" />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-white text-xs placeholder:text-white/20"
+              placeholder="Search by prompt..." />
+          </div>
+          <span className="text-white/30 text-xs">{filtered.length} assets</span>
+        </div>
+      </GlassCard>
+
+      {/* Grid */}
+      {filtered.length === 0 ? (
+        <GlassCard className="p-12 text-center">
+          <Image className="w-12 h-12 mx-auto mb-3 text-white/10" />
+          <p className="text-white/30 text-sm">No assets yet</p>
+          <p className="text-white/15 text-[10px] mt-1">Generate images or videos in the Generate Studio</p>
+        </GlassCard>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filtered.map((asset: any) => (
+            <GlassCard key={asset.id} className="overflow-hidden group">
+              <div className="aspect-square bg-black/30 relative overflow-hidden">
+                {asset.asset_type === "video" ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Video className="w-8 h-8 text-white/20" />
+                  </div>
+                ) : (
+                  <img src={asset.file_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                    <a href={asset.file_url} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white">
+                      <Eye className="w-4 h-4" />
+                    </a>
+                    <a href={asset.file_url} download className="text-white/70 hover:text-white">
+                      <Download className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+                {/* Provider badge */}
+                <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-[9px] text-white/60">
+                  {(asset.metadata as any)?.provider || "lovable"}
+                </div>
+              </div>
+              <div className="p-3">
+                <p className="text-white/60 text-[11px] line-clamp-2">{asset.prompt || "No prompt"}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Clock className="w-3 h-3 text-white/20" />
+                  <span className="text-white/25 text-[10px]">{formatDistanceToNow(new Date(asset.created_at), { addSuffix: true })}</span>
+                  {asset.style && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/5 text-white/30">{asset.style}</span>}
+                </div>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Mic, MicOff, Volume2, Brain, Radio, ChevronRight } from "lucide-react";
+import { Mic, MicOff, Volume2, Layers, Radio, ChevronRight } from "lucide-react";
 import GeminiLiveVoice from "@/components/GeminiLiveVoice";
+import type { GeminiLiveVoiceHandle } from "@/components/GeminiLiveVoice";
 
 const KOWHAI = "#D4A843";
 const POUNAMU = "#3A7D6E";
@@ -9,9 +10,9 @@ const POUNAMU = "#3A7D6E";
 type VoiceStatus = "ready" | "listening" | "processing" | "speaking";
 
 const Glass = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-2xl border backdrop-blur-md ${className}`} style={{
-    background: "linear-gradient(135deg, rgba(15,15,26,0.85), rgba(15,15,26,0.65))",
-    borderColor: "rgba(255,255,255,0.06)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+  <div className={`rounded-2xl border border-white/[0.06] backdrop-blur-xl ${className}`} style={{
+    background: "linear-gradient(135deg, hsl(var(--card) / 0.85), hsl(var(--card) / 0.65))",
+    boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
   }}>{children}</div>
 );
 
@@ -19,7 +20,7 @@ const STATUS_CONFIG: Record<VoiceStatus, { label: string; color: string; labelMi
   ready: { label: "Ready", color: POUNAMU, labelMi: "Kua rite" },
   listening: { label: "Listening...", color: "#E44D4D", labelMi: "E whakarongo ana..." },
   processing: { label: "Processing...", color: KOWHAI, labelMi: "E mahi ana..." },
-  speaking: { label: "Speaking...", color: "#3B82F6", labelMi: "E kōrero ana..." },
+  speaking: { label: "Speaking...", color: "#1A3A5C", labelMi: "E kōrero ana..." },
 };
 
 interface TranscriptEntry { role: "user" | "agent"; text: string; time: string }
@@ -38,6 +39,7 @@ export default function VoiceAgentPage() {
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([
     { role: "agent", text: "Kia ora! I'm ĀRAI, your safety intelligence agent. How can I help you today?", time: "09:00" },
   ]);
+  const liveRef = useRef<GeminiLiveVoiceHandle>(null);
 
   const toggleListening = () => {
     if (status === "ready") {
@@ -56,23 +58,41 @@ export default function VoiceAgentPage() {
     }
   };
 
+  const handlePromptClick = (prompt: string) => {
+    if (useLive) {
+      // Send prompt text to Gemini Live session
+      liveRef.current?.sendTextPrompt(prompt);
+    } else {
+      // Demo mode — simulate interaction
+      setTranscript(t => [...t, { role: "user", text: prompt, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]);
+      setStatus("processing");
+      setTimeout(() => {
+        setTranscript(t => [...t, { role: "agent", text: `Processing your request: "${prompt}". In a live session, ĀRAI would provide a real-time response powered by Gemini Live.`, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]);
+        setStatus("speaking");
+        setTimeout(() => setStatus("ready"), 2000);
+      }, 1500);
+    }
+  };
+
   const sc = STATUS_CONFIG[status];
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-3xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-xl font-bold text-white flex items-center gap-2"><Mic size={22} style={{ color: KOWHAI }} /> Voice Agent — Reo</h1>
-        <p className="text-xs text-white/40">Hands-free construction intelligence · NZ accent</p>
+        <h1 className="text-xl font-display font-light text-foreground tracking-[0.1em] uppercase flex items-center gap-2">
+          <Mic size={22} className="text-kowhai" /> Voice Agent — Reo
+        </h1>
+        <p className="text-xs text-muted-foreground">Hands-free construction intelligence · NZ accent</p>
       </motion.div>
 
       {/* Agent indicator */}
       <Glass className="p-4 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(58,125,110,0.15)" }}>
-          <Brain size={16} style={{ color: POUNAMU }} />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-pounamu/15">
+          <Layers size={16} className="text-pounamu" />
         </div>
         <div className="flex-1">
-          <div className="text-xs text-white/70">Connected to <span style={{ color: POUNAMU }}>ĀRAI Safety Intelligence</span></div>
-          <div className="text-[10px] text-white/30">Powered by IHO — Te Iho · Kiwi Voice</div>
+          <div className="text-xs text-foreground/70">Connected to <span className="text-pounamu font-medium">ĀRAI Safety Intelligence</span></div>
+          <div className="text-[10px] text-muted-foreground">Powered by IHO — Te Iho · Kiwi Voice</div>
         </div>
         <button
           onClick={() => setUseLive(!useLive)}
@@ -84,8 +104,8 @@ export default function VoiceAgentPage() {
       </Glass>
 
       {useLive ? (
-        /* Real Gemini Live voice with NZ accent */
         <GeminiLiveVoice
+          ref={liveRef}
           agentId="construction"
           agentName="ĀRAI"
           agentColor={POUNAMU}
@@ -97,7 +117,7 @@ export default function VoiceAgentPage() {
             <motion.button
               onClick={toggleListening}
               className="relative w-32 h-32 rounded-full flex items-center justify-center"
-              style={{ background: `linear-gradient(135deg, ${sc.color}30, ${sc.color}10)`, border: `2px solid ${sc.color}50` }}
+              style={{ background: `${sc.color}20`, border: `2px solid ${sc.color}50` }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -107,30 +127,30 @@ export default function VoiceAgentPage() {
               )}
               {status === "listening" ? <MicOff size={40} style={{ color: sc.color }} /> :
                 status === "speaking" ? <Volume2 size={40} style={{ color: sc.color }} /> :
-                status === "processing" ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Brain size={40} style={{ color: sc.color }} /></motion.div> :
+                status === "processing" ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Layers size={40} style={{ color: sc.color }} /></motion.div> :
                 <Mic size={40} style={{ color: sc.color }} />}
             </motion.button>
             <div className="mt-4 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full" style={{ background: sc.color }} />
               <span className="text-sm" style={{ color: sc.color }}>{sc.label}</span>
             </div>
-            <span className="text-[10px] text-white/20 mt-1">{sc.labelMi}</span>
+            <span className="text-[10px] text-muted-foreground mt-1">{sc.labelMi}</span>
           </div>
 
           {/* Demo Transcript */}
           <Glass className="p-5">
-            <h3 className="text-sm font-semibold text-white mb-4">Transcript</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-4">Transcript</h3>
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {transcript.map((t, i) => (
                 <motion.div key={i} initial={{ opacity: 0, x: t.role === "user" ? 10 : -10 }} animate={{ opacity: 1, x: 0 }}
                   className={`flex ${t.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-xs leading-relaxed ${t.role === "user" ? "text-white" : "text-white/70"}`} style={{
+                  <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-xs leading-relaxed ${t.role === "user" ? "text-foreground" : "text-foreground/70"}`} style={{
                     background: t.role === "user" ? `${KOWHAI}20` : "rgba(255,255,255,0.04)",
                     border: `1px solid ${t.role === "user" ? `${KOWHAI}30` : "rgba(255,255,255,0.06)"}`,
                     borderRadius: t.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
                   }}>
                     {t.text}
-                    <div className="text-[9px] text-white/20 mt-1">{t.time}</div>
+                    <div className="text-[9px] text-muted-foreground mt-1">{t.time}</div>
                   </div>
                 </motion.div>
               ))}
@@ -141,13 +161,17 @@ export default function VoiceAgentPage() {
 
       {/* Quick prompts */}
       <Glass className="p-5">
-        <h3 className="text-sm font-semibold text-white mb-3">Quick Prompts</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-3">Quick Prompts</h3>
         <div className="space-y-2">
           {prompts.map(p => (
-            <button key={p} className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-xs text-white/50 hover:text-white/80 hover:bg-white/[0.03] transition-all">
-              <Radio size={12} style={{ color: KOWHAI }} />
+            <button
+              key={p}
+              onClick={() => handlePromptClick(p)}
+              className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-xs text-foreground/50 hover:text-foreground/80 hover:bg-white/[0.03] transition-all"
+            >
+              <Radio size={12} className="text-kowhai shrink-0" />
               {p}
-              <ChevronRight size={12} className="ml-auto text-white/20" />
+              <ChevronRight size={12} className="ml-auto text-muted-foreground shrink-0" />
             </button>
           ))}
         </div>

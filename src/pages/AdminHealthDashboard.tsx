@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import BrandFooter from "@/components/BrandFooter";
-import { Activity, CheckCircle, XCircle, RefreshCw, ArrowLeft } from "lucide-react";
+import { Activity, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import AdminShell from "@/components/admin/AdminShell";
 
 interface HealthCheck {
   id: string;
@@ -113,28 +113,24 @@ export default function AdminHealthDashboard() {
   const allOk = services.every((s) => s.lastStatus === "ok");
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/admin/dashboard")} className="text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <Activity className="w-6 h-6 text-primary" />
-            <h1 className="text-2xl font-bold">System Health</h1>
-            <span className={`ml-3 px-3 py-1 rounded-full text-xs font-semibold ${allOk ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-              {allOk ? "All Systems Operational" : "Issues Detected"}
-            </span>
-          </div>
-          <button
-            onClick={triggerManualCheck}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-            {refreshing ? "Checking..." : "Run Check"}
-          </button>
-        </div>
+    <AdminShell
+      title="System Health"
+      subtitle={allOk ? "All systems operational" : "Issues detected"}
+      icon={<Activity className="w-5 h-5 text-primary" />}
+      backTo="/admin/dashboard"
+      actions={
+        <button
+          onClick={triggerManualCheck}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 disabled:opacity-50 text-sm"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        >
+          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          {refreshing ? "Checking..." : "Run Check"}
+        </button>
+      }
+    >
+      <div className="space-y-6">
 
         {/* Service Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -208,7 +204,6 @@ export default function AdminHealthDashboard() {
           )}
         </div>
       </div>
-      <BrandFooter />
-    </div>
+    </AdminShell>
   );
 }

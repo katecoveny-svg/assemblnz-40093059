@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { DollarSign, TrendingUp, Calculator } from "lucide-react";
 import { AgentBarChart, AgentPieChart } from "@/components/shared/AgentCharts";
 
-const HAVEN_PINK = "#FF80AB";
+const HAVEN_PINK = "#D4A843";
 
 interface CategoryData {
   category: string; count: number; total: number; avg: number; min: number; max: number;

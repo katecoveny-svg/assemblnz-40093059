@@ -29,8 +29,8 @@ function VerdictDot({ v }: { v: string }) {
 }
 
 function OverallBadge({ v }: { v: string }) {
-  if (v === "pass") return <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 text-[10px]"><CheckCircle2 className="w-3 h-3 mr-1" />Pass</Badge>;
-  if (v === "fail") return <Badge className="bg-red-500/15 text-red-400 border-red-500/20 text-[10px]"><XCircle className="w-3 h-3 mr-1" />Fail</Badge>;
+  if (v === "pass") return <Badge className="bg-[#3A7D6E]/15 text-[#5AADA0] border-emerald-500/20 text-[10px]"><CheckCircle2 className="w-3 h-3 mr-1" />Pass</Badge>;
+  if (v === "fail") return <Badge className="bg-[#C85A54]/15 text-[#C85A54] border-red-500/20 text-[10px]"><XCircle className="w-3 h-3 mr-1" />Fail</Badge>;
   if (v === "warn") return <Badge className="bg-yellow-500/15 text-yellow-400 border-yellow-500/20 text-[10px]"><AlertTriangle className="w-3 h-3 mr-1" />Warn</Badge>;
   return <Badge variant="outline" className="text-[10px]">{v}</Badge>;
 }

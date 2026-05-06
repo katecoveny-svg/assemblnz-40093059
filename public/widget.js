@@ -6,7 +6,7 @@
   // Create bubble button
   var bubble = document.createElement('div');
   bubble.style.cssText = 'position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:' + color + ';cursor:pointer;z-index:99999;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,0.4), 0 0 20px ' + color + '33;transition:transform 0.2s, box-shadow 0.2s;';
-  bubble.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#09090F"/></svg>';
+  bubble.innerHTML = '<img src="' + baseUrl + '/toroa-mark.svg" width="32" height="32" alt="Tōro" style="border-radius:50%;" />';
   bubble.onmouseover = function(){ this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 32px rgba(0,0,0,0.5), 0 0 30px ' + color + '55'; };
   bubble.onmouseout = function(){ this.style.transform='scale(1)'; this.style.boxShadow='0 4px 24px rgba(0,0,0,0.4), 0 0 20px ' + color + '33'; };
 
@@ -26,8 +26,8 @@
     open = !open;
     container.style.display = open ? 'block' : 'none';
     bubble.innerHTML = open
-      ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#09090F"/></svg>'
-      : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#09090F"/></svg>';
+       ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#09090F"/></svg>'
+       : '<img src="' + baseUrl + '/toroa-mark.svg" width="32" height="32" alt="Tōro" style="border-radius:50%;" />';
   };
 
   document.body.appendChild(container);

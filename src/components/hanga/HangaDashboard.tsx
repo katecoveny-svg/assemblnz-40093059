@@ -18,6 +18,8 @@ import KeteSmsExplainer from "@/components/sms/KeteSmsExplainer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import KeteDashboardShell from "@/components/kete/KeteDashboardShell";
 import DashboardGlassCard from "@/components/kete/DashboardGlassCard";
+import KeteDocUpload from "@/components/shared/KeteDocUpload";
+import KeteEvidencePackPanel from "@/components/shared/KeteEvidencePackPanel";
 
 const KOWHAI = "#D4A843";
 const POUNAMU = "#3A7D6E";
@@ -33,7 +35,7 @@ const Glass = ({ children, className = "", glow = false }: { children: React.Rea
 const agents = [
   { name: "KAUPAPA", role: "PROGRAMME & CLAIMS", desc: "Critical path tracking & Form 1 claims.", status: "ANALYSING", color: KOWHAI, to: "/waihanga/kaupapa" },
   { name: "ĀRAI", role: "SAFETY & RISK", desc: "Site-specific H&S risk register.", status: "MONITORING", color: POUNAMU, to: "/waihanga/arai" },
-  { name: "KAHU", role: "COMPLIANCE", desc: "CCA 2002 & Retention trust audit.", status: "IDLE", color: "#6B7280", to: "/waihanga/docs" },
+  { name: "KAHU", role: "COMPLIANCE", desc: "CCA 2002 & Retention trust audit.", status: "IDLE", color: "#7ECFC2", to: "/waihanga/docs" },
 ];
 
 const programmeData = [
@@ -88,7 +90,7 @@ export default function HangaDashboard() {
       {/* ── Header ── */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>WAIHANGA</h1>
+          <h1 className="text-2xl sm:text-3xl font-display font-light text-white tracking-[0.15em] uppercase">WAIHANGA</h1>
           <span className="text-[9px] font-bold tracking-[0.2em] px-3 py-1 rounded-full" style={{ background: `${KOWHAI}18`, color: KOWHAI, border: `1px solid ${KOWHAI}30` }}>
             CONSTRUCTION INTELLIGENCE
           </span>
@@ -366,6 +368,35 @@ export default function HangaDashboard() {
         accentColor="#3A7D6E"
         conversations={[]}
       />
+
+      <KeteEvidencePackPanel
+        keteSlug="waihanga"
+        keteName="Waihanga — Construction"
+        accentColor={KOWHAI}
+        agentId="apex"
+        agentName="APEX"
+        packTemplates={[
+          { label: "Building Consent Pack", description: "Building Act 2004 consent evidence", packType: "building-consent-pack", complianceChecks: [
+            { check: "Building Act 2004 — consent docs complete", status: "pass" },
+            { check: "Architectural drawings verified", status: "pass" },
+            { check: "Structural calculations attached", status: "pass" },
+            { check: "Fire engineering report filed", status: "pass" },
+          ]},
+          { label: "H&S Compliance Pack", description: "HSWA 2015 site safety evidence", packType: "hs-compliance-pack", complianceChecks: [
+            { check: "HSWA 2015 — site safety plan current", status: "pass" },
+            { check: "Hazard register documented", status: "pass" },
+            { check: "Worker inductions logged", status: "pass" },
+          ]},
+          { label: "Progress Claim Pack", description: "CCA 2002 payment claim evidence", packType: "progress-claim-pack", complianceChecks: [
+            { check: "CCA 2002 — claim format compliant", status: "pass" },
+            { check: "Variations documented", status: "pass" },
+            { check: "Retentions tracked", status: "pass" },
+          ]},
+        ]}
+      />
+
+      <KeteDocUpload keteSlug="waihanga" keteColor={KOWHAI} keteName="Waihanga — Construction"
+        docContext="Expect construction contracts, specifications, building consents, payment claims, site diaries, health & safety plans, and NZS 3910 documents. Flag Building Act 2004, Health & Safety at Work Act 2015, and Construction Contracts Act 2002 compliance." />
 
       <KeteBrainChat keteId="waihanga" keteName="Waihanga" keteNameEn="Construction" accentColor="#3A7D6E" />
     </KeteDashboardShell>

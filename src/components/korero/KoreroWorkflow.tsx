@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Brain, PenTool, Palette, Shield, ArrowRight, CheckCircle2, Loader2, Sparkles, Play } from "lucide-react";
+import { Mic, Layers, PenTool, Palette, Shield, ArrowRight, CheckCircle2, Loader2, Sparkles, Play } from "lucide-react";
 
 const WORKFLOW_STEPS = [
   {
     agent: "SAGE",
     role: "Business Strategy",
-    icon: Brain,
+    icon: Layers,
     color: "#1A3A5C",
     action: "Provides topic direction, key points, and audience insight",
     output: "Strategic brief with audience persona and core messaging",

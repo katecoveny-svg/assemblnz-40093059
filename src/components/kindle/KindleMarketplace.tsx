@@ -6,7 +6,7 @@ import { nzCauses, causeTypes, locationOptions, valueOptions } from "@/data/nzCa
 const KINDLE_COLOR = "#CE93D8";
 
 const ScoreBadge = ({ score }: { score: number }) => {
-  const bg = score >= 8 ? `${KINDLE_COLOR}20` : score >= 5 ? "rgba(0,255,136,0.1)" : "rgba(239,68,68,0.1)";
+  const bg = score >= 8 ? `${KINDLE_COLOR}20` : score >= 5 ? "rgba(58,125,110,0.12)" : "rgba(239,68,68,0.1)";
   const color = score >= 8 ? KINDLE_COLOR : score >= 5 ? "#5AADA0" : "#EF4444";
   return (
     <div className="w-8 h-8 rounded-full grid place-items-center text-[10px] font-bold tabular-nums" style={{ background: bg, color }}>{score}</div>
@@ -45,7 +45,7 @@ const KindleMarketplace = ({ onSendToChat }: Props) => {
         <div className="relative flex-1 min-w-[180px] max-w-sm">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input type="text" placeholder="Search causes..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 rounded-lg text-xs bg-background/50 border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-purple-400" />
+            className="w-full pl-8 pr-3 py-2 rounded-lg text-xs bg-background/50 border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-pounamu" />
         </div>
         <select value={causeFilter} onChange={e => setCauseFilter(e.target.value)} className="px-2.5 py-2 rounded-lg text-xs bg-background/50 border border-white/10 text-foreground">
           {causeTypes.map(c => <option key={c}>{c}</option>)}

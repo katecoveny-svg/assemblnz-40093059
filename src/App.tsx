@@ -9,7 +9,8 @@ import MobileTabBar from "@/components/MobileTabBar";
 import EchoChatWidget from "@/components/EchoChatWidget";
 import { HighContrastProvider } from "@/components/chat/HighContrastProvider";
 import { TeReoProvider } from "@/components/chat/TeReoProvider";
-import AgentGrid from "./pages/AgentGrid";
+import { PersonalizationProvider } from "@/contexts/PersonalizationContext";
+
 import ChatPage from "./pages/ChatPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
@@ -21,7 +22,7 @@ const ChatPageKeyed = () => {
   return <ChatPage key={agentId} />;
 };
 
-// MarinerLanding removed — redirects to /toroa
+// ─── Lazy imports (aligned pages only) ───────────────────────────────────────
 const EmbedPage = lazy(() => import("./pages/EmbedPage"));
 const EmbedChatWidget = lazy(() => import("./pages/EmbedChatWidget"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
@@ -30,47 +31,32 @@ const AdminForgotPassword = lazy(() => import("./pages/AdminForgotPassword"));
 const AdminResetPassword = lazy(() => import("./pages/AdminResetPassword"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
-const ClaimsRegisterPage = lazy(() => import("./pages/ClaimsRegisterPage"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfUse = lazy(() => import("./pages/TermsOfUse"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const Disclaimer = lazy(() => import("./pages/Disclaimer"));
 const SecurityPage = lazy(() => import("./pages/SecurityPage"));
-const TradiePortal = lazy(() => import("./pages/TradiePortal"));
-const LandlordPortal = lazy(() => import("./pages/LandlordPortal"));
-const EchoPage = lazy(() => import("./pages/EchoPage"));
-const ContentHub = lazy(() => import("./pages/ContentHub"));
-const AgentDetailPage = lazy(() => import("./pages/AgentDetailPage"));
 const MyAppsPage = lazy(() => import("./pages/MyAppsPage"));
 const SparkAppViewer = lazy(() => import("./pages/SparkAppViewer"));
 const WorkflowSettings = lazy(() => import("./pages/WorkflowSettings"));
 const IntegrationHub = lazy(() => import("./pages/IntegrationHub"));
-// WelcomePage removed — merged into onboarding
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const AdminHealthDashboard = lazy(() => import("./pages/AdminHealthDashboard"));
 const AdminLeadsDashboard = lazy(() => import("./pages/AdminLeadsDashboard"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
-const TurfDeadlinePage = lazy(() => import("./pages/TurfDeadlinePage"));
 const AdminAnalyticsDashboard = lazy(() => import("./pages/AdminAnalyticsDashboard"));
 const AdminMessagesPage = lazy(() => import("./pages/AdminMessagesPage"));
 const DevelopersPage = lazy(() => import("./pages/DevelopersPage"));
-const BrandGuidelinesPage = lazy(() => import("./pages/BrandGuidelinesPage"));
-const BrandAssetsPage = lazy(() => import("./pages/BrandAssetsPage"));
-const LogoStackPage = lazy(() => import("./pages/LogoStackPage"));
-const BrandStoryPage = lazy(() => import("./pages/BrandStoryPage"));
 const DataSovereigntyPage = lazy(() => import("./pages/DataSovereigntyPage"));
-const AuraLandingPage = lazy(() => import("./pages/AuraLandingPage"));
-const NexusLandingPage = lazy(() => import("./pages/NexusLandingPage"));
 const DataPrivacyLegal = lazy(() => import("./pages/DataPrivacyLegal"));
-const InvestPage = lazy(() => import("./pages/InvestPage"));
+
 const ToroaLandingPage = lazy(() => import("./pages/ToroaLandingPage"));
 const ToroaApp = lazy(() => import("./pages/ToroaApp"));
 const ToroaInstallPage = lazy(() => import("./pages/ToroaInstallPage"));
 const AgentApp = lazy(() => import("./pages/AgentApp"));
 const AdminSmsPage = lazy(() => import("./pages/AdminSmsPage"));
 const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage"));
-const KeteOverviewPage = lazy(() => import("./pages/KeteOverviewPage"));
 const KeteCollectionPage = lazy(() => import("./pages/KeteCollectionPage"));
 const KeteDetailPageNew = lazy(() => import("./pages/KeteDetailPage"));
 const CareDashboard = lazy(() => import("./pages/CareDashboard"));
@@ -83,20 +69,18 @@ const KanohiDashboard = lazy(() => import("./components/hanga/KanohiDashboard"))
 const HangaLayout = lazy(() => import("./components/hanga/HangaLayout"));
 const HangaDashboard = lazy(() => import("./components/hanga/HangaDashboard"));
 const AraiSafetyPage = lazy(() => import("./components/hanga/AraiSafetyPage"));
-const FuelSavingsPage = lazy(() => import("./pages/FuelSavingsPage"));
 const SiteCheckinPage = lazy(() => import("./components/hanga/SiteCheckinPage"));
 const PhotoDocsPage = lazy(() => import("./components/hanga/PhotoDocsPage"));
 const TenderWriterPage = lazy(() => import("./components/hanga/TenderWriterPage"));
 const DocIntelPage = lazy(() => import("./components/hanga/DocIntelPage"));
 const CommsHubPage = lazy(() => import("./components/hanga/CommsHubPage"));
 const VoiceAgentPage = lazy(() => import("./components/hanga/VoiceAgentPage"));
-const PackLandingPage = lazy(() => import("./pages/PackLandingPage"));
+
 const SampleEvidencePackPage = lazy(() => import("./pages/SampleEvidencePackPage"));
 const AuahaLayout = lazy(() => import("./components/auaha/AuahaLayout"));
 const AuahaDashboard = lazy(() => import("./components/auaha/AuahaDashboard"));
 const AuahaCampaignBuilder = lazy(() => import("./components/auaha/AuahaCampaignBuilder"));
 const AuahaCopyStudio = lazy(() => import("./components/auaha/AuahaCopyStudio")); // ALLOW: brand-voice — component name is a product feature, not a brand rule violation
-const AuahaImageStudio = lazy(() => import("./components/auaha/AuahaImageStudio"));
 const PixelImageStudio = lazy(() => import("./pages/auaha/ImageStudio"));
 const AuahaVideoStudio = lazy(() => import("./components/auaha/AuahaVideoStudio"));
 const AuahaPodcastStudio = lazy(() => import("./components/auaha/AuahaPodcastStudio"));
@@ -106,35 +90,48 @@ const AuahaAnalytics = lazy(() => import("./components/auaha/AuahaAnalytics"));
 const AuahaBrandIdentity = lazy(() => import("./components/auaha/AuahaBrandIdentity"));
 const AuahaWebBuilder = lazy(() => import("./components/auaha/AuahaWebBuilder"));
 const AuahaWhaikorero = lazy(() => import("./components/auaha/AuahaWhaikorero"));
+const AuahaGenerate = lazy(() => import("./components/auaha/AuahaGenerate"));
+const AuahaGallery = lazy(() => import("./components/auaha/AuahaGallery"));
+const AuahaTaAudit = lazy(() => import("./components/auaha/AuahaTaAudit"));
+const AuahaPromptLibrary = lazy(() => import("./components/auaha/AuahaPromptLibrary"));
+const AuahaLoomStudio = lazy(() => import("./components/auaha/AuahaLoomStudio"));
 const AdminPacksPage = lazy(() => import("./pages/AdminPacksPage"));
 const AdminPackAnalytics = lazy(() => import("./pages/AdminPackAnalytics"));
 const AdminMessagingDashboard = lazy(() => import("./pages/AdminMessagingDashboard"));
 const ManaakiDashboard = lazy(() => import("./components/manaaki/ManaakiDashboard"));
-// PakihiDashboard, HangarauDashboard, TeKahuiReoDashboard — retired kete, routes removed 2026-04-10
+const AratakiDashboard = lazy(() => import("./components/arataki/AratakiDashboard"));
+const PikauDashboard = lazy(() => import("./components/pikau/PikauDashboard"));
 const ToroaDashboard = lazy(() => import("./components/toroa/ToroaDashboard"));
+const WorkspaceDashboard = lazy(() => import("./pages/WorkspaceDashboard"));
+const WorkspaceConnections = lazy(() => import("./pages/WorkspaceConnections"));
 const SkillWiringDashboard = lazy(() => import("./components/admin/SkillWiringDashboard"));
-const SkillHubPage = lazy(() => import("./pages/SkillHubPage"));
 const AaaipDashboard = lazy(() => import("./pages/AaaipDashboard"));
 const AaaipResearcher = lazy(() => import("./pages/AaaipResearcher"));
-const ArohaLayout = lazy(() => import("./components/aroha/ArohaLayout"));
-const ArohaOverviewPage = lazy(() => import("./pages/ArohaOverviewPage"));
-const ArohaContracts = lazy(() => import("./components/aroha/ArohaContracts"));
-const ArohaOnboarding = lazy(() => import("./components/aroha/ArohaOnboarding"));
-const ArohaPayroll = lazy(() => import("./components/aroha/ArohaPayroll"));
-const ArohaRecruitment = lazy(() => import("./components/aroha/ArohaRecruitment"));
-const ArohaPeopleCulture = lazy(() => import("./components/aroha/ArohaPeopleCulture"));
-const ArohaCompanySetup = lazy(() => import("./components/aroha/ArohaCompanySetup"));
-const ArohaRetention = lazy(() => import("./components/aroha/ArohaRetention"));
+const AaaipPitchPrep = lazy(() => import("./pages/AaaipPitchPrep"));
+const AaaipLanding = lazy(() => import("./pages/AaaipLanding"));
 const AratakiLandingPage = lazy(() => import("./pages/AratakiLandingPage"));
 const PikauLandingPage = lazy(() => import("./pages/PikauLandingPage"));
+const ManaakiLandingPage = lazy(() => import("./pages/ManaakiLandingPage"));
+const AuahaLandingPage = lazy(() => import("./pages/AuahaLandingPage"));
+const WaihangaLandingPage = lazy(() => import("./pages/WaihangaLandingPage"));
 const ToroaTravelPage = lazy(() => import("./pages/ToroaTravelPage"));
 const ToroaChatPage = lazy(() => import("./pages/ToroaChatPage"));
 const WaihangaArchitecturePage = lazy(() => import("./pages/WaihangaArchitecturePage"));
-const TeReoReferencePage = lazy(() => import("./pages/TeReoReferencePage"));
-const TryPage = lazy(() => import("./pages/TryPage"));
+const WaihangaWorkflow = lazy(() => import("./pages/WaihangaWorkflow"));
 const CaseStudiesPage = lazy(() => import("./pages/CaseStudiesPage"));
 const StartPage = lazy(() => import("./pages/StartPage"));
 const StartPendingPage = lazy(() => import("./pages/StartPendingPage"));
+const AdminComplianceDashboard = lazy(() => import("./pages/AdminComplianceDashboard"));
+const AdminTestReports = lazy(() => import("./pages/AdminTestReports"));
+const AdminKnowledgeBase = lazy(() => import("./pages/AdminKnowledgeBase"));
+const AdminFlintDashboard = lazy(() => import("./pages/AdminFlintDashboard"));
+const AdminAgentTestLab = lazy(() => import("./pages/AdminAgentTestLab"));
+const RoiCalculatorPage = lazy(() => import("./pages/RoiCalculatorPage"));
+const DemosHub = lazy(() => import("./pages/demos/DemosHub"));
+const PipelineDemo = lazy(() => import("./pages/demos/PipelineDemo"));
+const EvidencePackDemo = lazy(() => import("./pages/demos/EvidencePackDemo"));
+const ConfidenceScoringDemo = lazy(() => import("./pages/demos/ConfidenceScoringDemo"));
+const KaitiakiGateDemo = lazy(() => import("./pages/demos/KaitiakiGateDemo"));
 
 const queryClient = new QueryClient();
 
@@ -147,54 +144,38 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+              <PersonalizationProvider>
               <div className="pb-14 sm:pb-0">
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/app" element={<AgentGrid />} />
+                  <Route path="/app" element={<Navigate to="/kete" replace />} />
                   <Route path="/chat/:agentId" element={<ChatPageKeyed />} />
                   <Route path="/login" element={<AuthPage mode="login" />} />
                   <Route path="/signup" element={<AuthPage mode="signup" />} />
-                  <Route path="/mariner" element={<Navigate to="/toroa" replace />} />
+                  <Route path="/mariner" element={<Navigate to="/toro" replace />} />
                   <Route path="/embed/:agentId" element={<Suspense fallback={null}><EmbedChatWidget /></Suspense>} />
                   <Route path="/embed" element={<Suspense fallback={null}><EmbedPage /></Suspense>} />
                   <Route path="/dashboard" element={<Suspense fallback={null}><DashboardPage /></Suspense>} />
                   <Route path="/pricing" element={<Suspense fallback={null}><PricingPage /></Suspense>} />
-                  <Route path="/claims-register" element={<Suspense fallback={null}><ClaimsRegisterPage /></Suspense>} />
                   <Route path="/contact" element={<Suspense fallback={null}><ContactPage /></Suspense>} />
                   <Route path="/how-it-works" element={<Suspense fallback={null}><HowItWorksPage /></Suspense>} />
                   <Route path="/content-hub" element={<Navigate to="/how-it-works" replace />} />
                   <Route path="/agents" element={<Navigate to="/how-it-works" replace />} />
                   <Route path="/tools" element={<Navigate to="/how-it-works" replace />} />
                   <Route path="/founding-pilots" element={<Navigate to="/contact" replace />} />
+
+                  {/* Admin */}
                   <Route path="/admin" element={<Suspense fallback={null}><AdminLogin /></Suspense>} />
                   <Route path="/admin/forgot-password" element={<Suspense fallback={null}><AdminForgotPassword /></Suspense>} />
                   <Route path="/admin/reset-password" element={<Suspense fallback={null}><AdminResetPassword /></Suspense>} />
                   <Route path="/admin/dashboard" element={<Suspense fallback={null}><AdminDashboard /></Suspense>} />
                   <Route path="/admin/health" element={<Suspense fallback={null}><AdminHealthDashboard /></Suspense>} />
                   <Route path="/admin/leads" element={<Suspense fallback={null}><AdminLeadsDashboard /></Suspense>} />
-                  <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicy /></Suspense>} />
-                  <Route path="/terms" element={<Suspense fallback={null}><TermsOfUse /></Suspense>} />
-                  <Route path="/cookies" element={<Suspense fallback={null}><CookiePolicy /></Suspense>} />
-                  <Route path="/disclaimer" element={<Suspense fallback={null}><Disclaimer /></Suspense>} />
-                  <Route path="/security" element={<Suspense fallback={null}><SecurityPage /></Suspense>} />
-                  <Route path="/tradie-portal" element={<Suspense fallback={null}><TradiePortal /></Suspense>} />
-                  <Route path="/landlord" element={<Suspense fallback={null}><LandlordPortal /></Suspense>} />
-                  <Route path="/agents/echo" element={<Suspense fallback={null}><EchoPage /></Suspense>} />
-                  <Route path="/agents/:agentId" element={<Suspense fallback={null}><AgentDetailPage /></Suspense>} />
-                  <Route path="/content-hub" element={<Suspense fallback={null}><ContentHub /></Suspense>} />
-                  <Route path="/my-apps" element={<Suspense fallback={null}><MyAppsPage /></Suspense>} />
-                  <Route path="/apps/:appName" element={<Suspense fallback={null}><SparkAppViewer /></Suspense>} />
-                  <Route path="/settings/workflows" element={<Suspense fallback={null}><WorkflowSettings /></Suspense>} />
-                  <Route path="/settings/integrations" element={<Suspense fallback={null}><IntegrationHub /></Suspense>} />
-                  <Route path="/welcome" element={<Navigate to="/onboarding" replace />} />
-                  <Route path="/about" element={<Suspense fallback={null}><AboutPage /></Suspense>} />
-                  <Route path="/try" element={<Suspense fallback={null}><TryPage /></Suspense>} />
-                  <Route path="/case-studies" element={<Suspense fallback={null}><CaseStudiesPage /></Suspense>} />
-                  <Route path="/onboarding" element={<Suspense fallback={null}><OnboardingPage /></Suspense>} />
-                  <Route path="/turf" element={<Suspense fallback={null}><TurfDeadlinePage /></Suspense>} />
-                  <Route path="/turf-5-april-2026" element={<Navigate to="/turf" replace />} />
-                  <Route path="/aura" element={<Suspense fallback={null}><AuraLandingPage /></Suspense>} />
-                  <Route path="/nexus" element={<Suspense fallback={null}><NexusLandingPage /></Suspense>} />
+                  <Route path="/admin/compliance" element={<Suspense fallback={null}><AdminComplianceDashboard /></Suspense>} />
+                  <Route path="/admin/test-reports" element={<Suspense fallback={null}><AdminTestReports /></Suspense>} />
+                  <Route path="/admin/knowledge" element={<Suspense fallback={null}><AdminKnowledgeBase /></Suspense>} />
+                  <Route path="/admin/flint" element={<Suspense fallback={null}><AdminFlintDashboard /></Suspense>} />
+                  <Route path="/admin/test-lab" element={<Suspense fallback={null}><AdminAgentTestLab /></Suspense>} />
                   <Route path="/admin/analytics" element={<Suspense fallback={null}><AdminAnalyticsDashboard /></Suspense>} />
                   <Route path="/admin/messages" element={<Suspense fallback={null}><AdminMessagesPage /></Suspense>} />
                   <Route path="/admin/sms" element={<Suspense fallback={null}><AdminSmsPage /></Suspense>} />
@@ -202,52 +183,81 @@ const App = () => (
                   <Route path="/admin/packs" element={<Suspense fallback={null}><AdminPacksPage /></Suspense>} />
                   <Route path="/admin/pack-analytics" element={<Suspense fallback={null}><AdminPackAnalytics /></Suspense>} />
                   <Route path="/admin/skill-wiring" element={<Suspense fallback={null}><SkillWiringDashboard /></Suspense>} />
-                  <Route path="/skill-hub" element={<Suspense fallback={null}><SkillHubPage /></Suspense>} />
-                  <Route path="/te-reo" element={<Suspense fallback={null}><TeReoReferencePage /></Suspense>} />
-                  <Route path="/fuel-savings" element={<Suspense fallback={null}><FuelSavingsPage /></Suspense>} />
-                  <Route path="/aaaip" element={<Suspense fallback={null}><AaaipDashboard /></Suspense>} />
-                  <Route path="/aaaip/researcher" element={<Suspense fallback={null}><AaaipResearcher /></Suspense>} />
-                  <Route path="/packs/:packSlug" element={<Suspense fallback={null}><PackLandingPage /></Suspense>} />
-                  <Route path="/sample/:kete" element={<Suspense fallback={null}><SampleEvidencePackPage /></Suspense>} />
-                  <Route path="/developers" element={<Suspense fallback={null}><DevelopersPage /></Suspense>} />
-                  <Route path="/brand-guidelines" element={<Suspense fallback={null}><BrandGuidelinesPage /></Suspense>} />
-                  <Route path="/brand-assets" element={<Suspense fallback={null}><BrandAssetsPage /></Suspense>} />
-                  <Route path="/logo-stack" element={<Suspense fallback={null}><LogoStackPage /></Suspense>} />
-                  <Route path="/brand-story" element={<Suspense fallback={null}><BrandStoryPage /></Suspense>} />
+
+                  {/* Sales & marketing */}
+                  <Route path="/roi" element={<Suspense fallback={null}><RoiCalculatorPage /></Suspense>} />
+                  <Route path="/about" element={<Suspense fallback={null}><AboutPage /></Suspense>} />
+                  <Route path="/case-studies" element={<Suspense fallback={null}><CaseStudiesPage /></Suspense>} />
                   <Route path="/data-sovereignty" element={<Suspense fallback={null}><DataSovereigntyPage /></Suspense>} />
+                  
+                  <Route path="/developers" element={<Suspense fallback={null}><DevelopersPage /></Suspense>} />
+
+                  {/* Legal */}
+                  <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicy /></Suspense>} />
+                  <Route path="/terms" element={<Suspense fallback={null}><TermsOfUse /></Suspense>} />
+                  <Route path="/cookies" element={<Suspense fallback={null}><CookiePolicy /></Suspense>} />
+                  <Route path="/disclaimer" element={<Suspense fallback={null}><Disclaimer /></Suspense>} />
+                  <Route path="/security" element={<Suspense fallback={null}><SecurityPage /></Suspense>} />
                   <Route path="/data-privacy" element={<Suspense fallback={null}><DataPrivacyLegal /></Suspense>} />
-                  <Route path="/invest" element={<Suspense fallback={null}><InvestPage /></Suspense>} />
-                  <Route path="/kete" element={<Suspense fallback={null}><KeteCollectionPage /></Suspense>} />
-                  <Route path="/kete/:slug" element={<Suspense fallback={null}><KeteDetailPageNew /></Suspense>} />
-                  <Route path="/manaaki" element={<Suspense fallback={null}><ManaakiDashboard /></Suspense>} />
-                  <Route path="/arataki" element={<Suspense fallback={null}><AratakiLandingPage /></Suspense>} />
-                  <Route path="/pikau" element={<Suspense fallback={null}><PikauLandingPage /></Suspense>} />
-                  {/* Retired kete — redirected 2026-04-10 */}
-                  <Route path="/pakihi" element={<Navigate to="/" replace />} />
-                  <Route path="/hangarau" element={<Navigate to="/" replace />} />
-                  <Route path="/te-kahui-reo" element={<Navigate to="/" replace />} />
-                  <Route path="/toroa" element={<Suspense fallback={null}><ToroaLandingPage /></Suspense>} />
-                  <Route path="/toroa/dashboard" element={<Suspense fallback={null}><ToroaDashboard /></Suspense>} />
-                  <Route path="/toroa/app" element={<Suspense fallback={null}><ToroaApp /></Suspense>} />
-                  <Route path="/toroa/install" element={<Suspense fallback={null}><ToroaInstallPage /></Suspense>} />
-                  <Route path="/toroa/travel" element={<Suspense fallback={null}><ToroaTravelPage /></Suspense>} />
-                  <Route path="/toroa/chat" element={<Suspense fallback={null}><ToroaChatPage /></Suspense>} />
-                  <Route path="/helm" element={<Navigate to="/toroa" replace />} />
-                  <Route path="/helm/*" element={<Navigate to="/toroa" replace />} />
+
+                  {/* Functional */}
+                  <Route path="/my-apps" element={<Suspense fallback={null}><MyAppsPage /></Suspense>} />
+                  <Route path="/apps/:appName" element={<Suspense fallback={null}><SparkAppViewer /></Suspense>} />
+                  <Route path="/settings/workflows" element={<Suspense fallback={null}><WorkflowSettings /></Suspense>} />
+                  <Route path="/settings/integrations" element={<Suspense fallback={null}><IntegrationHub /></Suspense>} />
+                  <Route path="/welcome" element={<Navigate to="/onboarding" replace />} />
+                  <Route path="/onboarding" element={<Suspense fallback={null}><OnboardingPage /></Suspense>} />
+                  <Route path="/try" element={<Navigate to="/contact" replace />} />
+                  <Route path="/packs/:packSlug" element={<Navigate to="/kete" replace />} />
+                  <Route path="/sample/:kete" element={<Suspense fallback={null}><SampleEvidencePackPage /></Suspense>} />
                   <Route path="/app/:agentId" element={<Suspense fallback={null}><AgentApp /></Suspense>} />
                   <Route path="/care/:seniorId" element={<Suspense fallback={null}><CareDashboard /></Suspense>} />
-                  <Route path="/aroha" element={<Suspense fallback={null}><ArohaLayout /></Suspense>}>
-                    <Route index element={<Suspense fallback={null}><ArohaOverviewPage /></Suspense>} />
-                    <Route path="contracts" element={<Suspense fallback={null}><ArohaContracts /></Suspense>} />
-                    <Route path="onboarding" element={<Suspense fallback={null}><ArohaOnboarding /></Suspense>} />
-                    <Route path="payroll" element={<Suspense fallback={null}><ArohaPayroll /></Suspense>} />
-                    <Route path="recruitment" element={<Suspense fallback={null}><ArohaRecruitment /></Suspense>} />
-                    <Route path="people" element={<Suspense fallback={null}><ArohaPeopleCulture /></Suspense>} />
-                    <Route path="setup" element={<Suspense fallback={null}><ArohaCompanySetup /></Suspense>} />
-                    <Route path="retention" element={<Suspense fallback={null}><ArohaRetention /></Suspense>} />
-                  </Route>
-                  <Route path="/hanga" element={<Navigate to="/waihanga" replace />} />
-                  <Route path="/hanga/*" element={<Navigate to="/waihanga" replace />} />
+                  <Route path="/start" element={<Suspense fallback={null}><StartPage /></Suspense>} />
+                  <Route path="/start/pending/:id" element={<Suspense fallback={null}><StartPendingPage /></Suspense>} />
+                  <Route path="/workspace" element={<Suspense fallback={null}><WorkspaceDashboard /></Suspense>} />
+                  <Route path="/workspace/connections" element={<Suspense fallback={null}><WorkspaceConnections /></Suspense>} />
+
+                  {/* Kete browser */}
+                  <Route path="/kete" element={<Suspense fallback={null}><KeteCollectionPage /></Suspense>} />
+                  <Route path="/kete/:slug" element={<Suspense fallback={null}><KeteDetailPageNew /></Suspense>} />
+
+                  {/* AAAIP */}
+                  <Route path="/aaaip" element={<Suspense fallback={null}><AaaipDashboard /></Suspense>} />
+                  <Route path="/aaaip/researcher" element={<Suspense fallback={null}><AaaipResearcher /></Suspense>} />
+                  <Route path="/aaaip/pitch-prep" element={<Suspense fallback={null}><AaaipPitchPrep /></Suspense>} />
+                  <Route path="/aaaip/landing" element={<Suspense fallback={null}><AaaipLanding /></Suspense>} />
+
+                  {/* Demos */}
+                  <Route path="/demos" element={<Suspense fallback={null}><DemosHub /></Suspense>} />
+                  <Route path="/demos/pipeline" element={<Suspense fallback={null}><PipelineDemo /></Suspense>} />
+                  <Route path="/demos/evidence-pack" element={<Suspense fallback={null}><EvidencePackDemo /></Suspense>} />
+                  <Route path="/demos/confidence-scoring" element={<Suspense fallback={null}><ConfidenceScoringDemo /></Suspense>} />
+                  <Route path="/demos/kaitiaki-gate" element={<Suspense fallback={null}><KaitiakiGateDemo /></Suspense>} />
+
+
+                  {/* Manaaki (Hospitality) */}
+                  <Route path="/manaaki" element={<Suspense fallback={null}><ManaakiLandingPage /></Suspense>} />
+                  <Route path="/manaaki/dashboard" element={<Suspense fallback={null}><ManaakiDashboard /></Suspense>} />
+
+                  {/* Arataki (Automotive) */}
+                  <Route path="/arataki" element={<Suspense fallback={null}><AratakiLandingPage /></Suspense>} />
+                  <Route path="/arataki/dashboard" element={<Suspense fallback={null}><AratakiDashboard /></Suspense>} />
+
+                  {/* Pikau (Freight & Customs) */}
+                  <Route path="/pikau" element={<Suspense fallback={null}><PikauLandingPage /></Suspense>} />
+                  <Route path="/pikau/dashboard" element={<Suspense fallback={null}><PikauDashboard /></Suspense>} />
+
+                  {/* Tōro (Family) */}
+                  <Route path="/toro" element={<Suspense fallback={null}><ToroaLandingPage /></Suspense>} />
+                  <Route path="/toro/dashboard" element={<Suspense fallback={null}><ToroaDashboard /></Suspense>} />
+                  <Route path="/toro/app" element={<Suspense fallback={null}><ToroaApp /></Suspense>} />
+                  <Route path="/toro/install" element={<Suspense fallback={null}><ToroaInstallPage /></Suspense>} />
+                  <Route path="/toro/travel" element={<Suspense fallback={null}><ToroaTravelPage /></Suspense>} />
+                  <Route path="/toro/chat" element={<Suspense fallback={null}><ToroaChatPage /></Suspense>} />
+
+                  {/* Waihanga (Construction) */}
+                  <Route path="/waihanga/workflow" element={<Suspense fallback={null}><WaihangaWorkflow /></Suspense>} />
+                  <Route path="/waihanga/about" element={<Suspense fallback={null}><WaihangaLandingPage /></Suspense>} />
                   <Route path="/waihanga" element={<Suspense fallback={null}><HangaLayout /></Suspense>}>
                     <Route index element={<HangaDashboard />} />
                     <Route path="arai" element={<AraiSafetyPage />} />
@@ -265,14 +275,21 @@ const App = () => (
                     <Route path="overview" element={<KanohiDashboard />} />
                     <Route path="architecture" element={<Suspense fallback={null}><WaihangaArchitecturePage /></Suspense>} />
                   </Route>
+
+                  {/* Auaha (Creative) */}
+                  <Route path="/auaha/about" element={<Suspense fallback={null}><AuahaLandingPage /></Suspense>} />
                   <Route path="/auaha" element={<Suspense fallback={null}><AuahaLayout /></Suspense>}>
                     <Route index element={<AuahaDashboard />} />
+                    <Route path="generate" element={<AuahaGenerate />} />
+                    <Route path="gallery" element={<AuahaGallery />} />
+                    <Route path="audit" element={<AuahaTaAudit />} />
+                    <Route path="prompts" element={<AuahaPromptLibrary />} />
                     <Route path="whaikorero" element={<AuahaWhaikorero />} />
                     <Route path="campaign" element={<AuahaCampaignBuilder />} />
                     <Route path="copy" element={<AuahaCopyStudio />} />
-                    <Route path="images" element={<AuahaImageStudio />} />
                     <Route path="image-studio" element={<PixelImageStudio />} />
                     <Route path="video" element={<AuahaVideoStudio />} />
+                    <Route path="loom" element={<AuahaLoomStudio />} />
                     <Route path="podcast" element={<AuahaPodcastStudio />} />
                     <Route path="ads" element={<AuahaAdManager />} />
                     <Route path="calendar" element={<AuahaCalendar />} />
@@ -280,13 +297,44 @@ const App = () => (
                     <Route path="brand" element={<AuahaBrandIdentity />} />
                     <Route path="web" element={<AuahaWebBuilder />} />
                   </Route>
-                  <Route path="/start" element={<Suspense fallback={null}><StartPage /></Suspense>} />
-                  <Route path="/start/pending/:id" element={<Suspense fallback={null}><StartPendingPage /></Suspense>} />
+
+                  {/* ── Retired routes → redirects ── */}
+                  <Route path="/hanga" element={<Navigate to="/waihanga" replace />} />
+                  <Route path="/hanga/*" element={<Navigate to="/waihanga" replace />} />
+                  <Route path="/helm" element={<Navigate to="/toro" replace />} />
+                  <Route path="/helm/*" element={<Navigate to="/toro" replace />} />
+                  <Route path="/toroa" element={<Navigate to="/toro" replace />} />
+                  <Route path="/toroa/*" element={<Navigate to="/toro" replace />} />
+                  <Route path="/pakihi" element={<Navigate to="/" replace />} />
+                  <Route path="/hangarau" element={<Navigate to="/" replace />} />
+                  <Route path="/te-kahui-reo" element={<Navigate to="/" replace />} />
+                  <Route path="/aura" element={<Navigate to="/manaaki" replace />} />
+                  <Route path="/nexus" element={<Navigate to="/" replace />} />
+                  <Route path="/aroha" element={<Navigate to="/" replace />} />
+                  <Route path="/aroha/*" element={<Navigate to="/" replace />} />
+                  <Route path="/tradie-portal" element={<Navigate to="/waihanga" replace />} />
+                  <Route path="/landlord" element={<Navigate to="/" replace />} />
+                  <Route path="/agents/echo" element={<Navigate to="/how-it-works" replace />} />
+                  <Route path="/agents/:agentId" element={<Navigate to="/how-it-works" replace />} />
+                  <Route path="/fuel-savings" element={<Navigate to="/arataki" replace />} />
+                  <Route path="/claims-register" element={<Navigate to="/" replace />} />
+                  <Route path="/turf" element={<Navigate to="/" replace />} />
+                  <Route path="/turf-5-april-2026" element={<Navigate to="/" replace />} />
+                  <Route path="/tikanga" element={<Navigate to="/about" replace />} />
+                  <Route path="/skill-hub" element={<Navigate to="/" replace />} />
+                  <Route path="/proposal" element={<Navigate to="/contact" replace />} />
+                  <Route path="/brand-guidelines" element={<Navigate to="/about" replace />} />
+                  <Route path="/brand-assets" element={<Navigate to="/about" replace />} />
+                  <Route path="/logo-stack" element={<Navigate to="/about" replace />} />
+                  <Route path="/brand-story" element={<Navigate to="/about" replace />} />
+                  <Route path="/te-reo" element={<Navigate to="/about" replace />} />
+
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </div>
               <EchoChatWidget />
               <MobileTabBar />
+              </PersonalizationProvider>
             </AuthProvider>
           </BrowserRouter>
         </TeReoProvider>

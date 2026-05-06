@@ -41,7 +41,7 @@ interface Props {
   isProcessing: boolean;
 }
 
-const NEXUS_COLOR = "#5B8CFF";
+const NEXUS_COLOR = "#1A3A5C";
 
 const STEPS = [
   "Upload Job Sheet",
@@ -132,7 +132,7 @@ const NexusJobSheet = ({
           ].map((doc) => (
             <div key={doc.key} className="flex items-center gap-2">
               {documentStatus[doc.key] ? (
-                <CheckCircle2 size={14} className="text-green-400 shrink-0" />
+                <CheckCircle2 size={14} className="text-[#5AADA0] shrink-0" />
               ) : (
                 <Circle size={14} style={{ color: color + "40" }} className="shrink-0" />
               )}

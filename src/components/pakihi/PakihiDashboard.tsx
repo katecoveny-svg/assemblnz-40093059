@@ -144,7 +144,7 @@ function OverviewTab() {
               <span className="text-[10px] text-white/40 uppercase tracking-wider">{m.label}</span>
             </div>
             <div className="text-xl font-bold text-white/90" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{m.value}</div>
-            <span className={`text-[10px] ${m.trend.startsWith("+") || m.trend.startsWith("-3") ? "text-emerald-400" : "text-white/40"}`}>{m.trend}</span>
+            <span className={`text-[10px] ${m.trend.startsWith("+") || m.trend.startsWith("-3") ? "text-[#5AADA0]" : "text-white/40"}`}>{m.trend}</span>
           </Glass>
         ))}
       </div>
@@ -200,9 +200,9 @@ function OverviewTab() {
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-medium text-white/90">{formatNZD(inv.amount)}</span>
                   <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
-                    inv.status === "paid" ? "bg-emerald-500/15 text-emerald-400" :
-                    inv.status === "overdue" ? "bg-red-500/15 text-red-400" :
-                    "bg-amber-500/15 text-amber-400"
+                    inv.status === "paid" ? "bg-[#3A7D6E]/15 text-[#5AADA0]" :
+                    inv.status === "overdue" ? "bg-[#C85A54]/15 text-[#C85A54]" :
+                    "bg-amber-500/15 text-[#D4A843]"
                   }`}>{inv.status === "overdue" ? `${inv.daysOut}d overdue` : inv.status}</span>
                 </div>
               </div>
@@ -222,13 +222,13 @@ function OverviewTab() {
                   <p className="text-[11px] text-white/80">{bill.name}</p>
                   <p className="text-[9px] text-white/35">Due {bill.due} {bill.recurring && "· Recurring"}</p>
                 </div>
-                <span className="text-[11px] font-medium text-red-400/80">-{formatNZD(bill.amount)}</span>
+                <span className="text-[11px] font-medium text-[#C85A54]/80">-{formatNZD(bill.amount)}</span>
               </div>
             ))}
           </div>
           <div className="mt-3 pt-2 border-t border-white/[0.04] flex justify-between">
             <span className="text-[10px] text-white/40">Total due next 30 days</span>
-            <span className="text-[11px] font-bold text-red-400">{formatNZD(upcomingBills.reduce((s, b) => s + b.amount, 0))}</span>
+            <span className="text-[11px] font-bold text-[#C85A54]">{formatNZD(upcomingBills.reduce((s, b) => s + b.amount, 0))}</span>
           </div>
         </Glass>
       </div>
@@ -244,7 +244,7 @@ function OverviewTab() {
                 <div className="text-xs font-bold text-white/80">{a.name}</div>
                 <div className="text-[9px] text-white/35">{a.desc}</div>
               </div>
-              <div className={`ml-auto w-2 h-2 rounded-full ${a.status === "online" ? "bg-emerald-400" : "bg-amber-400"}`} />
+              <div className={`ml-auto w-2 h-2 rounded-full ${a.status === "online" ? "bg-[#5AADA0]" : "bg-[#D4A843]"}`} />
             </div>
           ))}
         </div>
@@ -275,7 +275,7 @@ function ReconciliationTab() {
           <p className="text-[10px] text-white/40 mt-1">Matched This Week</p>
         </Glass>
         <Glass className="p-4 text-center">
-          <div className="text-2xl font-bold text-amber-400" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{recentTransactions.length - matchedCount}</div>
+          <div className="text-2xl font-bold text-[#D4A843]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{recentTransactions.length - matchedCount}</div>
           <p className="text-[10px] text-white/40 mt-1">Need Review</p>
         </Glass>
       </div>
@@ -301,17 +301,17 @@ function ReconciliationTab() {
         <div className="space-y-1">
           {filtered.map(txn => (
             <div key={txn.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.02] transition-colors">
-              <div className={`w-2 h-2 rounded-full shrink-0 ${txn.matched ? "bg-emerald-400" : "bg-amber-400 animate-pulse"}`} />
+              <div className={`w-2 h-2 rounded-full shrink-0 ${txn.matched ? "bg-[#5AADA0]" : "bg-[#D4A843] animate-pulse"}`} />
               <span className="text-[10px] text-white/30 w-12 shrink-0 font-mono">{txn.date}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] text-white/80 truncate">{txn.description}</p>
                 {txn.category ? (
                   <p className="text-[9px] text-white/30">{txn.category} · {txn.confidence}% confidence</p>
                 ) : (
-                  <p className="text-[9px] text-amber-400/70">Uncategorised — click to assign</p>
+                  <p className="text-[9px] text-[#D4A843]/70">Uncategorised — click to assign</p>
                 )}
               </div>
-              <span className={`text-[11px] font-medium shrink-0 ${txn.amount >= 0 ? "text-emerald-400" : "text-white/70"}`}>
+              <span className={`text-[11px] font-medium shrink-0 ${txn.amount >= 0 ? "text-[#5AADA0]" : "text-white/70"}`}>
                 {txn.amount >= 0 ? "+" : ""}{formatNZD(txn.amount)}
               </span>
             </div>
@@ -333,7 +333,7 @@ function ReconciliationTab() {
               <GlowIcon name="ArrowRight" size={10} color="rgba(255,255,255,0.2)" />
               <span className="text-[10px] text-white/80">{l.corrected}</span>
               <span className="ml-auto text-[9px] text-white/30">{l.count}× seen</span>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${l.adopted ? "bg-emerald-500/15 text-emerald-400" : "bg-white/5 text-white/30"}`}>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${l.adopted ? "bg-[#3A7D6E]/15 text-[#5AADA0]" : "bg-white/5 text-white/30"}`}>
                 {l.adopted ? "Adopted" : "Learning"}
               </span>
             </div>
@@ -355,7 +355,7 @@ function CashFlowTab() {
             <GlowIcon name="TrendingUp" size={14} color={ACCENT} />
             <h3 className="text-xs font-semibold text-white/60">30-Day Cash Flow Prediction</h3>
           </div>
-          <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400">+$6,400 net</span>
+          <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#3A7D6E]/15 text-[#5AADA0]">+$6,400 net</span>
         </div>
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={cashFlowForecast}>
@@ -392,12 +392,12 @@ function CashFlowTab() {
                   <p className="text-[11px] text-white/80">{inv.client}</p>
                   <p className="text-[9px] text-white/30">{inv.ref} · {inv.daysOut}d outstanding</p>
                 </div>
-                <span className="text-[11px] font-medium text-emerald-400">+{formatNZD(inv.amount)}</span>
+                <span className="text-[11px] font-medium text-[#5AADA0]">+{formatNZD(inv.amount)}</span>
               </div>
             ))}
             <div className="pt-2 border-t border-white/[0.04] flex justify-between">
               <span className="text-[10px] text-white/40">Total expected</span>
-              <span className="text-[11px] font-bold text-emerald-400">
+              <span className="text-[11px] font-bold text-[#5AADA0]">
                 +{formatNZD(invoiceQueue.filter(i => i.status !== "paid").reduce((s, i) => s + i.amount, 0))}
               </span>
             </div>
@@ -416,12 +416,12 @@ function CashFlowTab() {
                   <p className="text-[11px] text-white/80">{bill.name}</p>
                   <p className="text-[9px] text-white/30">Due {bill.due}</p>
                 </div>
-                <span className="text-[11px] font-medium text-red-400/80">-{formatNZD(bill.amount)}</span>
+                <span className="text-[11px] font-medium text-[#C85A54]/80">-{formatNZD(bill.amount)}</span>
               </div>
             ))}
             <div className="pt-2 border-t border-white/[0.04] flex justify-between">
               <span className="text-[10px] text-white/40">Total outflows</span>
-              <span className="text-[11px] font-bold text-red-400">
+              <span className="text-[11px] font-bold text-[#C85A54]">
                 -{formatNZD(upcomingBills.reduce((s, b) => s + b.amount, 0))}
               </span>
             </div>

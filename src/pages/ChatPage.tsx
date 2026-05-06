@@ -4,7 +4,7 @@ import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom"
 import { agents, echoAgent, pilotAgent } from "@/data/agents";
 import AgentAvatar from "@/components/AgentAvatar";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Send, ImagePlus, Paperclip, X, FileText, Globe, LayoutGrid, Lock, Sparkles, Shield, Trophy, Leaf, MessageSquare, Mic, MicOff, Volume2, Upload, Loader2, Brain, ListChecks, Phone, Radio, Camera, RotateCcw, Target } from "lucide-react";
+import { ArrowLeft, Send, ImagePlus, Paperclip, X, FileText, Globe, LayoutGrid, Lock, Sparkles, Shield, Trophy, Leaf, MessageSquare, Mic, MicOff, Volume2, Upload, Loader2, Layers, ListChecks, Phone, Radio, Camera, RotateCcw, Target } from "lucide-react";
 import { AGENT_LOADING_MESSAGES } from "@/engine/personality";
 import { agentCapabilities } from "@/data/agentCapabilities";
 import AgentMemoryPanel from "@/components/chat/AgentMemoryPanel";
@@ -56,13 +56,7 @@ import ForgeEvents from "@/components/forge/ForgeEvents";
 import ForgeBrandHub from "@/components/forge/ForgeBrandHub";
 import ForgeTeam from "@/components/forge/ForgeTeam";
 import ForgeAudit from "@/components/forge/ForgeAudit";
-import ArohaContracts from "@/components/aroha/ArohaContracts";
-import ArohaOnboarding from "@/components/aroha/ArohaOnboarding";
-import ArohaPayroll from "@/components/aroha/ArohaPayroll";
-import ArohaRecruitment from "@/components/aroha/ArohaRecruitment";
-import ArohaPeopleCulture from "@/components/aroha/ArohaPeopleCulture";
-import ArohaCompanySetup from "@/components/aroha/ArohaCompanySetup";
-import ArohaRetention from "@/components/aroha/ArohaRetention";
+// Aroha imports removed — HR module retired
 import AuraPropertySetup from "@/components/aura/AuraPropertySetup";
 import AuraReservations from "@/components/aura/AuraReservations";
 import AuraGuestExperience from "@/components/aura/AuraGuestExperience";
@@ -473,7 +467,7 @@ const ChatPage = () => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [auraModeKey, setAuraModeKey] = useState(0);
 
-  // Voice input/output state (TŌROA)
+  // Voice input/output state (TORO)
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState<number | null>(null);
   const recognitionRef = useRef<any>(null);
@@ -1048,7 +1042,7 @@ const ChatPage = () => {
       toolTabs.push({ id: "odyssey_planner", label: "Trip Planner" });
     }
     if (hasLiveDataTab) toolTabs.push({ id: "live_data", label: "Live Data" });
-    // Te Reo Video Learner for TŌROA, ECHO, and Te Kāhui Reo agents
+    // Te Reo Video Learner for TORO, ECHO, and Te Kāhui Reo agents
     const teReoAgents = ["family", "echo", "tiriti"];
     if (teReoAgents.includes(agentId || "")) toolTabs.push({ id: "te_reo_learn", label: "Mārama" });
     if (!isToroa && !isSports && agentId !== "maritime") toolTabs.push({ id: "internal_comms", label: "Comms" });
@@ -1061,7 +1055,7 @@ const ChatPage = () => {
     // SMS tab
     tabs.push({ id: "agent_sms", label: "SMS", icon: <MessageSquare size={13} /> });
     // Settings/Train tab
-    tabs.push({ id: "agent_training", label: "Settings", icon: <Brain size={13} /> });
+    tabs.push({ id: "agent_training", label: "Settings", icon: <Layers size={13} /> });
     return tabs;
   }, [agent, agentId, hasTemplateTab, isMarketing, isConstruction, isHanga, isForge, isAroha, isAura, isHaven, isFlux, isPrism, isNonprofit, isAxis, isToroa, isSports, isOra, isTahi, isVitae, hasLiveDataTab, auraModeKey]);
 
@@ -1296,7 +1290,7 @@ const ChatPage = () => {
 
         // Read agent metadata from response headers
         const respondingAgent = decodeURIComponent(resp.headers.get("X-Agent-Name") || agent.name);
-        const respondingIcon = resp.headers.get("X-Agent-Icon") || "Brain";
+        const respondingIcon = resp.headers.get("X-Agent-Icon") || "Layers";
 
         // Stream SSE response token by token
         const reader = resp.body!.getReader();
@@ -1941,7 +1935,7 @@ const ChatPage = () => {
       )}
 
       {/* Tab Views */}
-      {/* TŌROA Tab Views */}
+      {/* TORO Tab Views */}
       {activeTab === "helm_week" && isToroa ? (
         <HelmThisWeek onSendToChat={(msg) => { setActiveTab("chat"); sendMessage(msg); }} />
       ) : activeTab === "helm_bus" && isToroa ? (
@@ -2073,20 +2067,6 @@ const ChatPage = () => {
         <AuraTrade onGenerate={(p) => { setActiveTab("chat"); sendMessage(p); }} />
       ) : activeTab === "aura_pos" && isAura ? (
         <AuraPOS onGenerate={(p) => { setActiveTab("chat"); sendMessage(p); }} />
-      ) : activeTab === "aroha_contracts" && isAroha ? (
-        <ArohaContracts />
-      ) : activeTab === "aroha_onboarding" && isAroha ? (
-        <ArohaOnboarding />
-      ) : activeTab === "aroha_payroll" && isAroha ? (
-        <ArohaPayroll />
-      ) : activeTab === "aroha_recruitment" && isAroha ? (
-        <ArohaRecruitment />
-      ) : activeTab === "aroha_people" && isAroha ? (
-        <ArohaPeopleCulture />
-      ) : activeTab === "aroha_company" && isAroha ? (
-        <ArohaCompanySetup />
-      ) : activeTab === "aroha_retention" && isAroha ? (
-        <ArohaRetention />
       ) : activeTab === "forge_showroom" && isForge ? (
         <ForgeShowroom />
       ) : activeTab === "forge_sales" && isForge ? (
@@ -2666,7 +2646,7 @@ const ChatPage = () => {
 
               <input
                 ref={inputRef} type="text" value={input} onChange={(e) => setInput(e.target.value)}
-                placeholder={isArc && pendingImage ? "Describe the building..." : isToroa ? (isListening ? "Listening..." : "Ask TŌROA anything...") : isNexus ? "Ask NEXUS or upload..." : `Message ${agent.name}...`}
+                placeholder={isArc && pendingImage ? "Describe the building..." : isToroa ? (isListening ? "Listening..." : "Ask TORO anything...") : isNexus ? "Ask NEXUS or upload..." : `Message ${agent.name}...`}
                 className="flex-1 bg-transparent border-none rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors"
                 aria-label={`Message ${agent.name}`}
                 onKeyDown={(e) => { if (e.key === "Escape") inputRef.current?.blur(); }}

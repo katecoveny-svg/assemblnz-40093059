@@ -36,7 +36,7 @@ const KETE_COLORS: Record<string, string> = {
   'Waka': '#6B8FA3',
   'Hangarau': '#3A7D6E',
   'Te Kāhui Reo': '#D4A843',
-  'Tōroa': '#E8D5B7',
+  'Toro': '#E8D5B7',
 };
 
 const CATEGORIES = ['All', 'Compliance', 'Operations', 'Sales', 'Design', 'Finance', 'Legal', 'NZ-Specific', 'Māori'];

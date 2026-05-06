@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  UtensilsCrossed, HardHat, Palette, ShieldCheck, Package, Bird,
+  UtensilsCrossed, HardHat, Palette, Car, Package, Bird,
 } from "lucide-react";
 
 /**
@@ -49,16 +49,16 @@ export const KETE_CONFIG: KeteDefinition[] = [
   {
     id: "auaha", name: "Auaha", nameEn: "Creative & Media",
     color: "#F0D078", icon: Palette, agentCount: 9, group: "business",
-    description: "Brief to published with fewer handoffs. Content that stays on-brand and on-deadline.",
+    description: "Strategy, content, brand voice, design, campaigns, lead formation, analytics — one coordinated studio, not six tools and a freelancer.",
     wananga: "Te Kete Aronui — the basket of human expression",
     route: "/auaha", smsStatus: "coming-soon", whatsappStatus: "coming-soon",
   },
   {
-    id: "arataki", name: "Arataki", nameEn: "Privacy & Business Compliance",
-    color: "#C65D4E", icon: ShieldCheck, agentCount: 4, group: "business",
-    description: "IPP3A-ready. Every Privacy Act 2020 run ends in a signed evidence pack your Privacy Officer can file, forward, or footnote.",
+    id: "arataki", name: "Arataki", nameEn: "Automotive",
+    color: "#E8E8E8", icon: Car, agentCount: 11, group: "business",
+    description: "Enquiry → test drive → sale → delivery → service → loyalty. No handoff dropped.",
     wananga: "Te Kete Tuauri — the basket of guidance and protection",
-    route: "/kete/arataki", smsStatus: "coming-soon", whatsappStatus: "coming-soon",
+    route: "/arataki", smsStatus: "coming-soon", whatsappStatus: "coming-soon",
   },
   {
     id: "pikau", name: "Pikau", nameEn: "Freight & Customs",
@@ -68,11 +68,11 @@ export const KETE_CONFIG: KeteDefinition[] = [
     route: "/pikau", smsStatus: "coming-soon", whatsappStatus: "coming-soon",
   },
   {
-    id: "toro", name: "Tōro", nameEn: "Whānau Family Navigator",
+    id: "toro", name: "Toro", nameEn: "Whānau Family Navigator",
     color: "#D4A843", icon: Bird, agentCount: 1, group: "whanau",
     description: "SMS-first. No app, no login. Just text. School notices, meals, budgets, reminders, learning.",
     wananga: "Te Kete Aronui — caring for whānau",
-    route: "/toroa/dashboard", smsStatus: "active", whatsappStatus: "active",
+    route: "/toro/dashboard", smsStatus: "active", whatsappStatus: "active",
   },
 ];
 

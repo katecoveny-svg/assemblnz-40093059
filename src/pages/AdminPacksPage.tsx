@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
-import BrandNav from "@/components/BrandNav";
-import ParticleField from "@/components/ParticleField";
+import AdminShell from "@/components/admin/AdminShell";
 import { toast } from "sonner";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Layers } from "lucide-react";
 
 const ROLE_OPTIONS = ["free", "starter", "pro", "business"] as const;
 
@@ -45,13 +44,12 @@ const AdminPacksPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ background: "#09090F" }}>
-      <ParticleField />
-      <BrandNav />
-      <main className="flex-1 relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-16">
-        <h1 style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, letterSpacing: "0.1em", textTransform: "uppercase", fontSize: "1.5rem", color: "#FFFFFF" }} className="mb-8">
-          Industry Packs Management
-        </h1>
+    <AdminShell
+      title="Pack Management"
+      subtitle="Industry pack visibility & ordering"
+      icon={<Layers size={18} style={{ color: "#D4A843" }} />}
+      backTo="/admin/dashboard"
+    >
 
         {loading ? (
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Loading…</p>
@@ -109,8 +107,7 @@ const AdminPacksPage = () => {
             </table>
           </div>
         )}
-      </main>
-    </div>
+    </AdminShell>
   );
 };
 

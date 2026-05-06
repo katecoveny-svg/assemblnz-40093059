@@ -1,6 +1,6 @@
 import { FileText, Download } from "lucide-react";
 
-const HAVEN_PINK = "#FF80AB";
+const HAVEN_PINK = "#D4A843";
 
 const NZ_TEMPLATES = [
   { title: "Residential Tenancy Agreement", act: "Residential Tenancies Act 1986", desc: "Standard NZ tenancy agreement compliant with current legislation." },

@@ -32,17 +32,17 @@ export const COMPARISONS: ComparisonItem[] = [
   { agent: "FLUX", agentColor: "#3A6A9C", replaces: "CRM & Sales Platform", theirCost: "$450-800/mo", assemblCost: "Included in kete" },
   { agent: "PRISM", agentColor: "#E040FB", replaces: "AI Writer + Scheduler + Agency", theirCost: "$3,000-8,000/mo", assemblCost: "Included in kete" },
   { agent: "AROHA", agentColor: "#FF6F91", replaces: "HR Consultant", theirCost: "$150-250/hr", assemblCost: "Included in kete" },
-  { agent: "HAVEN", agentColor: "#FF80AB", replaces: "Property Manager", theirCost: "7-10% of rent", assemblCost: "Included in kete" },
+  { agent: "HAVEN", agentColor: "#D4A843", replaces: "Property Manager", theirCost: "7-10% of rent", assemblCost: "Included in kete" },
   { agent: "FORGE", agentColor: "#FF4D6A", replaces: "F&I Software + Compliance", theirCost: "$500-2,000/mo", assemblCost: "Included in kete" },
   { agent: "ECHO", agentColor: "#E4A0FF", replaces: "Social Media Manager", theirCost: "$3,000-6,000/mo", assemblCost: "Included in kete" },
 ];
 
 export const FILTER_AGENTS = [
   { name: "All", color: "#ffffff" },
-  { name: "TŌROA", color: "#3A6A9C" },
+  { name: "TORO", color: "#3A6A9C" },
   { name: "AROHA", color: "#FF6F91" },
   { name: "LEDGER", color: "#4FC3F7" },
-  { name: "HAVEN", color: "#FF80AB" },
+  { name: "HAVEN", color: "#D4A843" },
   { name: "APEX", color: "#FF6B35" },
   { name: "PRISM", color: "#E040FB" },
   { name: "FORGE", color: "#FF4D6A" },
@@ -130,7 +130,7 @@ export const OUTPUT_CARDS: OutputCard[] = [
     agentId: "property",
     agentName: "HAVEN",
     agentCode: "ASM-018",
-    agentColor: "#FF80AB",
+    agentColor: "#D4A843",
     outputType: "Healthy Homes Compliance Check",
     formatBadge: "Report",
     preview: `**PROPERTY:** 14 Rata Street, Mt Eden, Auckland\n\n| Standard | Status |\n|---|---|\n| Heating |  PASS |\n| Ceiling Insulation |  PASS |`,
@@ -264,11 +264,11 @@ export const OUTPUT_CARDS: OutputCard[] = [
     preview: `**PRIVACY POLICY**\n\n[Business Name] is committed to protecting your privacy in accordance with the Privacy Act 2020 (NZ).`,
     fullContent: `**PRIVACY POLICY**\n\n[Business Name] is committed to protecting your privacy in accordance with the Privacy Act 2020 (NZ).\n\n**1. Information We Collect**\nWe collect personal information including name, email, phone number, and payment details when you use our services.\n\n**2. How We Use Your Information**\n• To provide and improve our services\n• To communicate with you about your account\n• To comply with legal obligations\n\n**3. Information Sharing**\nWe do not sell your personal information. We may share with:\n• Service providers who assist our operations\n• Legal authorities when required by law\n\n**4. Your Rights (Privacy Act 2020)**\n• Right to access your personal information\n• Right to request correction of inaccurate information\n• Right to request deletion\n\n**5. Data Security**\nWe implement industry-standard security measures including encryption, access controls, and regular security audits.\n\n**6. Contact**\nPrivacy Officer: [Name], [Email]\n\n*Compliant with NZ Privacy Act 2020 and Information Privacy Principles 1-13.*`,
   },
-  // TŌROA
+  // TORO
   {
     id: "helm-dashboard",
     agentId: "operations",
-    agentName: "TŌROA",
+    agentName: "TORO",
     agentCode: "ASM-013",
     agentColor: "#3A6A9C",
     outputType: "Weekly Family Dashboard",
@@ -279,7 +279,7 @@ export const OUTPUT_CARDS: OutputCard[] = [
   {
     id: "helm-newsletter",
     agentId: "operations",
-    agentName: "TŌROA",
+    agentName: "TORO",
     agentCode: "ASM-013",
     agentColor: "#3A6A9C",
     outputType: "Newsletter AI Parse",

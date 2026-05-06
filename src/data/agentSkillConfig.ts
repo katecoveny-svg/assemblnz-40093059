@@ -245,7 +245,7 @@ export const KETE_SKILL_DATA: KeteSkillConfig[] = [
     gradientAccent: { from: '#D4A843', via: '#3A7D6E', to: '#1A3A5C' },
   },
   {
-    id: 'toroa', name: 'TŌROA', accent: '#E8D5B7',
+    id: 'toroa', name: 'TORO', accent: '#E8D5B7',
     purpose: 'Family and personal agent (SMS-first, $29/month)',
     agents: ['toroa'],
     keteSkills: [

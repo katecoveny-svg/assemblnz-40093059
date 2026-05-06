@@ -199,7 +199,7 @@ export default function PlanTo3DUploader({ color = ACCENT }: { color?: string })
       {stage === "error" && (
         <div className="p-4 rounded-xl" style={{ background: "rgba(255,60,60,0.08)", border: "1px solid rgba(255,60,60,0.2)" }}>
           <div className="flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 mt-0.5 text-red-400" />
+            <AlertTriangle className="w-4 h-4 mt-0.5 text-[#C85A54]" />
             <div>
               <p className="text-xs text-red-300">{error}</p>
               <button onClick={reset} className="text-[10px] mt-2 underline" style={{ color }}>Try again</button>

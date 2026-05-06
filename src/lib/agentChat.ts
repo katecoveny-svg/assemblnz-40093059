@@ -3,6 +3,8 @@
  * Routes through agent-router for full skill wiring, memory, symbiotic context, and governance.
  */
 
+import { searchMemory, buildMemoryBlock } from "@/lib/searchMemory";
+
 const AGENT_ROUTER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/agent-router`;
 
 interface AgentChatOptions {
@@ -10,13 +12,30 @@ interface AgentChatOptions {
   message: string;
   messages?: { role: string; content: string }[];
   packId?: string;
+  systemPrompt?: string;
+  /** If provided, search memory for this user and inject relevant context */
+  userId?: string;
+  /** Skip memory injection even if userId is set */
+  skipMemory?: boolean;
 }
 
 /**
  * One-shot (non-streaming) call to agent-router.
  * Collects the full SSE stream and returns the complete response text.
  */
-export async function agentChat({ agentId, message, messages = [], packId }: AgentChatOptions): Promise<string> {
+export async function agentChat({ agentId, message, messages = [], packId, systemPrompt, userId, skipMemory }: AgentChatOptions): Promise<string> {
+  // Memory injection: search for relevant past context
+  let enrichedPrompt = systemPrompt;
+  if (userId && !skipMemory) {
+    try {
+      const memories = await searchMemory(userId, message, agentId, 3);
+      const block = buildMemoryBlock(memories);
+      if (block) {
+        enrichedPrompt = (enrichedPrompt || "") + block;
+      }
+    } catch { /* non-blocking */ }
+  }
+
   const resp = await fetch(AGENT_ROUTER_URL, {
     method: "POST",
     headers: {
@@ -28,6 +47,7 @@ export async function agentChat({ agentId, message, messages = [], packId }: Age
       agentId,
       packId: packId || agentId,
       messages,
+      ...(enrichedPrompt ? { systemPromptOverride: enrichedPrompt } : {}),
     }),
   });
 
@@ -70,6 +90,9 @@ export async function agentChatStream({
   message,
   messages = [],
   packId,
+  systemPrompt,
+  userId,
+  skipMemory,
   onDelta,
   onDone,
   onError,
@@ -79,6 +102,16 @@ export async function agentChatStream({
   onError?: (error: Error) => void;
 }): Promise<void> {
   try {
+    // Memory injection for streaming calls
+    let enrichedPrompt = systemPrompt;
+    if (userId && !skipMemory) {
+      try {
+        const memories = await searchMemory(userId, message, agentId, 3);
+        const block = buildMemoryBlock(memories);
+        if (block) enrichedPrompt = (enrichedPrompt || "") + block;
+      } catch { /* non-blocking */ }
+    }
+
     const resp = await fetch(AGENT_ROUTER_URL, {
       method: "POST",
       headers: {
@@ -90,6 +123,7 @@ export async function agentChatStream({
         agentId,
         packId: packId || agentId,
         messages,
+        ...(enrichedPrompt ? { systemPromptOverride: enrichedPrompt } : {}),
       }),
     });
 

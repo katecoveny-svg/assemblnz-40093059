@@ -78,6 +78,7 @@ const NexusEntryCard = ({ data, color = "#5B8CFF" }: Props) => {
       agentDesignation: "ASM-009",
       subtitle: `Import Entry Summary — ${new Date().toLocaleDateString("en-NZ")}`,
       margin: m,
+      keteSlug: "pikau",
     });
 
     // Meta
@@ -145,7 +146,7 @@ const NexusEntryCard = ({ data, color = "#5B8CFF" }: Props) => {
         className="rounded-t-xl px-4 py-2.5 flex items-center gap-2"
         style={{ background: "#3D0000", border: "1px solid #FF4D4D30", borderBottom: "none" }}
       >
-        <ShieldAlert size={14} className="text-red-400 shrink-0" />
+        <ShieldAlert size={14} className="text-[#C85A54] shrink-0" />
         <p className="text-[11px] text-red-300 font-semibold">
           Broker sign-off required — This entry must be reviewed by a Licensed Customs Broker before lodgement to TSW.
         </p>

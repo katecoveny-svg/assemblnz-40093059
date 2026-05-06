@@ -1,770 +1,606 @@
-import React, { useRef, useState, lazy, Suspense } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, Send, ChevronDown, Check } from "lucide-react";
+import React, { lazy, Suspense, useMemo } from "react";
+import { motion, LayoutGroup } from "framer-motion";
+import { ArrowRight, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { usePersonalization } from "@/contexts/PersonalizationContext";
+import { useReturnVisitor } from "@/hooks/useReturnVisitor";
+import ContextBar from "@/components/personalized/ContextBar";
 import BrandNav from "@/components/BrandNav";
 import BrandFooter from "@/components/BrandFooter";
 import SEO from "@/components/SEO";
-import LiquidGlassCard from "@/components/LiquidGlassCard";
 import KeteWeaveVisual from "@/components/KeteWeaveVisual";
-import HeroKeteNetwork from "@/components/HeroKeteNetwork";
+import KeteAgentChat from "@/components/kete/KeteAgentChat";
+import KeteMiniIcon, { type KeteGlyph } from "@/components/kete/KeteMiniIcon";
+import WharikiFoundation from "@/components/whariki/WharikiFoundation";
+import { KETE } from "@/data/pricing";
+import GlassPanel from "@/components/whariki/GlassPanel";
+import MaungaBorder from "@/components/whariki/MaungaBorder";
+import WovenDivider from "@/components/whariki/WovenDivider";
 
 const Kete3DModel = lazy(() => import("@/components/kete/Kete3DModel"));
 
-/* ─── Design tokens — Pounamu primary, White secondary, Gold accent ─── */
+/* ─── Tokens ─── */
 const C = {
-  bg: "#060610",
-  surface: "#0A0A18",
+  bg: "#0A1628",
   pounamu: "#3A7D6E",
-  pounamuLight: "#5AADA0",
+  pounamuLight: "#4FE4A7",
   pounamuGlow: "#7ECFC2",
-  gold: "#D4A843",       // small accent only
+  gold: "#D4A853",
   goldLight: "#F0D078",
   navy: "#1A3A5C",
+  bone: "#F5F0E8",
   white: "#FFFFFF",
-  textSec: "rgba(255,255,255,0.55)",
-  textMuted: "rgba(255,255,255,0.30)",
-  border: "rgba(255,255,255,0.08)",
+  t1: "rgba(245,240,232,0.92)",
+  t2: "rgba(245,240,232,0.75)",
+  t3: "rgba(245,240,232,0.45)",
+  border: "rgba(58,125,110,0.15)",
 };
 
-const FONT = {
-  heading: "'Lato', sans-serif",
-  body: "'Plus Jakarta Sans', sans-serif",
-  mono: "'JetBrains Mono', monospace",
-};
-
-const ease = [0.16, 1, 0.3, 1] as const;
-
-/* ─── Kete weave section divider ─── */
-const WeaveDivider = () => (
-  <div className="w-full overflow-hidden" style={{ height: 32, opacity: 0.08 }}>
-    <svg width="100%" height="32" viewBox="0 0 600 32" preserveAspectRatio="xMidYMid meet">
-      {Array.from({ length: 44 }).map((_, i) => (
-        <g key={i} transform={`translate(${i * 14}, 0)`}>
-          <path d="M0 16 L7 0 L14 16 L7 32 Z" stroke={C.pounamu} strokeWidth="0.6" fill="none" />
-          <circle cx="7" cy="16" r="1" fill={C.pounamu} opacity="0.4" />
-        </g>
-      ))}
-    </svg>
-  </div>
-);
-
-/* ─── Typography components ─── */
-const Eyebrow = ({ children, color }: { children: string; color?: string }) => (
-  <span
-    className="inline-block text-[10px] font-bold tracking-[4px] uppercase mb-5"
-    style={{ fontFamily: FONT.mono, color: color || C.pounamuLight }}
-  >
-    {children}
-  </span>
-);
-
-const SectionHeading = React.forwardRef<HTMLHeadingElement, { children: React.ReactNode }>(({ children }, ref) => (
-  <h2
-    ref={ref}
-    className="text-3xl sm:text-4xl lg:text-5xl uppercase tracking-[2px] sm:tracking-[4px] mb-6"
-    style={{ fontFamily: FONT.heading, fontWeight: 300, color: C.white, lineHeight: 1.15 }}
-  >
-    {children}
-  </h2>
-));
-SectionHeading.displayName = "SectionHeading";
-
-const Body = React.forwardRef<HTMLParagraphElement, { children: React.ReactNode; className?: string; style?: React.CSSProperties }>(({ children, className = "", style }, ref) => (
-  <p
-    ref={ref}
-    className={`text-sm sm:text-[15px] leading-relaxed ${className}`}
-    style={{ fontFamily: FONT.body, color: C.textSec, ...style }}
-  >
-    {children}
-  </p>
-));
-Body.displayName = "Body";
-
-const SEC = "relative px-6 sm:px-8 py-24 sm:py-32";
-const INNER = "max-w-5xl mx-auto";
-
-/* ─── Data ─── */
-const PROOF = [
-  "5 industry kete",
-  "6-layer agent stack",
-  "Simulation-tested",
-  "From $1,490 NZD/mo",
-];
-
-const PACKS: {
-  reo: string;
-  en: string;
-  desc: string;
-  color: string;
-  to: string;
-  accentLight: string;
-}[] = [
-  { reo: "Manaaki", en: "Hospitality", desc: "Food Act plans, liquor licensing, guest experience, tourism operators.", color: "#3A7D6E", accentLight: "#5AADA0", to: "/sample/manaaki" },
-  { reo: "Waihanga", en: "Construction", desc: "Site to sign-off. H&S, consenting, project programmes, quality records.", color: "#1A3A5C", accentLight: "#2A5A8C", to: "/sample/waihanga" },
-  { reo: "Auaha", en: "Creative", desc: "Brief to published. Copy, image, video, podcast, ads, analytics.", color: "#D4A843", accentLight: "#E8C76A", to: "/sample/auaha" },
-  { reo: "Arataki", en: "Privacy & Business Compliance", desc: "IPP3A-ready. Every Privacy Act 2020 run ends in a signed evidence pack your Privacy Officer can file, forward, or footnote.", color: "#E8E8E8", accentLight: "rgba(255,255,255,0.7)", to: "/sample/arataki" },
-  { reo: "Pikau", en: "Freight & Customs", desc: "Route optimisation, declarations, broker hand-off, customs compliance.", color: "#7ECFC2", accentLight: "#A8E6DA", to: "/sample/pikau" },
-  { reo: "Toroa", en: "Family Navigator", desc: "SMS-first whānau coordination. School notices, kai plans, appointments, budgets — no app needed.", color: "#87CEEB", accentLight: "#AEE0F7", to: "/sample/toroa" },
-];
-
-const PIPELINE_STAGES = [
-  { name: "Perception", desc: "Connects to your signals — messages, documents, calendars", color: C.pounamu },
-  { name: "Memory", desc: "Business context carries forward across every session", color: C.pounamuLight },
-  { name: "Reasoning", desc: "Policy-aware decision logic tuned to NZ legislation", color: C.white },
-  { name: "Action", desc: "Executes within defined permissions and approval pathways", color: C.pounamuGlow },
-  { name: "Explanation", desc: "Every output comes with a readable audit trail", color: C.gold },
-  { name: "Simulation", desc: "Tests outcomes before they ship — not after", color: C.navy },
-];
-
-const DIFFS = [
-  { num: "01", title: "Governed, not generic", body: "Every agent runs inside defined permissions, policy rules, and approval pathways. Not a chatbot. Not a replacement for your team.", accent: C.pounamu },
-  { num: "02", title: "Simulation-tested", body: "Agents are tested against simulated scenarios before they touch production. Outputs are checked before they ship, not after.", accent: C.pounamuLight },
-  { num: "03", title: "Built on NZ law", body: "Holidays Act 2003, Privacy Act 2020, Food Act 2014, Construction Contracts Act, IRD rules. Updated when the law updates.", accent: C.white },
-  { num: "04", title: "Tikanga at the foundation", body: "Rangatiratanga, kaitiakitanga, manaakitanga, whanaungatanga. Built in, not bolted on.", accent: C.gold },
-];
-
-const PRICING = [
-  {
-    name: "Family",
-    price: "$29",
-    setup: "No setup fee",
-    desc: "Whānau coordination over SMS. No app, no logins, just text.",
-    features: ["SMS-first family agent", "School notices, calendar, meals", "Budget tracking", "Up to 6 family members"],
-    highlight: false,
-    accent: C.pounamuLight,
-    stripeUrl: "https://buy.stripe.com/7sYdRbc9KeoE0KNdx43oA0c",
-  },
-  {
-    name: "Operator",
-    price: "$1,490",
-    setup: "+ $590 setup (invoiced separately)",
-    desc: "Sole traders and micro-SMEs. One kete, up to 5 seats, email support.",
-    features: ["1 industry kete (your pick)", "Up to 5 seats", "Tikanga compliance layer", "Email support, 1 business day"],
-    highlight: true,
-    accent: C.pounamu,
-    stripeUrl: "https://buy.stripe.com/14AdRbb5GeoEfFHct03oA0d",
-    badge: "Most popular",
-  },
-  {
-    name: "Leader",
-    price: "$1,990",
-    setup: "+ $1,290 setup (invoiced separately)",
-    desc: "Multi-discipline SMEs. Two kete, 15 seats, signed quarterly compliance review.",
-    features: ["2 industry kete", "Up to 15 seats", "Quarterly compliance review (signed)", "Monthly audit report"],
-    highlight: false,
-    accent: C.pounamuGlow,
-    stripeUrl: "https://buy.stripe.com/eVq9AV3DefsIbpr64C3oA0e",
-  },
-  {
-    name: "Enterprise",
-    price: "$2,990",
-    setup: "+ $2,890 setup (invoiced separately)",
-    desc: "Multi-site, regulated, high-stakes. All five kete, unlimited seats, named success manager, 99.9% uptime SLA.",
-    features: ["All 5 industry kete", "Unlimited seats", "NZ data residency", "Named success manager", "99.9% uptime SLA"],
-    highlight: false,
-    accent: C.navy,
-    stripeUrl: "https://buy.stripe.com/14A4gB6Pq94k79bboW3oA0f",
-  },
-];
-
-const OUTCOMES = [
-  { title: "Quotes go out same-day.", body: "Two-hour quote builds drop to twelve minutes. Your win rate climbs because you're not the slowest in the inbox.", accent: C.pounamu },
-  { title: "Compliance stops eating Sundays.", body: "Payroll, food safety, H&S, IRD. assembl checks the rules on the day they change, not the week after you get fined.", accent: C.pounamuLight },
-  { title: "Friday actually ends on Friday.", body: "Planning, reporting and the long admin tail run in the background. You get your evenings back.", accent: C.white },
-];
-
-const FOUR_POU = [
-  { reo: "Rangatiratanga", en: "Self-determination", body: "Your data, your decisions, your direction.", accent: C.pounamu },
-  { reo: "Kaitiakitanga", en: "Stewardship", body: "We care for the tools and the whenua they serve, with an intergenerational lens.", accent: C.pounamuLight },
-  { reo: "Manaakitanga", en: "Care", body: "We look after our customers, our people, and our communities.", accent: C.gold },
-  { reo: "Whanaungatanga", en: "Connection", body: "We build real relationships. We grow together.", accent: C.pounamuGlow },
-];
-
-/* ─── Animation presets ─── */
+const ease = [0.22, 1, 0.36, 1] as const;
 const fade = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-60px" as const },
-  transition: { duration: 0.65, ease },
-};
-
-const stagger = (i: number) => ({
   initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-40px" as const },
-  transition: { delay: i * 0.1, duration: 0.55, ease },
+  transition: { duration: 0.4, ease },
+};
+const stagger = (i: number) => ({
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { delay: i * 0.07, duration: 0.4, ease },
 });
 
-const InputField = ({ value, onChange, placeholder, type = "text" }: {
-  value: string; onChange: (v: string) => void; placeholder: string; type?: string;
-}) => (
-  <input
-    value={value}
-    onChange={(e) => onChange(e.target.value)}
-    type={type}
-    placeholder={placeholder}
-    required
-    className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
-    style={{
-      fontFamily: FONT.body,
-      background: "rgba(255,255,255,0.04)",
-      border: "1px solid rgba(255,255,255,0.09)",
-      backdropFilter: "blur(8px)",
-    }}
-  />
-);
+/* ─── Data (sourced from pricing.ts) ─── */
+const KETE_COLORS: Record<string, { color: string; accentLight: string; to: string }> = {
+  manaaki: { color: C.pounamu, accentLight: C.pounamuLight, to: "/manaaki" },
+  waihanga: { color: C.navy, accentLight: "#2A5A8C", to: "/waihanga/about" },
+  auaha: { color: C.gold, accentLight: C.goldLight, to: "/auaha/about" },
+  arataki: { color: "#C8C8C8", accentLight: "#A8A8A8", to: "/arataki" },
+  pikau: { color: C.pounamuGlow, accentLight: "#A8E6DA", to: "/pikau" },
+};
 
-/* ═══════════════════════════════════════════════
-   PAGE
-   ═══════════════════════════════════════════════ */
+const PACKS = [
+  ...KETE.map((k) => ({
+    reo: k.name,
+    en: k.eng,
+    desc: k.desc,
+    ...KETE_COLORS[k.key],
+  })),
+  { reo: "Toro", en: "Family", desc: "School runs, meal planning, family admin — one less thing to worry about.", color: C.bone, accentLight: "#E8DDD0", to: "/toroa" },
+];
+
+const LAYERS = [
+  { name: "Perception", desc: "Reads your real inputs: invoices, emails, sensor data, calendar events." },
+  { name: "Memory", desc: "Separates verified facts from inferred guesses. Keeps a validated knowledge base." },
+  { name: "Reasoning", desc: "Combines pattern recognition with hard compliance rules. Never guesses on legislation." },
+  { name: "Action", desc: "Every action is classified: allowed, needs approval, or forbidden. No rogue moves." },
+  { name: "Explanation", desc: "Logs the reason behind every material decision in plain language." },
+  { name: "Simulation", desc: "Tests workflows against realistic scenarios before they touch production." },
+];
+
+const TRUST_NODES = [
+  { name: "Kahu", desc: "Policy layer — what's allowed" },
+  { name: "Iho", desc: "Routing — picks the right specialist" },
+  { name: "Tā", desc: "Execution — does the work" },
+  { name: "Mahara", desc: "Memory — learns and remembers" },
+  { name: "Mana", desc: "Assurance — proves it was done right" },
+];
+
+const EVIDENCE_PACKS = [
+  {
+    kete: "Manaaki", title: "Monthly Food Safety Report", date: "March 2026",
+    checks: [
+      { label: "Food Control Plan verification", ref: "FCP-2024", pass: true },
+      { label: "Temperature log compliance", ref: "TMP-047", pass: true },
+      { label: "Staff certification check", ref: "CERT-12", pass: true },
+    ],
+  },
+  {
+    kete: "Waihanga", title: "Site Safety Evidence Pack", date: "March 2026",
+    checks: [
+      { label: "H&S site briefing log", ref: "HSB-091", pass: true },
+      { label: "Payment claim schedule verified", ref: "PCS-004", pass: true },
+    ],
+  },
+  {
+    kete: "Arataki", title: "Vehicle Compliance Pack", date: "March 2026",
+    checks: [
+      { label: "WoF/CoF status verified", ref: "VCC-12", pass: true },
+      { label: "Workshop service log", ref: "WSL-033", pass: true },
+    ],
+  },
+];
+
+
+
+
+/* ═══ PAGE ═══ */
 const Index = () => {
   const isMobile = useIsMobile();
-  const pilotRef = useRef<HTMLDivElement>(null);
-  const [pilotName, setPilotName] = useState("");
-  const [pilotEmail, setPilotEmail] = useState("");
-  const [pilotBiz, setPilotBiz] = useState("");
+  const { profile, atmosphere, isPersonalized } = usePersonalization();
+  const hero = profile.preferences.heroVariant;
+  useReturnVisitor();
 
-  const scrollToPilot = () => pilotRef.current?.scrollIntoView({ behavior: "smooth" });
-
-  const handlePilot = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const msg = `Founding pilot application — ${pilotBiz}`;
-      const { data: inserted, error } = await supabase
-        .from("contact_submissions")
-        .insert({ name: pilotName, email: pilotEmail, message: msg })
-        .select("id")
-        .single();
-      if (error) throw error;
-      toast.success("Application received. We'll be in touch within one business day.");
-      setPilotName(""); setPilotEmail(""); setPilotBiz("");
-      supabase.functions.invoke("send-contact-email", { body: { name: pilotName, email: pilotEmail, message: msg } }).catch(console.error);
-      if (inserted?.id) supabase.functions.invoke("qualify-lead", { body: { submissionId: inserted.id } }).catch(console.error);
-    } catch { toast.error("Something went wrong. Please try again."); }
-  };
+  const orderedPacks = useMemo(() => {
+    if (!isPersonalized) return PACKS;
+    const keteOrder = profile.preferences.keteOrder;
+    const SLUG_MAP: Record<string, string> = {
+      manaaki: "Manaaki", waihanga: "Waihanga", auaha: "Auaha",
+      arataki: "Arataki", pikau: "Pikau", toro: "Toro",
+    };
+    return [...PACKS].sort((a, b) => {
+      const aIdx = keteOrder.indexOf(Object.entries(SLUG_MAP).find(([_, v]) => v === a.reo)?.[0] as any ?? "");
+      const bIdx = keteOrder.indexOf(Object.entries(SLUG_MAP).find(([_, v]) => v === b.reo)?.[0] as any ?? "");
+      return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+    });
+  }, [isPersonalized, profile.preferences.keteOrder]);
 
   return (
-    <div className="min-h-screen relative" style={{ background: C.bg, color: C.white }}>
+    <div className="min-h-screen relative" style={{ background: `linear-gradient(180deg, #0A1628 0%, #0D1E35 30%, #0A1628 60%, #0E1A2E 100%)`, color: C.bone }}>
       <SEO
-        title="assembl — Every workflow ends in a pack you can file, forward or footnote"
-        description="Five industry kete for NZ business. Each run ends in a signed evidence pack — your hospitality audit, privacy review, or site sign-off. File it, forward it, footnote it. From $1,490/mo NZD ex GST."
+        title="assembl — Governed workflow tools for NZ businesses"
+        description="Specialist operational workflows that reduce admin, surface risk earlier, and keep people in control. Built for NZ."
       />
-      <BrandNav />
+      <WharikiFoundation />
 
-      {/* ═══ 1 — HERO ═══ */}
-      <section className="relative flex flex-col items-center text-center px-6 sm:px-8 pt-20 sm:pt-24 pb-12" style={{ zIndex: 1 }}>
-        {/* 3D Kete network — green, blue, white orbs */}
-        <HeroKeteNetwork isMobile={isMobile} />
+      <div className="relative z-10">
+        <BrandNav />
+        <ContextBar />
 
-        {/* Badge */}
-        <motion.div
-          className="relative mb-6"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <span
-            className="inline-block text-[10px] tracking-[5px] uppercase px-5 py-2 rounded-full"
-            style={{
-              fontFamily: FONT.mono,
-              color: C.pounamuLight,
-              background: "rgba(58,125,110,0.08)",
-              border: "1px solid rgba(58,125,110,0.2)",
-              backdropFilter: "blur(12px)",
-              boxShadow: "0 0 30px rgba(58,125,110,0.1)",
-            }}
-          >
-            Governed Intelligence for Aotearoa — specialist kete for real NZ operations
-          </span>
-        </motion.div>
+        {/* ═══ HERO — Full viewport + Kete Particle Canvas ═══ */}
+        <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 overflow-hidden">
+          {/* Deep luminous background — not flat */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: `
+              radial-gradient(ellipse 60% 50% at 50% 55%, rgba(79,228,167,0.18) 0%, transparent 60%),
+              radial-gradient(ellipse 40% 40% at 30% 30%, rgba(0,220,200,0.10) 0%, transparent 50%),
+              radial-gradient(ellipse 35% 45% at 70% 60%, rgba(212,168,83,0.07) 0%, transparent 50%),
+              radial-gradient(ellipse 80% 80% at 50% 50%, rgba(10,30,50,0.9) 0%, rgba(6,14,28,1) 100%)
+            `,
+          }} />
+          {/* Breathing glow pulse */}
+          <div className="absolute inset-0 pointer-events-none animate-[glowPulse_4s_ease-in-out_infinite]" style={{
+            background: "radial-gradient(ellipse 55% 45% at 50% 55%, rgba(79,228,167,0.10) 0%, transparent 60%)",
+          }} />
+          <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none">
+            <source src="/hero-woven-video.mp4" type="video/mp4" />
+          </video>
+          {/* Vignette edges */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: "radial-gradient(ellipse 90% 70% at 50% 50%, transparent 40%, rgba(6,14,28,0.7) 100%)",
+          }} />
+          {/* Dark scrim behind text for legibility */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(6,14,28,0.6) 0%, transparent 80%)",
+          }} />
 
-        {/* Headline */}
-        <motion.h1
-          className="relative max-w-4xl"
-          style={{
-            fontFamily: FONT.heading,
-            fontWeight: 300,
-            fontSize: isMobile ? "1.75rem" : "3.25rem",
-            lineHeight: 1.12,
-            letterSpacing: isMobile ? "1px" : "2px",
-            zIndex: 1,
-          }}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.5, ease }}
-        >
-          Every workflow ends in a pack you can{" "}
-          <span
-            style={{
-              background: `linear-gradient(135deg, ${C.pounamu} 0%, ${C.pounamuGlow} 50%, ${C.pounamu} 100%)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            file, forward or footnote.
-          </span>
-        </motion.h1>
+          <div className="relative z-10 max-w-3xl">
+            <motion.h1
+              style={{
+                fontFamily: "'Lato', sans-serif",
+                fontWeight: 300,
+                fontSize: isMobile ? "1.75rem" : "3.25rem",
+                lineHeight: 1.1,
+                letterSpacing: isMobile ? "3px" : "6px",
+                textTransform: "uppercase" as const,
+                color: C.white,
+                textShadow: "0 2px 30px rgba(0,0,0,0.8), 0 0 60px rgba(6,14,28,0.9)",
+              }}
+              initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1, ease }}
+            >
+              The operating system for NZ business.
+            </motion.h1>
 
-        {/* Subheadline */}
-        <motion.p
-          className="relative max-w-2xl mt-7"
-          style={{ fontFamily: FONT.body, fontSize: isMobile ? "14px" : "17px", lineHeight: 1.8, color: C.textSec, zIndex: 1 }}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, delay: 0.65, ease }}
-        >
-          Specialist operational workflows for NZ businesses — reduce admin, surface risk earlier, and keep people in control. Five industry kete, each run ending in a signed evidence pack your auditor can read, your lawyer can rely on, and your client can sign.
-        </motion.p>
+            <motion.p
+              className="max-w-[640px] mx-auto mt-6 text-base sm:text-lg leading-[1.8]"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: "rgba(245,240,232,0.8)", textShadow: "0 1px 20px rgba(0,0,0,0.7)" }}
+              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25, ease }}
+            >
+              Specialist operational workflows that reduce admin, surface risk earlier, and keep people in control.
+            </motion.p>
 
-        {/* CTAs */}
-        <motion.div
-          className="relative flex flex-col sm:flex-row gap-3 mt-10"
-          style={{ zIndex: 1 }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8, ease }}
-        >
-          <Link
-            to="/sample/manaaki"
-            className="cta-glass-green inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm"
-          >
-            See a sample pack <ArrowRight size={15} />
-          </Link>
-          <Link
-            to="/contact"
-            className="btn-ghost inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm"
-          >
-            Book a 20-minute pack walk-through
-          </Link>
-        </motion.div>
+            <motion.div
+              className="flex flex-col sm:flex-row gap-3 mt-10 justify-center"
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4, ease }}
+            >
+              <Link to="/contact" className="group inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-semibold rounded-lg transition-all duration-300"
+                style={{ background: "rgba(212,168,83,0.12)", border: "1px solid rgba(212,168,83,0.5)", color: C.goldLight, boxShadow: "0 0 20px rgba(212,168,83,0.15), inset 0 1px 0 rgba(212,168,83,0.2)", fontFamily: "'Plus Jakarta Sans', sans-serif", backdropFilter: "blur(8px)" }}>
+                Get started <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link to="/demos" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-medium rounded-lg transition-all duration-300"
+                style={{ border: `1px solid ${C.pounamu}`, color: C.bone, backdropFilter: "blur(8px)" }}>
+                See it in action →
+              </Link>
+            </motion.div>
 
-        {/* Scroll */}
-        <motion.div
-          className="mt-16"
-          style={{ color: "rgba(255,255,255,0.15)" }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.3 }}
-        >
-          <motion.div animate={{ y: [0, 7, 0] }} transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}>
-            <ChevronDown size={20} />
-          </motion.div>
-        </motion.div>
-      </section>
+            <motion.p
+              className="mt-10 text-[11px] tracking-[3px] uppercase"
+              style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, color: C.gold, textShadow: "0 1px 16px rgba(0,0,0,0.6)" }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6, duration: 0.5 }}
+            >
+              Trusted. Intelligent. Aotearoa.
+            </motion.p>
+          </div>
+        </section>
 
-      {/* ═══ 2 — PROOF BAR ═══ */}
-      <section className="px-6 sm:px-8 py-5 relative z-10">
-        <motion.div
-          className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.9 }}
-        >
-          {PROOF.map((label, i) => (
-            <span key={label} className="flex items-center gap-x-1">
-              <span
-                className="px-4 py-1.5 rounded-full text-[11px]"
-                style={{
-                  fontFamily: FONT.mono,
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  color: "rgba(255,255,255,0.5)",
-                  letterSpacing: "0.04em",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                {label}
-              </span>
-              {i < PROOF.length - 1 && (
-                <span style={{ color: "rgba(255,255,255,0.12)", fontSize: "10px" }}>·</span>
-              )}
-            </span>
-          ))}
-        </motion.div>
-      </section>
+        {/* Weave transition — strands tighten */}
+        <div className="relative h-20 overflow-hidden">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `linear-gradient(45deg, rgba(58,125,110,0.06) 1px, transparent 1px), linear-gradient(-45deg, rgba(58,125,110,0.06) 1px, transparent 1px)`,
+            backgroundSize: "12px 12px",
+          }} />
+          <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent, ${C.bg})` }} />
+        </div>
 
-      {/* ═══ 3 — THE PROBLEM ═══ */}
-      <section className={`${SEC} relative z-10`}>
-        <div className={INNER}>
-          <motion.div {...fade}>
-            <Eyebrow>THE PROBLEM</Eyebrow>
-            <SectionHeading>Your team's already using AI. None of it's governed.</SectionHeading>
-            <Body className="max-w-2xl mb-5">
-              ChatGPT, Copilot, Gemini — running quietly on staff laptops. No audit trail. No compliance check. No idea what data's being fed into a model hosted offshore.
-            </Body>
-            <Body className="max-w-2xl" style={{ color: "rgba(255,255,255,0.38)" }}>
-              assembl is built differently. Every agent operates through a six-layer stack — perception, memory, reasoning, action, explanation, and simulation — inside defined permissions and approval pathways.
-            </Body>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-16">
-            {[
-              { stat: "605,000", label: "NZ businesses", accent: C.pounamu },
-              { stat: "97%", label: "have under 20 staff", accent: C.pounamuLight },
-              { stat: "0%", label: "audit what their AI does", accent: C.gold },
-            ].map((c, i) => (
-              <LiquidGlassCard key={c.label} className="p-8 text-center" accentColor={c.accent} delay={i * 0.1}>
-                <p className="text-4xl mb-2" style={{ fontFamily: FONT.heading, fontWeight: 300, color: c.accent }}>
-                  {c.stat}
+        {/* ═══ WHAT WE DO ═══ */}
+        <Sect>
+          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <motion.div {...fade}>
+              <GlassPanel className="p-8 sm:p-10" goldRim>
+                <p className="text-[15px] sm:text-base leading-[1.9]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: C.t2 }}>
+                  Assembl creates New Zealand business specialist operational workflows, that reduce admin, surface risk earlier, and keep people in control.
                 </p>
-                <p className="text-xs tracking-wider uppercase" style={{ fontFamily: FONT.mono, color: C.textMuted }}>
-                  {c.label}
+                <WovenDivider className="my-6" />
+                <p className="text-[15px] sm:text-base leading-[1.9]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: C.t2 }}>
+                  We help teams act faster with better information — not replace the people who know the work best.
                 </p>
-              </LiquidGlassCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <WeaveDivider />
-
-      {/* ═══ 4 — COMPLIANCE PIPELINE ═══ */}
-      <section className={`${SEC} relative z-10`}>
-        <div className={INNER}>
-          <motion.div {...fade} className="text-center mb-16">
-            <Eyebrow>SIX-LAYER AGENT STACK</Eyebrow>
-            <SectionHeading>Every agent. Six layers.<br />Governed end to end.</SectionHeading>
-            <Body className="max-w-xl mx-auto">
-              Every production-grade agent operates through a six-layer stack. No shortcuts, no black boxes. Your lawyers can actually read the audit trail.
-            </Body>
-          </motion.div>
-
-          <div className="flex flex-col sm:flex-row items-stretch gap-3">
-            {PIPELINE_STAGES.map((stage, i) => (
-              <LiquidGlassCard
-                key={stage.name}
-                className="flex-1 p-6 text-center"
-                accentColor={stage.color}
-                delay={i * 0.08}
-                glassIntensity="strong"
-              >
-                <div className="flex flex-col items-center gap-3">
-                  <span
-                    className="text-[10px] tracking-[3px] uppercase"
-                    style={{ fontFamily: FONT.mono, color: stage.color, fontWeight: 700 }}
-                  >
-                    Layer {i + 1}
-                  </span>
-                  <h3 className="text-lg" style={{ fontFamily: FONT.heading, fontWeight: 300, color: C.white }}>
-                    {stage.name}
-                  </h3>
-                  <p className="text-xs leading-relaxed" style={{ fontFamily: FONT.body, color: C.textSec }}>
-                    {stage.desc}
-                  </p>
-                  {i < PIPELINE_STAGES.length - 1 && (
-                    <span className="hidden sm:block absolute -right-2 top-1/2 text-xs" style={{ color: C.textMuted }}>→</span>
-                  )}
-                </div>
-              </LiquidGlassCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <WeaveDivider />
-
-      {/* ═══ 5 — OUTCOMES ═══ */}
-      <section className={`${SEC} relative z-10`}>
-        <div className={INNER}>
-          <motion.div {...fade} className="text-center mb-14">
-            <Eyebrow>WHAT CHANGES</Eyebrow>
-            <SectionHeading>What the first 30 days look like.</SectionHeading>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {OUTCOMES.map((o, i) => (
-              <LiquidGlassCard key={o.title} className="p-8 h-full" accentColor={o.accent} delay={i * 0.1}>
-                <h3 className="text-base mb-3" style={{ fontFamily: FONT.heading, fontWeight: 400, color: C.white, letterSpacing: "0.5px" }}>
-                  {o.title}
-                </h3>
-                <Body className="text-sm">{o.body}</Body>
-              </LiquidGlassCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ 6 — INDUSTRY KETE ═══ */}
-      <section id="industry-packs" className={`${SEC} relative z-10`}>
-        <div className={INNER}>
-          <motion.div {...fade} className="text-center mb-16">
-            <Eyebrow>INDUSTRY KETE</Eyebrow>
-            <SectionHeading>Five kete. Five sectors.<br />Specialist digital workers.</SectionHeading>
-            <Body className="max-w-xl mx-auto">
-              Each kete carries the legislation, workflows and terminology its industry actually uses. Specialist digital workers that operate inside defined permissions — not a generic chatbot pretending to know everything.
-            </Body>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {PACKS.map((p, i) => (
-              <LiquidGlassCard key={p.reo} className="h-full" accentColor={p.color} delay={i * 0.08}>
-                <Link to={p.to} className="block h-full group p-7">
-                  <div className="flex items-center gap-4 mb-5">
-                    {/* 3D model for first 3 kete, weave visual for rest */}
-                    {i < 3 ? (
-                      <Suspense fallback={<KeteWeaveVisual size={48} accentColor={p.color} accentLight={p.accentLight} showNodes={false} showGlow={false} />}>
-                        <Kete3DModel accentColor={p.color} accentLight={p.accentLight} size={64} />
-                      </Suspense>
-                    ) : (
-                      <KeteWeaveVisual size={48} accentColor={p.color} accentLight={p.accentLight} showNodes={false} showGlow={false} />
-                    )}
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[3px]" style={{ fontFamily: FONT.mono, color: p.color }}>
-                        {p.en}
-                      </p>
-                      <h3 className="text-xl" style={{ fontFamily: FONT.heading, fontWeight: 300, color: C.white, letterSpacing: "1px" }}>
-                        {p.reo}
-                      </h3>
-                    </div>
-                  </div>
-                  <Body className="text-sm">{p.desc}</Body>
-                  <div
-                    className="flex items-center gap-1 mt-5 text-[11px] transition-all duration-300 group-hover:gap-2 text-glow-hover"
-                    style={{ fontFamily: FONT.body, color: p.color, fontWeight: 500 }}
-                  >
-                    Explore kete <ArrowRight size={11} />
-                  </div>
-                </Link>
-              </LiquidGlassCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <WeaveDivider />
-
-      {/* ═══ 7 — WHY ASSEMBL ═══ */}
-      <section id="why-assembl" className={`${SEC} relative z-10`}>
-        <div className={INNER}>
-          <motion.div {...fade} className="text-center mb-16">
-            <Eyebrow>WHY ASSEMBL</Eyebrow>
-            <SectionHeading>Governed. Simulation-tested.<br />Built for Aotearoa.</SectionHeading>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {DIFFS.map((d, i) => (
-              <LiquidGlassCard key={d.title} className="p-8 h-full" accentColor={d.accent} delay={i * 0.08}>
-                <div className="flex items-start gap-5">
-                  <span className="text-[11px] shrink-0 mt-0.5" style={{ fontFamily: FONT.mono, color: d.accent, opacity: 0.7 }}>
-                    {d.num}
-                  </span>
-                  <div>
-                    <h3 className="text-base mb-3" style={{ fontFamily: FONT.heading, fontWeight: 400, color: C.white, letterSpacing: "0.5px" }}>
-                      {d.title}
-                    </h3>
-                    <Body className="text-sm">{d.body}</Body>
-                  </div>
-                </div>
-              </LiquidGlassCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ 8 — PRICING ═══ */}
-      <section id="pricing" className={`${SEC} relative z-10`}>
-        <div className={INNER}>
-          <motion.div {...fade} className="text-center mb-16">
-            <Eyebrow>PRICING</Eyebrow>
-            <SectionHeading>Pricing that fits an NZ small business.</SectionHeading>
-            <Body className="max-w-lg mx-auto">
-              Monthly billing. 30-day notice. NZD ex GST (15% added at invoice). Setup fees can split across the first three invoices on request.
-            </Body>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {PRICING.map((tier, i) => (
-              <motion.div key={tier.name} className="relative" {...stagger(i)}>
-                {tier.highlight && (
-                  <div className="absolute -inset-px rounded-[17px] pointer-events-none" style={{
-                    background: `linear-gradient(135deg, rgba(58,125,110,0.5) 0%, rgba(58,125,110,0.15) 50%, transparent 100%)`,
-                    zIndex: 0,
-                  }} />
-                )}
-                <LiquidGlassCard
-                  animate={false}
-                  className="p-7 h-full flex flex-col relative"
-                  accentColor={tier.accent}
-                  glassIntensity={tier.highlight ? "strong" : "medium"}
-                  style={{
-                    zIndex: 1,
-                    ...(tier.highlight ? {
-                      background: "rgba(5,15,12,0.92)",
-                      border: "1px solid rgba(58,125,110,0.35)",
-                      boxShadow: "0 0 0 1px rgba(58,125,110,0.1), 0 16px 48px rgba(58,125,110,0.12), 0 4px 24px rgba(0,0,0,0.4)",
-                      transform: "scale(1.02)",
-                    } : {}),
-                  }}
-                >
-                  {tier.highlight && (
-                    <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl"
-                      style={{ background: `linear-gradient(90deg, transparent, ${C.pounamu}, transparent)` }}
-                    />
-                  )}
-                  {"badge" in tier && tier.badge && (
-                    <span className="inline-block text-[9px] uppercase tracking-[2.5px] mb-3 px-2.5 py-1 rounded-full"
-                      style={{ fontFamily: FONT.mono, color: C.pounamuLight, background: "rgba(58,125,110,0.12)", border: "1px solid rgba(58,125,110,0.25)" }}>
-                      {tier.badge}
+              </GlassPanel>
+            </motion.div>
+            {/* Convergence visual — cinematic hero style */}
+            <motion.div {...fade} className="relative flex justify-center items-center rounded-2xl overflow-hidden" style={{ minHeight: 280 }}>
+              {/* Static woven background */}
+              <div className="absolute inset-0 pointer-events-none opacity-50" style={{
+                backgroundImage: `linear-gradient(45deg, ${C.pounamu}12 1px, transparent 1px), linear-gradient(-45deg, ${C.gold}08 1px, transparent 1px), linear-gradient(135deg, ${C.pounamu}06 1px, transparent 1px)`,
+                backgroundSize: "18px 18px, 24px 24px, 12px 12px",
+              }} />
+              {/* Dark scrim */}
+              <div className="absolute inset-0 pointer-events-none" style={{
+                background: "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(6,14,28,0.65) 0%, rgba(6,14,28,0.85) 100%)",
+              }} />
+              {/* Vignette */}
+              <div className="absolute inset-0 pointer-events-none" style={{
+                background: "radial-gradient(ellipse 90% 80% at 50% 50%, transparent 30%, rgba(6,14,28,0.8) 100%)",
+              }} />
+              {/* Convergence nodes */}
+              <div className="relative z-10 flex flex-col items-center py-10">
+                <div className="flex flex-wrap justify-center gap-3 mb-6 max-w-[240px]">
+                  {PACKS.map((p) => (
+                    <span key={p.reo} className="text-[9px] tracking-[2px] uppercase px-2.5 py-1 rounded-full"
+                      style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        color: p.color,
+                        border: `1px solid ${p.color}40`,
+                        background: `${p.color}10`,
+                        textShadow: `0 0 12px ${p.color}60`,
+                      }}>
+                      {p.reo} <span style={{ opacity: 0.55, fontSize: "8px" }}>/ {p.en}</span>
                     </span>
-                  )}
-                  <h3 className="text-sm uppercase tracking-[2px] mb-1"
-                    style={{ fontFamily: FONT.mono, fontWeight: 600, color: tier.highlight ? C.pounamuLight : "rgba(255,255,255,0.6)" }}>
-                    {tier.name}
-                  </h3>
-                  <p className="text-4xl mb-1" style={{ fontFamily: FONT.heading, fontWeight: 300, color: C.white }}>
-                    {tier.price}<span className="text-sm" style={{ color: C.textMuted }}>/mo</span>
-                  </p>
-                  <p className="text-[10px] mb-1" style={{ fontFamily: FONT.mono, color: "rgba(255,255,255,0.25)" }}>NZD ex GST</p>
-                  <p className="text-[10px] mb-5" style={{ fontFamily: FONT.mono, color: "rgba(255,255,255,0.4)" }}>{tier.setup}</p>
-                  <Body className="mb-6 text-xs">{tier.desc}</Body>
-                  <ul className="space-y-2.5 mt-auto mb-6">
-                    {tier.features.map((f) => (
-                      <li key={f} className="text-xs flex items-start gap-2.5" style={{ fontFamily: FONT.body, color: C.textSec }}>
-                        <Check size={12} style={{ color: tier.accent, marginTop: "2px", flexShrink: 0 }} />{f}
-                      </li>
-                    ))}
-                  </ul>
-                  <a href={tier.stripeUrl} target="_blank" rel="noopener noreferrer"
-                    className="block w-full text-center py-2.5 rounded-xl text-xs transition-all duration-300 hover:scale-[1.02]"
-                    style={{
-                      fontFamily: FONT.body, fontWeight: 600, letterSpacing: "0.04em",
-                      background: tier.highlight ? C.pounamu : "rgba(255,255,255,0.05)",
-                      color: tier.highlight ? "#FFFFFF" : "rgba(255,255,255,0.7)",
-                      border: tier.highlight ? "none" : "1px solid rgba(255,255,255,0.08)",
-                    }}>
-                    Subscribe — {tier.price}/mo
-                  </a>
-                </LiquidGlassCard>
+                  ))}
+                </div>
+                <div className="w-px h-8" style={{ background: `linear-gradient(to bottom, ${C.pounamu}60, ${C.gold}60)` }} />
+                <div className="w-4 h-4 rounded-full mt-1" style={{
+                  background: `radial-gradient(circle, ${C.gold} 0%, ${C.pounamu}80 100%)`,
+                  boxShadow: `0 0 20px ${C.pounamu}40, 0 0 40px ${C.gold}20`,
+                }} />
+                <p className="mt-3 text-[10px] tracking-[3px] uppercase"
+                  style={{ fontFamily: "'JetBrains Mono', monospace", color: C.gold, textShadow: "0 1px 12px rgba(0,0,0,0.7)" }}>
+                  Iho
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </Sect>
+
+        {/* ═══ DEMOS SECTION ═══ */}
+        <Sect>
+          <motion.div {...fade} className="text-center mb-12">
+            <Eye color={C.gold}>GOVERNANCE IN ACTION</Eye>
+            <H2>See the governance pipeline in action</H2>
+            <P className="max-w-xl mx-auto">
+              Four 60-second demos showing how Assembl enforces NZ law, tikanga, and human oversight before any output reaches a user.
+            </P>
+          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
+            {[
+              { title: "Pipeline Walkthrough", desc: "Watch a query flow through five governance stages", to: "/demos/pipeline", accent: C.pounamu },
+              { title: "Evidence Pack", desc: "See the structured, watermarked output your team keeps", to: "/demos/evidence-pack", accent: C.gold },
+              { title: "Confidence Scoring", desc: "Every claim tagged with source, confidence, and citation", to: "/demos/confidence-scoring", accent: C.pounamuLight },
+              { title: "Kaitiaki Gate", desc: "Sacred content guardrail and human-in-the-loop escalation", to: "/demos/kaitiaki-gate", accent: "#E87461" },
+            ].map((d, i) => (
+              <motion.div key={d.title} {...stagger(i)}>
+                <Link to={d.to} className="group block h-full">
+                  <GlassPanel className="p-6 h-full" tilt>
+                    <div className="w-3 h-3 rounded-full mb-4" style={{ background: d.accent, boxShadow: `0 0 12px ${d.accent}40` }} />
+                    <h3 className="text-[13px] mb-2" style={{ fontFamily: "'Lato', sans-serif", fontWeight: 400, letterSpacing: "2px", textTransform: "uppercase", color: C.t1 }}>{d.title}</h3>
+                    <p className="text-[12px] mb-3" style={{ color: C.t3 }}>{d.desc}</p>
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium group-hover:gap-3 transition-all" style={{ color: d.accent }}>
+                      Try it <ArrowRight size={10} />
+                    </span>
+                  </GlassPanel>
+                </Link>
               </motion.div>
             ))}
           </div>
+        </Sect>
 
-          <motion.div className="text-center mt-12" {...fade}>
-            <p className="text-[11px] uppercase tracking-[3px] mb-2" style={{ fontFamily: FONT.mono, color: C.pounamuLight, fontWeight: 700 }}>
-              OUTCOME ENGAGEMENTS · FROM $5,000/MO
-            </p>
-            <p className="text-xs max-w-xl mx-auto mb-3" style={{ fontFamily: FONT.body, color: "rgba(255,255,255,0.55)" }}>
-              We take on the result, not the hours. Base fee plus 10–20% of measured savings.
-            </p>
-            <Link to="/contact" className="text-xs underline" style={{ fontFamily: FONT.body, color: C.pounamuLight }}>Talk to us →</Link>
+        {/* ═══ AAAIP CALLOUT ═══ */}
+        <Sect>
+          <motion.div {...fade} className="text-center">
+            <GlassPanel className="p-6 sm:p-8 max-w-2xl mx-auto" goldRim>
+              <p className="text-[10px] tracking-[3px] uppercase mb-2" style={{ fontFamily: "'JetBrains Mono', monospace", color: C.gold }}>Research Lab</p>
+              <p className="text-[15px] leading-relaxed mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: C.t2 }}>
+                Live AAAIP pilots and audit log for the Aotearoa Agentic AI Platform bid.
+              </p>
+              <Link to="/aaaip" className="inline-flex items-center gap-2 text-[13px] font-medium hover:gap-3 transition-all" style={{ color: C.gold }}>
+                View Research Lab <ArrowRight size={12} />
+              </Link>
+            </GlassPanel>
           </motion.div>
+        </Sect>
 
-          <motion.p className="text-center mt-8 text-[11px]" style={{ fontFamily: FONT.mono, color: "rgba(255,255,255,0.25)" }} {...fade}>
-            NZD ex GST · Setup fees can split across the first three invoices · Existing customers grandfathered until 2027-04-08
-          </motion.p>
-        </div>
-      </section>
-
-      {/* ═══ 9 — FOUNDING PILOT CTA ═══ */}
-      <section ref={pilotRef} id="founding-pilot" className={`${SEC} relative z-10`}>
-        <div className={`${INNER} max-w-2xl mx-auto text-center`}>
-          <motion.div {...fade}>
-            <Eyebrow>FOUNDING PILOTS</Eyebrow>
-            <SectionHeading>Twenty businesses. One year.<br />The platform shaped around you.</SectionHeading>
-            <Body className="mb-10">
-              We work directly with twenty NZ businesses to wire assembl into the way you already run things. Hands-on onboarding, weekly working sessions, founder access, and pricing locked at the founding rate forever.
-            </Body>
+        {/* ═══ INDUSTRY KETE ═══ */}
+        <Sect id="industry-packs">
+          <motion.div {...fade} className="text-center mb-12">
+            <Eye color={C.pounamu}>YOUR INDUSTRY</Eye>
+            <H2>Sector-specific workflow packs</H2>
           </motion.div>
-          <motion.form
-            onSubmit={handlePilot}
-            className="rounded-2xl p-8 text-left space-y-4"
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              backdropFilter: "blur(24px)",
-              border: "1px solid rgba(58,125,110,0.2)",
-              boxShadow: "0 0 48px rgba(58,125,110,0.06), 0 8px 32px rgba(0,0,0,0.45)",
-            }}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease }}
-          >
-            <InputField value={pilotName} onChange={setPilotName} placeholder="Your name" />
-            <InputField value={pilotEmail} onChange={setPilotEmail} placeholder="Email address" type="email" />
-            <InputField value={pilotBiz} onChange={setPilotBiz} placeholder="Business name & industry" />
-            <button
-              type="submit"
-              className="cta-glass-green w-full py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
-            >
-              Apply for a founding pilot <Send size={14} />
-            </button>
-            <p className="text-[11px] text-center" style={{ fontFamily: FONT.mono, color: "rgba(255,255,255,0.2)" }}>
-              Limited places. We respond within one business day.
-            </p>
-          </motion.form>
-        </div>
-      </section>
+          <LayoutGroup>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+              {orderedPacks.map((p, i) => {
+                const isDetected = isPersonalized && i === 0;
+                return (
+                  <motion.div key={p.reo} layout layoutId={`kete-${p.reo}`} {...stagger(i)}>
+                    <Link to={p.to} className="group block h-full">
+                      <div className="glass-panel h-full rounded-2xl overflow-hidden transition-all duration-300 group-hover:translate-y-[-4px]"
+                        style={isDetected ? { boxShadow: `0 0 40px ${C.gold}12, inset 0 1px 0 rgba(212,168,83,0.25)` } : undefined}>
+                        <MaungaBorder variant="top" accentColor={p.color} />
+                        <div className="p-6 relative z-[1]">
+                          {isDetected && (
+                            <span className="text-[9px] px-2 py-0.5 rounded-full tracking-[2px] uppercase inline-block mb-3"
+                              style={{ background: `${C.gold}15`, color: `${C.gold}aa`, border: `1px solid ${C.gold}25`, fontFamily: "'JetBrains Mono', monospace" }}>
+                              Recommended for you
+                            </span>
+                          )}
+                          <div className="flex items-center gap-4 mb-4">
+                            <Suspense fallback={<KeteWeaveVisual size={40} accentColor={p.color} accentLight={p.accentLight} showNodes={false} showGlow={false} />}>
+                              <Kete3DModel accentColor={p.color} accentLight={p.accentLight} size={48} />
+                            </Suspense>
+                            <div>
+                              <h3 style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, fontSize: "1.15rem", letterSpacing: "4px", textTransform: "uppercase", color: C.white }}>{p.reo}</h3>
+                              <p className="text-[11px] tracking-[1px] uppercase" style={{ color: "rgba(245,240,232,0.45)", fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500 }}>{p.en}</p>
+                            </div>
+                          </div>
+                          <p className="text-[14px] leading-relaxed mb-4" style={{ color: C.t2 }}>{p.desc}</p>
+                          <span className="inline-flex items-center gap-1.5 text-[13px] font-medium group-hover:gap-3 transition-all" style={{ color: p.color }}>
+                            See a sample pack <ArrowRight size={12} />
+                          </span>
+                        </div>
+                        {/* Fading weave at bottom */}
+                        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-0" style={{
+                          backgroundImage: `linear-gradient(45deg, rgba(58,125,110,0.04) 1px, transparent 1px), linear-gradient(-45deg, rgba(58,125,110,0.04) 1px, transparent 1px)`,
+                          backgroundSize: "12px 12px",
+                          maskImage: "linear-gradient(transparent, rgba(0,0,0,0.3))",
+                          WebkitMaskImage: "linear-gradient(transparent, rgba(0,0,0,0.3))",
+                        }} />
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </LayoutGroup>
+        </Sect>
 
-      <WeaveDivider />
-
-      {/* ═══ 10 — TRUST LAYER ═══ */}
-      <section id="trust" className={`${SEC} relative z-10`}>
-        <div className={INNER}>
-          <motion.div {...fade} className="text-center mb-6">
-            <Eyebrow>TRUST LAYER</Eyebrow>
-            <SectionHeading>Te Kāhui Reo —<br />the language collective.</SectionHeading>
-            <Body className="max-w-2xl mx-auto mb-16">
-              Te Kāhui Reo is the cultural and language layer that runs underneath every kete. Tikanga Māori governance is a quiet structural layer through the whole platform, not a disclaimer at the bottom.
-            </Body>
+        {/* ═══ HOW IT WORKS — 6 layers ═══ */}
+        <Sect>
+          <motion.div {...fade} className="text-center mb-12">
+            <Eye color={C.gold}>HOW ASSEMBL WORKS</Eye>
+            <H2>Six layers of governed intelligence, woven together</H2>
+            <P className="max-w-xl mx-auto">
+              Every decision is checked, every action is logged, every output is something you can file.
+            </P>
           </motion.div>
-
-          <motion.div {...fade} className="text-center mb-10">
-            <p className="text-[10px] uppercase tracking-[4px]" style={{ fontFamily: FONT.mono, color: "rgba(255,255,255,0.3)" }}>
-              The four pou
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {FOUR_POU.map((pou, i) => (
-              <LiquidGlassCard key={pou.reo} className="p-8 h-full" accentColor={pou.accent} delay={i * 0.08}>
-                <div className="flex items-start gap-4">
-                  <KeteWeaveVisual size={32} accentColor={pou.accent} showNodes={false} showGlow={false} />
-                  <div>
-                    <h3 className="text-base mb-1" style={{ fontFamily: FONT.heading, fontWeight: 400, color: C.white, letterSpacing: "0.5px" }}>
-                      {pou.reo}
-                    </h3>
-                    <p className="text-[10px] uppercase tracking-[2.5px] mb-3"
-                      style={{ fontFamily: FONT.mono, color: pou.accent, opacity: 0.8 }}>
-                      {pou.en}
-                    </p>
-                    <Body className="text-sm">{pou.body}</Body>
+          <div className="max-w-2xl mx-auto space-y-1">
+            {LAYERS.map((layer, i) => (
+              <motion.div key={layer.name} {...stagger(i)}>
+                <GlassPanel className="p-5 flex items-center gap-5">
+                  <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `${i % 2 === 0 ? C.pounamu : C.gold}15` }}>
+                    <span className="text-[11px] font-bold" style={{ color: i % 2 === 0 ? C.pounamuLight : C.goldLight, fontFamily: "'JetBrains Mono', monospace" }}>{String(i + 1).padStart(2, "0")}</span>
                   </div>
-                </div>
-              </LiquidGlassCard>
+                  <div>
+                    <p className="text-[13px] mb-0.5" style={{ fontFamily: "'Lato', sans-serif", fontWeight: 400, letterSpacing: "2px", textTransform: "uppercase", color: C.t1 }}>{layer.name}</p>
+                    <p className="text-[13px]" style={{ color: C.t3 }}>{layer.desc}</p>
+                  </div>
+                </GlassPanel>
+                {i < LAYERS.length - 1 && (
+                  <div className="flex justify-center">
+                    <svg width="4" height="12" viewBox="0 0 4 12">
+                      <path d="M1 0 Q2 6 3 12" fill="none" stroke={C.pounamu} strokeWidth="1" opacity="0.3" />
+                      <path d="M3 0 Q2 6 1 12" fill="none" stroke={C.gold} strokeWidth="0.8" opacity="0.2" />
+                    </svg>
+                  </div>
+                )}
+              </motion.div>
             ))}
           </div>
-        </div>
-      </section>
+        </Sect>
 
-      {/* ═══ 11 — TORO ═══ */}
-      <section className="px-6 sm:px-8 py-20 relative z-10">
-        <div className={`${INNER} max-w-2xl mx-auto text-center`}>
-          <motion.div {...fade}>
-            <div className="flex justify-center mb-6">
-              <KeteWeaveVisual size={48} accentColor={C.pounamuLight} accentLight={C.pounamuGlow} showNodes={false} />
-            </div>
-            <Eyebrow>ALSO FROM ASSEMBL</Eyebrow>
-            <h3 className="text-2xl uppercase tracking-[4px] mb-4" style={{ fontFamily: FONT.heading, fontWeight: 300, color: C.white }}>
-              Tōroa
-            </h3>
-            <Body className="mb-8">SMS-first whānau navigator for Aotearoa. No app, no login, just text. $29/month.</Body>
-            <Link
-              to="/toroa"
-              className="btn-ghost inline-flex items-center gap-2 px-8 py-3.5 text-sm rounded-full"
-            >
-              Visit Tōroa <ArrowRight size={15} />
-            </Link>
+        {/* ═══ EVIDENCE PACKS ═══ */}
+        <Sect>
+          <motion.div {...fade} className="text-center mb-12">
+            <Eye color={C.gold}>EVIDENCE PACKS</Eye>
+            <H2>Every workflow ends in a pack you can file, forward, or footnote</H2>
+            <P className="max-w-xl mx-auto">
+              Not a chatbot response. A structured, evidence-backed document your auditor, your bank, or your regulator can trust.
+            </P>
           </motion.div>
-        </div>
-      </section>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+            {EVIDENCE_PACKS.map((pack, i) => (
+              <motion.div key={pack.kete} {...stagger(i)}>
+                <GlassPanel className="p-0 h-full" tilt>
+                   <MaungaBorder variant="top" />
+                   <div className="p-6">
+                     <p className="text-[10px] tracking-[3px] uppercase mb-1" style={{ color: C.gold, fontFamily: "'JetBrains Mono', monospace" }}>Evidence Pack</p>
+                     <h3 className="text-[15px] mb-0.5" style={{ fontFamily: "'Lato', sans-serif", fontWeight: 400, color: C.t1 }}>{pack.title}</h3>
+                     <p className="text-[11px] tracking-[1px] uppercase mb-4" style={{ color: C.pounamu, fontFamily: "'JetBrains Mono', monospace" }}>{pack.kete} · {pack.date}</p>
+                     <div className="space-y-2">
+                       {pack.checks.map((c) => (
+                         <div key={c.ref} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: "rgba(58,125,110,0.06)" }}>
+                           <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: `${C.pounamu}20` }}>
+                             <Check size={10} style={{ color: C.pounamuLight }} />
+                           </div>
+                           <span className="text-[12px] flex-1" style={{ color: C.t2 }}>{c.label}</span>
+                           <span className="text-[9px] tracking-wider" style={{ color: C.t3, fontFamily: "'JetBrains Mono', monospace" }}>{c.ref}</span>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                   <MaungaBorder variant="bottom" />
+                </GlassPanel>
+              </motion.div>
+            ))}
+          </div>
+        </Sect>
 
-      <BrandFooter />
+        {/* ═══ TRUST / COMPLIANCE PIPELINE ═══ */}
+        <Sect>
+          <motion.div {...fade} className="text-center mb-12">
+            <Eye color={C.pounamu}>TRUST</Eye>
+            <H2>Governed from the ground up</H2>
+            <P className="max-w-md mx-auto">Five stages of oversight from policy to proof.</P>
+          </motion.div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-2 max-w-4xl mx-auto">
+            {TRUST_NODES.map((node, i) => (
+              <React.Fragment key={node.name}>
+                <motion.div {...stagger(i)} className="flex flex-col items-center text-center min-w-[80px]">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2" style={{ background: `${C.pounamu}15`, boxShadow: `0 0 12px ${C.pounamu}20` }}>
+                    <div className="w-3 h-3 rounded-full" style={{ background: C.pounamu }} />
+                  </div>
+                  <span className="text-[10px] tracking-[2px] uppercase font-bold" style={{ color: C.pounamuLight, fontFamily: "'JetBrains Mono', monospace" }}>{node.name}</span>
+                  <span className="text-[10px] mt-1 max-w-[120px]" style={{ color: C.t3 }}>{node.desc}</span>
+                </motion.div>
+                {i < TRUST_NODES.length - 1 && (
+                  <svg className="hidden sm:block w-10 h-6 shrink-0" viewBox="0 0 40 6">
+                    <path d="M0 3 Q10 1 20 3 Q30 5 40 3" fill="none" stroke={C.pounamu} strokeWidth="1" opacity="0.3" />
+                    <path d="M0 3 Q10 5 20 3 Q30 1 40 3" fill="none" stroke={C.gold} strokeWidth="0.8" opacity="0.2" />
+                  </svg>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </Sect>
+
+        {/* ═══ CTA to Pricing FAQ ═══ */}
+        <Sect>
+          <motion.div {...fade} className="text-center">
+            <Eye color={C.pounamu}>QUESTIONS?</Eye>
+            <H2>Got questions?</H2>
+            <P className="max-w-md mx-auto mb-8">
+              Check our comprehensive FAQ on the pricing page, or get in touch.
+            </P>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/pricing#faq" className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-medium rounded-lg"
+                style={{ border: `1px solid ${C.pounamu}`, color: C.bone }}>
+                View FAQ
+              </Link>
+              <Link to="/contact" className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-medium rounded-lg"
+                style={{ border: `1px solid ${C.gold}50`, color: C.goldLight }}>
+                Talk to us
+              </Link>
+            </div>
+          </motion.div>
+        </Sect>
+
+        {/* ═══ FINAL CTA ═══ */}
+        <section className="relative px-4 sm:px-6 py-20 sm:py-24 text-center overflow-hidden">
+          {/* Cinematic background */}
+          <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none">
+            <source src="/hero-woven-video.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(6,14,28,0.7) 0%, rgba(6,14,28,0.9) 100%)",
+          }} />
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: "radial-gradient(ellipse 90% 80% at 50% 50%, transparent 30%, rgba(6,14,28,0.85) 100%)",
+          }} />
+          <div className="max-w-xl mx-auto relative z-10">
+            <motion.div {...fade}>
+              <GlassPanel className="p-10 sm:p-16" goldRim>
+                <H2>Ready to see what your industry team looks like?</H2>
+                <P className="mb-10">
+                  Pick your kete. Run the demo. See the evidence pack it produces.
+                </P>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link to="/contact" className="group inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-semibold rounded-lg transition-all duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+                      color: C.bg,
+                      boxShadow: `0 4px 24px rgba(212,168,83,0.35), 0 0 40px rgba(212,168,83,0.15)`,
+                      textShadow: "0 1px 2px rgba(0,0,0,0.2)",
+                    }}>
+                    See it in action <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link to="/contact" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-medium rounded-lg transition-all duration-300"
+                    style={{ border: `1px solid ${C.pounamu}`, color: C.bone, backdropFilter: "blur(8px)", boxShadow: `0 0 20px ${C.pounamu}15` }}>
+                    Book a walkthrough
+                  </Link>
+                </div>
+              </GlassPanel>
+            </motion.div>
+          </div>
+        </section>
+
+        <BrandFooter />
+      </div>
+
+      <KeteAgentChat
+        keteName="assembl" keteLabel="Platform Concierge" accentColor="#3A7D6E"
+        defaultAgentId="echo" packId="assembl"
+        starterPrompts={["What industry kete is right for my business?", "How does the onboarding process work?", "What's included in the Operator plan?", "How does assembl handle compliance?"]}
+      />
     </div>
   );
 };
 
 export default Index;
+
+/* ─── Layout primitives ─── */
+function Sect({ children, id }: { children: React.ReactNode; id?: string }) {
+  return (
+    <section id={id} className="px-4 sm:px-6 py-16 sm:py-20 relative">
+      <div className="max-w-5xl mx-auto relative z-10">{children}</div>
+      <div className="absolute bottom-0 left-0 right-0"><WovenDivider /></div>
+    </section>
+  );
+}
+
+function Eye({ children, color = "#3A7D6E" }: { children: string; color?: string }) {
+  return (
+    <p className="text-[10px] font-bold tracking-[4px] uppercase mb-4"
+      style={{ color, fontFamily: "'JetBrains Mono', monospace" }}>
+      — {children} —
+    </p>
+  );
+}
+
+function H2({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-2xl sm:text-3xl lg:text-[36px] mb-4"
+      style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, letterSpacing: "4px", textTransform: "uppercase", lineHeight: 1.15, color: "rgba(245,240,232,0.9)" }}>
+      {children}
+    </h2>
+  );
+}
+
+function P({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <p className={`text-[15px] sm:text-base leading-relaxed ${className}`}
+      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: "rgba(245,240,232,0.75)" }}>
+      {children}
+    </p>
+  );
+}

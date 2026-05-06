@@ -5,9 +5,9 @@
  * Plain-English tier names. NZD ex GST. Add 15% GST at invoice.
  *
  * Tier ladder (business):
- *   Operator   $590/mo  + $1,490 setup  · 1 kete  · up to 5 seats
- *   Leader     $1,290/mo + $1,990 setup · 2 kete  · up to 15 seats · quarterly compliance review
- *   Enterprise $2,890/mo + $2,990 setup · all 5 kete · unlimited seats · 99.9% SLA · NZ data residency · named success manager
+ *   Operator   $1,490/mo + $590 setup   · 1 kete  · up to 5 seats · 20 evidence packs/mo
+ *   Leader     $1,990/mo + $1,290 setup  · 2 kete  · up to 15 seats · 60 evidence packs/mo · quarterly compliance review
+ *   Enterprise $2,990/mo + $2,890 setup  · all 5 kete · unlimited seats · 200 evidence packs/mo · 99.9% SLA · NZ data residency · named success manager
  *   Outcome    from $5,000/mo · per-engagement scope · 10–20% of measured savings
  *
  * Consumer:
@@ -24,7 +24,7 @@
  *
  * DO NOT introduce te reo on the pricing tier names. Te reo stays on the kete
  * names and the trust layer (Kahu / Iho / Mana / Tā / Mahara). The consumer
- * agent's internal branding (Tōroa) is unchanged — only the *pricing tier* is
+ * agent's internal branding (Toro) is unchanged — only the *pricing tier* is
  * called "Family".
  */
 
@@ -50,16 +50,16 @@ export const PRICING = {
   },
   operator: {
     name: 'Operator',
-    price: 590,
+    price: 1490,
     period: '/mo',
     currency: 'NZD',
-    setup: 1490,
+    setup: 590,
     setupNote: 'Splittable across first 3 invoices on request',
     descriptor: 'Sole traders and micro-SMEs — one industry, one team, one source of truth',
     features: [
       '1 industry kete (your pick)',
       'Up to 5 seats',
-      'Tikanga compliance layer',
+      'Tikanga posture — partner, not label. Mead\'s Five Tests applied to Māori-origin content. Sacred content hard-blocked.',
       'Privacy Act 2020 + AAAIP alignment',
       'SMS, WhatsApp & dashboard access',
       '3 training hours / year',
@@ -73,16 +73,16 @@ export const PRICING = {
   },
   leader: {
     name: 'Leader',
-    price: 1290,
+    price: 1990,
     period: '/mo',
     currency: 'NZD',
-    setup: 1990,
+    setup: 1290,
     setupNote: 'Splittable across first 3 invoices on request',
     descriptor: 'Multi-discipline SMEs and growing teams — covers two parts of the business with quarterly compliance review',
     features: [
       '2 industry kete (your pick)',
       'Up to 15 seats',
-      'Tikanga compliance layer',
+      'Tikanga posture — partner, not label. Mead\'s Five Tests applied to Māori-origin content. Sacred content hard-blocked.',
       'Privacy Act 2020 + AAAIP alignment',
       'Quarterly compliance review (signed)',
       'Monthly audit report',
@@ -97,10 +97,10 @@ export const PRICING = {
   },
   enterprise: {
     name: 'Enterprise',
-    price: 2890,
+    price: 2990,
     period: '/mo',
     currency: 'NZD',
-    setup: 2990,
+    setup: 2890,
     setupNote: 'Splittable across first 3 invoices on request',
     descriptor: 'Multi-site, regulated, high-stakes operations — every kete, the SLA, and a named human to call',
     features: [
@@ -195,7 +195,7 @@ export const KETE = [
 export const COMPARISON_FEATURES = [
   { feature: 'Industry Kete', operator: '1', leader: '2', enterprise: 'All 5', outcome: 'All 5 + custom' },
   { feature: 'Seats', operator: 'Up to 5', leader: 'Up to 15', enterprise: 'Unlimited', outcome: 'Unlimited' },
-  { feature: 'Tikanga compliance layer', operator: true, leader: true, enterprise: true, outcome: true },
+  { feature: 'Tikanga — Cultural governance', operator: true, leader: true, enterprise: true, outcome: true },
   { feature: 'Privacy Act 2020 + AAAIP', operator: true, leader: true, enterprise: true, outcome: true },
   { feature: 'SMS & WhatsApp', operator: true, leader: true, enterprise: true, outcome: true },
   { feature: 'Quarterly compliance review', operator: false, leader: true, enterprise: true, outcome: true },

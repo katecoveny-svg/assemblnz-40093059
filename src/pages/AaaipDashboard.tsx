@@ -7,12 +7,15 @@
 // while reusing the chrome.
 // ═══════════════════════════════════════════════════════════════
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuthSafe } from "@/hooks/useAuth";
 import {
   Activity,
   AlertTriangle,
   Anchor,
+  ArrowLeft,
   Bird,
   Briefcase,
   Car,
@@ -52,8 +55,11 @@ import {
 } from "recharts";
 
 import SEO from "@/components/SEO";
-import ParticleField from "@/components/ParticleField";
+import BrandNav from "@/components/BrandNav";
+import BrandFooter from "@/components/BrandFooter";
+import GlowPageWrapper from "@/components/kete/GlowPageWrapper";
 import KeteIcon from "@/components/kete/KeteIcon";
+import ParticleField from "@/components/ParticleField";
 import AgentTestToggle from "@/components/aaaip/AgentTestToggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -221,10 +227,10 @@ const DOMAIN_META: Record<DomainKey, DomainMeta> = {
     keteVariant: "organic",
   },
   auaha: {
-    title: "Auaha — Creative Digital Twin",
-    pilotLabel: "Aotearoa Agentic AI Platform · Pilot 08",
+    title: "Auaha — Creative & Media Studio",
+    pilotLabel: "Aotearoa Agentic AI Platform · Pilot 08 — Auaha (creative & media)",
     description:
-      "A creative agent generating campaign copy, imagery and video. Copyright, likeness consent, brand safety, te reo integrity and misinformation policies gate every publish.",
+      "A coordinated studio of nine specialist agents — Rautaki (strategy), Kōrero (content), Mana Kupu (compliance), Toi (creative), Whakahaere (campaigns), Whaikōrero-Ā-Hoko (lead gen), Aro (analytics), Reo Whare (internal comms) and Studio Director (orchestrator). Every output is gated by the claim register, Fair Trading Act, Privacy Act + IPP 3A, UEMA, and tikanga-compliance before a human signs it off. No autonomous publishing — ever.",
     policyPrefix: "auaha.",
     group: "industry",
     accentColor: "#F0D078",
@@ -243,7 +249,7 @@ const DOMAIN_META: Record<DomainKey, DomainMeta> = {
     keteVariant: "standard",
   },
   toro: {
-    title: "Tōroa — Whānau Family Navigator",
+    title: "Toro — Whānau Family Navigator",
     pilotLabel: "Aotearoa Agentic AI Platform · Pilot 09",
     description:
       "An SMS-first whānau family navigator sending school notices, meal ideas, budget alerts, learning prompts and reminders. Parental-consent, age-appropriate, financial-harm, wellbeing-crisis and te reo integrity policies gate every outbound message.",
@@ -256,6 +262,9 @@ const DOMAIN_META: Record<DomainKey, DomainMeta> = {
 };
 
 export default function AaaipDashboard() {
+  const auth = useAuthSafe();
+  const isAdmin = auth?.isAdmin ?? false;
+  const authLoading = auth?.loading ?? true;
   const [domain, setDomain] = useState<DomainKey>("clinic");
   const clinic = useAaaipRuntime();
   const robot = useRobotRuntime();
@@ -338,16 +347,16 @@ export default function AaaipDashboard() {
     }
   };
 
+  if (!authLoading && !isAdmin) return <Navigate to="/" replace />;
+
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
+    <GlowPageWrapper accentColor={meta.accentColor}>
+    <div className="relative min-h-screen" style={{ background: "#0A0A14", color: "#fff" }}>
       <SEO
         title="AAAIP Live Demo · Assembl"
-        description="Simulation-tested, policy-governed autonomous agents across every Assembl industry Kete — Waihanga, Pikau, Manaaki, Auaha, Tōroa — plus clinical, robotics, drug-screening and community-moderation pilots."
+        description="Simulation-tested, policy-governed autonomous agents across every Assembl industry Kete — Waihanga, Pikau, Manaaki, Auaha, Toro — plus clinical, robotics, drug-screening and community-moderation pilots."
       />
-      {/* Animated star-field constellation background */}
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-60">
-        <ParticleField />
-      </div>
+      <BrandNav />
       <div className="relative z-10">
       <header
         className="border-b border-border/40 backdrop-blur-xl"
@@ -398,7 +407,7 @@ export default function AaaipDashboard() {
                 Pause
               </Button>
             ) : (
-              <Button onClick={rt.start}>
+              <Button onClick={rt.start} variant="outline">
                 <Play className="mr-1" />
                 Run sim
               </Button>
@@ -822,8 +831,10 @@ export default function AaaipDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+      <BrandFooter />
       </div>
     </div>
+    </GlowPageWrapper>
   );
 }
 
@@ -839,7 +850,7 @@ const DOMAIN_OPTIONS: Array<{ key: DomainKey; label: string; group: "foundation"
   { key: "manaaki", label: "Manaaki — hospitality", group: "industry" },
   { key: "auaha", label: "Auaha — creative", group: "industry" },
   { key: "arataki", label: "Arataki — automotive", group: "industry" },
-  { key: "toro", label: "Tōroa — whānau navigator", group: "industry" },
+  { key: "toro", label: "Toro — whānau navigator", group: "industry" },
 ];
 
 function DomainIcon({ domain }: { domain: DomainKey }) {

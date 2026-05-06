@@ -59,7 +59,7 @@ const SymbioticNotification = ({ agentColor, notification, onDismiss, onViewAll 
               <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
               <span className="font-bold" style={{ color }}>{step.target}</span>
               <span className="text-muted-foreground truncate flex-1">{step.action.substring(0, 60)}...</span>
-              {step.status === "completed" && <Check size={12} className="text-green-400 shrink-0" />}
+              {step.status === "completed" && <Check size={12} className="text-[#5AADA0] shrink-0" />}
               {step.status === "processing" && <Loader2 size={12} className="animate-spin shrink-0" style={{ color }} />}
               {step.status === "pending" && <Clock size={12} className="text-muted-foreground/40 shrink-0" />}
             </div>

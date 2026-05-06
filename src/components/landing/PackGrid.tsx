@@ -1,29 +1,12 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import GlowIcon from "@/components/GlowIcon";
+import { lazy, Suspense } from "react";
+import KeteOrbHero from "./KeteOrbHero";
 
-/* Albatross silhouette — matches Toro landing page header */
-function AlbatrossIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
-      <path
-        d="M160 40 C140 32, 80 18, 20 28 C50 26, 90 34, 130 38 L160 40 L190 38 C230 34, 270 26, 300 28 C240 18, 180 32, 160 40Z"
-        fill="#D4A843" opacity="0.85"
-      />
-      <ellipse cx="160" cy="42" rx="18" ry="8" fill="#D4A843" />
-      <ellipse cx="160" cy="42" rx="12" ry="5" fill="#FFE082" opacity="0.3" />
-      <path d="M178 42 L210 40 L215 41" stroke="#D4A843" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
+const Kete3DModel = lazy(() => import("@/components/kete/Kete3DModel"));
 
-/**
- * PackGrid — homepage kete display.
- * Locked to the 5 industry kete + Tōroa whānau kete per PRICING-LOCKED.md.
- * No data lookup — everything hardcoded so retired kete (Pakihi, Waka,
- * Hangarau, Hauora, Te Kāhui Reo) can never leak back in.
- */
+import ToroBirdIcon from "@/components/ToroBirdIcon";
 
 type PackCard = {
   id: string;
@@ -31,7 +14,7 @@ type PackCard = {
   label: string;
   description: string;
   accent: string;
-  iconName: string;
+  accentLight: string;
   route: string;
 };
 
@@ -39,56 +22,54 @@ const PACKS: PackCard[] = [
   {
     id: "manaaki",
     name: "Manaaki",
-    label: "Hospitality & Tourism",
+    label: "HOSPITALITY & TOURISM",
     description:
       "Fewer missed checks. Cleaner compliance. Guests looked after without the paperwork pile-up.",
     accent: "#D4A843",
-    iconName: "utensils-crossed",
+    accentLight: "#F0D078",
     route: "/manaaki",
   },
   {
     id: "waihanga",
     name: "Waihanga",
-    label: "Construction",
+    label: "CONSTRUCTION",
     description:
       "Site safety, schedule risks surfaced earlier, cleaner audit trails, approvals that don't stall.",
     accent: "#3A7D6E",
-    iconName: "hard-hat",
+    accentLight: "#7ECFC2",
     route: "/waihanga",
   },
   {
     id: "auaha",
     name: "Auaha",
-    label: "Creative & Media",
+    label: "CREATIVE & MEDIA",
     description:
       "Brief to published with fewer handoffs. Content that stays on-brand and on-deadline.",
     accent: "#F0D078",
-    iconName: "palette",
+    accentLight: "#FFE866",
     route: "/auaha",
   },
   {
     id: "arataki",
     name: "Arataki",
-    label: "Automotive",
+    label: "AUTOMOTIVE",
     description:
-      "Dealership compliance, customer enquiry response, finance disclosure — the showroom back office handled.",
-    accent: "#C65D4E",
-    iconName: "car",
+      "Enquiry → test drive → sale → delivery → service → loyalty. No handoff dropped across DMS, CRM, and OEM portals.",
+    accent: "#E8E8E8",
+    accentLight: "#FFFFFF",
     route: "/arataki",
   },
   {
     id: "pikau",
     name: "Pikau",
-    label: "Freight & Customs",
+    label: "FREIGHT & CUSTOMS",
     description:
-      "Customs entries, freight quotes, dangerous goods checks — border compliance without the scramble.",
+      "Route optimisation, declarations, broker hand-off, customs compliance.",
     accent: "#5AADA0",
-    iconName: "package",
+    accentLight: "#7ECFC2",
     route: "/packs/pikau",
   },
 ];
-
-const ease = [0.16, 1, 0.3, 1] as const;
 
 const PackGrid = () => {
   return (
@@ -98,28 +79,8 @@ const PackGrid = () => {
       style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        {/* Section header */}
-        <motion.div
-          className="text-center mb-14"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease }}
-        >
-          <p className="font-mono-jb text-[10px] tracking-[4px] uppercase text-primary/60 mb-3">
-            Ngā Kete o te Wānanga · 5 Industry Kete · Built in Aotearoa
-          </p>
-          <h2
-            className="text-2xl sm:text-4xl font-display tracking-[0.02em] text-foreground mb-3 heading-glow section-heading"
-            style={{ fontWeight: 300 }}
-          >
-            Ngā Kete
-          </h2>
-          <p className="text-sm font-body text-muted-foreground max-w-lg mx-auto">
-            Five industry kete — each a focused AI operations hub, grounded in
-            NZ legislation and built for the way your business actually runs.
-          </p>
-        </motion.div>
+        {/* Hero orb */}
+        <KeteOrbHero />
 
         {/* The 5 industry kete */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
@@ -152,41 +113,59 @@ const PackGrid = () => {
               />
 
               <div className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <GlowIcon name={pack.iconName} size={28} color={pack.accent} />
-                  <div className="flex-1 min-w-0">
-                    <h3
-                      className="font-display text-sm tracking-[2px] uppercase text-foreground"
-                      style={{ fontWeight: 300, fontFamily: "'Lato', sans-serif" }}
-                    >
-                      {pack.name}
-                    </h3>
-                  </div>
+                {/* 3D Kete model */}
+                <div className="flex justify-center mb-4">
+                  <Suspense
+                    fallback={
+                      <div
+                        className="w-[100px] h-[100px] rounded-full animate-pulse"
+                        style={{ background: `${pack.accent}10` }}
+                      />
+                    }
+                  >
+                    <Kete3DModel
+                      accentColor={pack.accent}
+                      accentLight={pack.accentLight}
+                      size={100}
+                    />
+                  </Suspense>
                 </div>
 
-                <p
-                  className="text-[11px] font-mono-jb tracking-wider uppercase mb-2"
-                  style={{ color: pack.accent }}
-                >
-                  {pack.label}
-                </p>
-                <p className="text-xs font-body text-muted-foreground leading-relaxed">
+                <div className="mb-3">
+                  <p
+                    className="text-[10px] tracking-[3px] uppercase mb-0.5"
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      color: pack.accent,
+                    }}
+                  >
+                    {pack.label}
+                  </p>
+                  <h3
+                    className="text-lg tracking-[2px] uppercase text-foreground"
+                    style={{ fontWeight: 300, fontFamily: "'Lato', sans-serif" }}
+                  >
+                    {pack.name}
+                  </h3>
+                </div>
+
+                <p className="text-xs font-body text-muted-foreground leading-relaxed mb-3">
                   {pack.description}
                 </p>
 
                 <Link
                   to={pack.route}
-                  className="inline-flex items-center gap-1.5 mt-3 text-[11px] font-body transition-colors hover:gap-2"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-body transition-all duration-200 hover:gap-2.5 group/link"
                   style={{ color: pack.accent }}
                 >
-                  View kete <ArrowRight size={10} />
+                  Explore kete <ArrowRight size={10} className="transition-transform group-hover/link:translate-x-0.5" />
                 </Link>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Whānau kete — Tōroa */}
+        {/* Whānau kete — Toro */}
         <div className="max-w-md mx-auto mb-8">
           <motion.div
             className="flex items-center gap-3 mb-3"
@@ -197,17 +176,18 @@ const PackGrid = () => {
             <div className="w-1 h-6 rounded-full" style={{ background: "#D4A843" }} />
             <div>
               <p
-                className="text-[10px] font-display tracking-[3px] uppercase"
-                style={{ fontWeight: 700, color: "#D4A843" }}
+                className="text-[10px] tracking-[3px] uppercase"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontWeight: 700,
+                  color: "#D4A843",
+                }}
               >
-                WHĀNAU KETE
-              </p>
-              <p className="text-[10px] font-body text-muted-foreground/50">
-                Family navigator
+                FAMILY NAVIGATOR
               </p>
             </div>
           </motion.div>
-          <Link to="/toroa" className="block">
+          <Link to="/toro" className="block">
             <motion.div
               className="relative rounded-xl p-5 group"
               style={{
@@ -221,25 +201,29 @@ const PackGrid = () => {
               viewport={{ once: true }}
               whileHover={{
                 borderColor: "rgba(212,168,67,0.3)",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 30px rgba(212,168,67,0.08)",
               }}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className="w-12 h-12 shrink-0 flex items-center justify-center"
-                  style={{ filter: "drop-shadow(0 0 8px rgba(212,168,67,0.3))" }}
+                  className="w-14 h-14 shrink-0 flex items-center justify-center rounded-lg"
+                  style={{
+                    background: "rgba(212,168,67,0.06)",
+                    border: "1px solid rgba(212,168,67,0.15)",
+                    filter: "drop-shadow(0 0 8px rgba(212,168,67,0.3))",
+                  }}
                 >
-                  <AlbatrossIcon className="w-full h-auto" />
+                  <ToroBirdIcon size={36} color="#D4A843" />
                 </div>
                 <div>
                   <h3
-                    className="font-display text-sm tracking-[3px] uppercase text-foreground"
-                    style={{ fontWeight: 300 }}
+                    className="text-lg tracking-[3px] uppercase text-foreground"
+                    style={{ fontWeight: 300, fontFamily: "'Lato', sans-serif" }}
                   >
                     Toro
                   </h3>
                   <p className="text-[11px] font-body text-muted-foreground mt-0.5">
-                    Family AI Navigator · SMS-first · $29/mo
+                    SMS-first whānau coordination. School notices, kai plans, appointments, budgets — just text.
                   </p>
                 </div>
               </div>

@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 const FAQS = [
-  { q: "What is Assembl?", a: "Assembl gives New Zealand businesses specialist operational workflows that reduce admin, surface risk earlier, and keep people in control. We help teams act faster with better information — not replace the people who know the work best. Five industry kete cover hospitality, construction, creative, automotive, and freight & customs." },
-  { q: "How is this different from ChatGPT?", a: "ChatGPT gives generic answers based on global training data. Assembl is grounded in NZ legislation and policy workflows, with a tikanga compliance layer and an audit trail on every output. When you ask a compliance question, the answer is anchored in the law that actually applies to your business and you can see where it came from." },
+  { q: "What is Assembl?", a: "assembl is an intelligent business platform built for Aotearoa. It runs your compliance, operations, and reporting — then hands you signed evidence packs you can file with your auditor, send to your lawyer, or present at a board meeting. Five industry kete cover hospitality, construction, creative, automotive, and freight & customs." },
+  { q: "How is this different from ChatGPT?", a: "ChatGPT gives generic answers based on global training data. Assembl is grounded in NZ legislation and policy workflows, with a tikanga governance posture and an audit trail on every output. When you ask a compliance question, the answer is anchored in the law that actually applies to your business and you can see where it came from." },
   { q: "What is the minimum wage in New Zealand in 2026?", a: "As of 1 April 2026, the NZ adult minimum wage is $23.65 per hour. The starting-out and training minimum wage is $18.92 per hour." },
   { q: "Do I need technical skills to use it?", a: "Not at all. Every agent works through natural conversation — just type or speak. No code, no training required." },
   { q: "Is my data safe?", a: "All data is encrypted in transit and at rest. We follow NZISM guidance, align to AAAIP and the NZ Privacy Act 2020, and your business data is never used to train models. Enterprise customers get attested NZ data residency." },
@@ -16,7 +16,7 @@ const FAQS = [
   { q: "How does the annual prepay work?", a: "Annual prepay saves 12% on any business tier. You're billed once per year alongside the setup fee, with a 14-day cool-off. Non-refundable after that." },
   { q: "Can I embed agents on my website?", a: "Yes. Leader and above include an embeddable chat widget. Drop it straight into your website — instant compliance and operational support for your team or customers." },
   { q: "What industries do you cover?", a: "Five industry kete: Manaaki (hospitality), Waihanga (construction), Auaha (creative), Arataki (automotive), and Pikau (freight & customs)." },
-  { q: "Who built this?", a: "Assembl was founded in Auckland by Kate Harland. Every agent is designed, trained, and maintained in Aotearoa — built from the ground up for how NZ businesses actually operate." },
+  { q: "Who built this?", a: "Assembl was founded in Auckland by Kate Hudson. Every workflow is designed, trained, and maintained in Aotearoa — built from the ground up for how NZ businesses actually operate." },
 ];
 
 const FAQSection = () => {

@@ -1,11 +1,12 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronDown, Rocket, Layers, Package, Crown, Brain, Eye, FileText, Database, Lock, Globe, Heart, PenTool, Monitor, Phone, MessageCircle, Mic, Mail } from "lucide-react";
+import { motion } from "framer-motion";
+import { Check, ChevronDown, Rocket, Layers, Package, Crown, Eye, FileText, Database, Lock, Globe, Heart, PenTool, Monitor, Phone, MessageCircle, Mic, Mail } from "lucide-react";
 import SEO from "@/components/SEO";
 import BrandNav from "@/components/BrandNav";
 import BrandFooter from "@/components/BrandFooter";
 import GlowPageWrapper from "@/components/kete/GlowPageWrapper";
+import { KETE } from "@/data/pricing";
+import FAQSectionShared from "@/components/FAQSection";
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -34,7 +35,7 @@ const PricingHero = () => (
         HE KETE MĀTAURANGA
       </p>
         <h1 className="text-3xl sm:text-5xl font-display mb-4 text-foreground" style={{ fontWeight: 300, letterSpacing: "-0.02em" }}>
-        Priced by the packs you need each month. Seats and usage included.
+        Priced by the kete you need each month. Seats and usage included.
       </h1>
       <p className="text-base sm:text-lg font-body max-w-2xl mx-auto mb-4" style={{ color: "rgba(255,255,255,0.65)" }}>
         Pick the kete that matches your industry. Each run produces a signed, sourced evidence pack your team can file, forward, or footnote.
@@ -52,9 +53,13 @@ const PricingHero = () => (
           ))}
         </ul>
       </div>
+      <p className="text-center text-xs mb-6" style={{ color: "rgba(255,255,255,0.45)" }}>
+        Want to see what you're paying for?{" "}
+        <Link to="/demos" className="underline hover:text-white transition-colors" style={{ color: "hsl(var(--primary))" }}>See the demos →</Link>
+      </p>
       <div className="flex flex-wrap justify-center gap-3">
         <Link to="/contact" className="px-7 py-3 rounded-full text-sm font-body font-medium transition-all" style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}>
-          Start with one pack a month
+          Start with one kete a month
         </Link>
         <Link to="/contact" className="px-7 py-3 rounded-full text-sm font-body font-medium border transition-all" style={{ borderColor: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.7)" }}>
           Talk to us about bundles
@@ -67,8 +72,8 @@ const PricingHero = () => (
 /* ── Section B: Offer Stack ── */
 const OFFERS = [
   { icon: Rocket, badge: "START HERE", badgeColor: "hsl(var(--primary))", title: "Talk to us first", desc: "Every business is different. We map your workflows, pick the right kete, and agree what success looks like before you sign anything.", time: "Up and running in 10 business days", price: "Free workflow mapping", cta: "Get started", to: "/contact" },
-  { icon: Layers, badge: "FOUNDATION", badgeColor: "hsl(var(--pounamu))", title: "Core Platform", desc: "Included in every subscription. Your central routing engine (Iho), governance pipeline, SIGNAL security, SMS/WhatsApp messaging, and dashboard access.", price: "Included in every plan", note: "This is the foundation. Every kete runs on Core.", includes: ["Iho routing engine", "SIGNAL security agent", "Compliance pipeline (Kahu → Iho → Tā → Mahara → Mana)", "SMS & WhatsApp access", "Dashboard & analytics", "NZ data residency on Enterprise"] },
-  { icon: Package, badge: "SPECIALIST AI", badgeColor: "hsl(var(--tangaroa-light))", title: "Industry Kete", desc: "Each kete is a complete AI operations hub with specialist agents, governance pipeline, and evidence pack output. Every workflow run ends in a signed pack — structured, sourced, and ready to file.", price: "From NZ$1,490/month", list: "Manaaki · Waihanga · Auaha · Arataki · Pikau", cta: "See all packs", scrollTo: "packs" },
+  { icon: Layers, badge: "FOUNDATION", badgeColor: "hsl(var(--pounamu))", title: "Core Platform", desc: "Included in every subscription. Your central routing engine (Iho), governance pipeline, security layer, SMS/WhatsApp messaging, and dashboard access.", price: "Included in every plan", note: "This is the foundation. Every kete runs on Core.", includes: ["Iho routing engine", "Security & compliance layer", "Compliance pipeline (Kahu → Iho → Tā → Mahara → Mana)", "SMS & WhatsApp access", "Dashboard & analytics", "NZ data residency on Enterprise"] },
+  { icon: Package, badge: "SPECIALIST AI", badgeColor: "hsl(var(--tangaroa-light))", title: "Industry Kete", desc: "Each kete is a complete operations hub with specialist workflows, governance pipeline, and evidence pack output. Every workflow run ends in a signed pack — structured, sourced, and ready to file.", price: "From NZ$1,490/month", list: "Manaaki · Waihanga · Auaha · Arataki · Pikau", cta: "See all kete", scrollTo: "packs" },
   { icon: Crown, badge: "ENTERPRISE", badgeColor: "hsl(var(--primary))", title: "Enterprise", desc: "All 5 kete, unlimited seats, attested NZ data residency, 99.9% uptime SLA, named success manager, signed quarterly compliance review. Replaces a fraction of a full-time compliance manager.", price: "NZ$2,990/month + $2,890 setup", cta: "Talk to us", to: "/contact", includes: ["Named success manager", "Quarterly compliance review (signed)", "Monthly audit report", "NZ data residency (attested)", "99.9% uptime SLA"] },
 ];
 
@@ -133,7 +138,7 @@ const TIERS = [
     price: "NZ$1,490/mo", setup: "+ $590 setup (splittable across first 3 invoices)",
     best: "Sole traders and micro-SMEs — one industry, one team, one source of truth",
     packsPerMonth: "20 evidence packs/mo",
-    features: ["1 industry kete (your pick)", "Up to 5 seats", "Tikanga compliance layer", "Privacy Act 2020 + AAAIP alignment", "SMS, WhatsApp & dashboard access", "3 training hours / year", "Email support, 1 business day", "99.0% uptime"],
+    features: ["1 industry kete (your pick)", "Up to 5 seats", "Tikanga posture — partner, not label. Mead\u2019s Five Tests applied to M\u0101ori-origin content. Sacred content hard-blocked.", "Privacy Act 2020 + AAAIP alignment", "SMS, WhatsApp & dashboard access", "3 training hours / year", "Email support, 1 business day", "99.0% uptime"],
     goodFor: "Builders · Cafés · Single-discipline trades · Owner-operator carriers · Solo agencies",
     cta: "Talk to us", highlight: false,
   },
@@ -198,7 +203,7 @@ const PricingTiers = () => (
             <p className="text-[11px] font-body text-muted-foreground/50 mb-4">NZD ex GST · {t.setup}</p>
             {t.packsPerMonth && (
               <div className="rounded-lg px-3 py-2 mb-4 flex items-center gap-2" style={{ background: `${t.accent}18`, border: `1px solid ${t.accent}30` }}>
-                <span className="text-[10px] font-display tracking-[2px] uppercase" style={{ color: t.accent, fontWeight: 700 }}>PACKS</span>
+                <span className="text-[10px] font-display tracking-[2px] uppercase" style={{ color: t.accent, fontWeight: 700 }}>OUTPUT</span>
                 <span className="text-xs font-mono text-foreground/80" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{t.packsPerMonth}</span>
               </div>
             )}
@@ -225,7 +230,7 @@ const PricingTiers = () => (
         ))}
       </div>
       <p className="text-sm font-body text-center mt-8 italic" style={{ color: "hsl(var(--primary))" }}>
-        Save 12% on annual plans with code ANNUAL12.
+        Annual prepay saves 12% on any business tier. <Link to="/contact" className="underline hover:text-foreground">Talk to us</Link>.
       </p>
       <p className="text-[11px] font-body text-muted-foreground/40 text-center mt-3 max-w-2xl mx-auto">
         All prices in NZD, ex GST (add 15% at invoice). Setup fees can be split across the first 3 invoices on request. Monthly subscriptions include platform hosting, AI compute, agent support, and governance. Existing customers on the legacy model are grandfathered until 2027-04-08.
@@ -236,7 +241,7 @@ const PricingTiers = () => (
 
 /* ── Section D: Capability Map ── */
 const SHARED_AGENTS = [
-  { icon: Brain, name: "Iho", desc: "Central routing engine" },
+  { icon: Layers, name: "Iho", desc: "Central routing engine" },
   { icon: Eye, name: "Kahu", desc: "Compliance check" },
   { icon: FileText, name: "Tā", desc: "Audit trail" },
   { icon: Database, name: "Mahara", desc: "Business memory" },
@@ -246,13 +251,16 @@ const SHARED_AGENTS = [
   { icon: PenTool, name: "Elite Copy", desc: "Writing quality" },
 ];
 
-const KETE_DATA = [
-  { name: "Manaaki", eng: "Hospitality", desc: "Food safety, liquor licensing, guest experience, tourism operations", accent: "hsl(var(--primary))" },
-  { name: "Waihanga", eng: "Construction", desc: "Site safety, consenting, project management, quality and sign-off", accent: "hsl(var(--pounamu))" },
-  { name: "Auaha", eng: "Creative", desc: "Brief to publish — copy, image, video, podcast, ads, analytics", accent: "hsl(var(--kowhai-light))" },
-  { name: "Arataki", eng: "Business Operations", desc: "Dealership compliance, finance disclosure, and customer enquiry — the showroom back office handled.", accent: "hsl(var(--tangaroa-light))" },
-  { name: "Pikau", eng: "Freight & Customs", desc: "Route optimisation, declarations, broker hand-off, customs compliance", accent: "hsl(var(--tangaroa))" },
-];
+const KETE_DATA = KETE.map((k) => {
+  const accents: Record<string, string> = {
+    manaaki: "hsl(var(--primary))",
+    waihanga: "hsl(var(--pounamu))",
+    auaha: "hsl(var(--kowhai-light))",
+    arataki: "hsl(var(--tangaroa-light))",
+    pikau: "hsl(var(--tangaroa))",
+  };
+  return { name: k.name, eng: k.eng, desc: k.desc, accent: accents[k.key] || "hsl(var(--primary))" };
+});
 
 const CHANNELS = [
   { icon: Monitor, label: "Web Dashboard" },
@@ -299,12 +307,12 @@ const CapabilityMap = () => (
         ))}
       </div>
 
-      {/* Tōroa separate */}
+      {/* Toro separate */}
       <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="glass-card glow-card-hover rounded-2xl p-5 max-w-md mx-auto" style={{ borderTop: "2px solid hsl(var(--primary))" }}>
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[9px] font-display tracking-[2px] uppercase px-2 py-0.5 rounded-full" style={{ background: "rgba(212,168,67,0.15)", color: "hsl(var(--primary))", fontWeight: 700 }}>CONSUMER</span>
         </div>
-        <h3 className="text-base font-display text-foreground mb-1" style={{ fontWeight: 300 }}>Tōroa</h3>
+        <h3 className="text-base font-display text-foreground mb-1" style={{ fontWeight: 300 }}>Toro</h3>
         <p className="text-[11px] font-body text-muted-foreground/60 mb-2">Family Navigator · 1 agent</p>
         <p className="text-xs font-body text-muted-foreground">SMS-first family AI. No app. Just text. $29/mo</p>
       </motion.div>
@@ -331,14 +339,14 @@ const CapabilityMap = () => (
   </section>
 );
 
-/* ── Section E: Tōroa ── */
+/* ── Section E: Toro ── */
 const ToroaSection = () => {
   const features = ["Photo → school notice parsed", "Fridge photo → meal plan", "Live bus tracking", "Weather → dress the kids", "Smart reminders", "Homework tracker"];
   return (
     <section className="py-16 sm:py-20">
       <div className="max-w-3xl mx-auto px-5 text-center">
         <p className="text-[11px] font-display tracking-[5px] uppercase mb-3" style={{ fontWeight: 700, color: "hsl(var(--primary))" }}>FOR WHĀNAU</p>
-        <h2 className="text-xl sm:text-3xl font-display text-foreground mb-6" style={{ fontWeight: 300 }}>Tōroa — Your family's intelligent navigator</h2>
+        <h2 className="text-xl sm:text-3xl font-display text-foreground mb-6" style={{ fontWeight: 300 }}>Toro — Your family's intelligent navigator</h2>
         <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="glass-card glow-card-hover rounded-2xl p-8 inline-block text-left" style={{ borderColor: "rgba(212,168,67,0.2)" }}>
           <p className="text-2xl font-mono text-foreground mb-1" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 500 }}>NZ$29<span className="text-sm text-muted-foreground">/month</span></p>
           <p className="text-xs font-body text-muted-foreground mb-5">No app. No login. Just text.</p>
@@ -359,53 +367,7 @@ const ToroaSection = () => {
   );
 };
 
-/* ── Section F: FAQ ── */
-const FAQS = [
-  { q: "What's a kete?", a: "A kete is a traditional Māori woven basket, typically crafted from harakeke (New Zealand flax). We use it as a metaphor for our industry packs — each kete is a carefully woven collection of AI agents designed for a specific industry." },
-  { q: "How does onboarding work?", a: "Fill out our get started form. We map your workflows, agree on the right kete and tier, then run a 10-business-day setup: kickoff workshop, data import, brand kit, two policy gates, and a pilot kit. The setup fee covers the work. If we miss the 10-day window, we refund the setup fee." },
-  { q: "Can I start with one kete and add more later?", a: "Absolutely. Operator includes 1 kete. Leader includes 2. Enterprise includes all 5. You can also add an extra kete to Operator or Leader for $290/mo per kete without changing tiers." },
-  { q: "How does SMS/WhatsApp work?", a: "You get a dedicated NZ phone number for each kete. Your team texts questions and the right agent answers in seconds. WhatsApp groups let your team share photos, voice messages, and documents directly with agents." },
-  { q: "Where is my data stored?", a: "Operator and Leader run on standard NZ-region infrastructure. Enterprise includes attested NZ data residency. We follow the NZ Privacy Act 2020 and our tikanga governance layer ensures your data is treated with the care and respect it deserves." },
-  { q: "What AI models do you use?", a: "We use a mix: Claude for logic, compliance, and legal reasoning. Gemini for voice, multimodal, and speed. Iho (our routing engine) picks the best model for each task automatically." },
-  { q: "Do I need technical knowledge?", a: "No. We handle all the setup. Your team just texts, chats, or uses the dashboard. If you can send a text message, you can use Assembl." },
-  { q: "What's the difference between Family and the business tiers?", a: "Family is our consumer product for whānau — $29/mo, SMS-first, helps with school notices, meals, budgets, and daily household life. The business tiers (Operator, Leader, Enterprise, Outcome) are AI operations hubs for sole traders through multi-site enterprises. Different products, different audiences." },
-  { q: "What's the Outcome tier?", a: "Outcome is for engagements where Assembl takes on the result, not just the tools. Things like freight route optimisation, building maintenance scheduling, or fleet uptime. Base fee from $5,000/mo plus 10–20% of measured savings, scoped per engagement. Talk to us." },
-  { q: "Can I get a custom agent built?", a: "Yes. Custom agent builds start from $7,500 one-time and are available on any business tier. For workflows where the agent needs to take on the outcome end-to-end, that's the Outcome tier." },
-  { q: "What's tikanga governance?", a: "Tikanga Māori is the customary system of values and practices that has developed over time. Our governance layer ensures all AI operations respect the four pou: Rangatiratanga (self-determination), Kaitiakitanga (stewardship), Manaakitanga (care), and Whanaungatanga (connection). Your data is treated as taonga (treasure), not as a product." },
-];
-
-const FAQSection = () => {
-  const [open, setOpen] = useState<number | null>(null);
-  return (
-    <section className="py-16 sm:py-20">
-      <div className="max-w-3xl mx-auto px-5">
-        <h2 className="text-lg sm:text-2xl font-display text-center mb-8 text-foreground" style={{ fontWeight: 300, letterSpacing: "4px", textTransform: "uppercase" }}>
-          Frequently asked questions
-        </h2>
-        <div className="space-y-2">
-          {FAQS.map((faq, i) => (
-            <div key={i} className="glass-card glow-card-hover rounded-xl overflow-hidden">
-              <button onClick={() => setOpen(open === i ? null : i)} className="w-full flex items-center justify-between px-5 py-4 text-left">
-                <span className="text-sm font-medium font-body pr-4 text-foreground">{faq.q}</span>
-                <ChevronDown size={16} className={`shrink-0 transition-transform duration-200 text-muted-foreground ${open === i ? "rotate-180" : ""}`} />
-              </button>
-              <AnimatePresence>
-                {open === i && (
-                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease }}>
-                    <div className="px-5 pb-4">
-                      <p className="text-xs font-body leading-relaxed text-muted-foreground">{faq.a}</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
+/* FAQ uses the shared component from src/components/FAQSection.tsx */
 /* ── Section G: CTA Footer ── */
 const CTAFooter = () => (
   <section className="py-16 sm:py-20" style={{ borderTop: "2px solid hsl(var(--primary))" }}>
@@ -437,7 +399,7 @@ const PricingPage = () => (
   <div className="min-h-screen flex flex-col">
     <SEO
       title="Assembl Pricing — Every kete ends in an evidence pack"
-      description="Pick a kete, get a signed evidence pack. Operator $1,490/mo · Leader $1,990/mo · Enterprise $2,990/mo. NZD ex GST. Privacy Act 2020 aligned, tikanga governance built in."
+      description="Pick a kete, get a signed evidence pack. Operator $590/mo · Leader $1,290/mo · Enterprise $2,890/mo. NZD ex GST. Privacy Act 2020 aligned, tikanga governance built in."
       path="/pricing"
     />
     <BrandNav />
@@ -451,7 +413,7 @@ const PricingPage = () => (
     <div className="max-w-6xl mx-auto w-full px-5"><div className="section-divider" /></div>
     <ToroaSection />
     <div className="max-w-3xl mx-auto w-full px-5"><div className="section-divider" /></div>
-    <FAQSection />
+    <div id="faq"><FAQSectionShared /></div>
     <CTAFooter />
     <div className="mt-auto"><BrandFooter /></div>
   </div>

@@ -53,7 +53,7 @@ export default function HelmSmsSettings({ familyId }: Props) {
       setConfig(configRes.data as SmsConfig | null);
       setConversations((convosRes.data || []) as SmsConversation[]);
     } catch (e) {
-      console.error("[TŌROA SMS] Load error:", e);
+      console.error("[TORO SMS] Load error:", e);
     }
     setLoading(false);
   };
@@ -156,7 +156,7 @@ export default function HelmSmsSettings({ familyId }: Props) {
         >
           <MessageSquare size={24} style={{ color: HELM_COLOR }} className="mx-auto" />
           <div>
-            <p className="text-sm text-white/80 font-medium">Text TŌROA from your phone</p>
+            <p className="text-sm text-white/80 font-medium">Text TORO from your phone</p>
             <p className="text-[10px] text-white/40 mt-1">
               Get morning briefings, set reminders, ask about dinner — all via text message. Just like texting a
               super-organised friend.
@@ -320,16 +320,16 @@ export default function HelmSmsSettings({ familyId }: Props) {
                     <p className="text-[10px] text-white/30 font-mono">{c.phone_number}</p>
                     <div className="flex gap-2 mt-0.5">
                       {c.verified && (
-                        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400/60">
+                        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-[#5AADA0]/10 text-[#5AADA0]/60">
                           Verified
                         </span>
                       )}
                       {c.opted_in ? (
-                        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400/60">
+                        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-[#1A3A5C]/10 text-blue-400/60">
                           Active
                         </span>
                       ) : (
-                        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400/60">
+                        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-[#C85A54]/10 text-[#C85A54]/60">
                           Opted out
                         </span>
                       )}
@@ -337,15 +337,15 @@ export default function HelmSmsSettings({ familyId }: Props) {
                   </div>
                   <button
                     onClick={() => removePhone(c.id)}
-                    className="p-1 rounded hover:bg-red-500/20 transition"
+                    className="p-1 rounded hover:bg-[#C85A54]/20 transition"
                   >
-                    <X size={12} className="text-red-400/50" />
+                    <X size={12} className="text-[#C85A54]/50" />
                   </button>
                 </div>
               ))}
               {conversations.length === 0 && (
                 <p className="text-xs text-white/25 py-3 text-center">
-                  No phone numbers added yet. Add family members' numbers to let them text TŌROA.
+                  No phone numbers added yet. Add family members' numbers to let them text TORO.
                 </p>
               )}
             </div>
@@ -359,8 +359,8 @@ export default function HelmSmsSettings({ familyId }: Props) {
             <p className="text-[10px] text-white/50 font-semibold uppercase tracking-wide mb-2">How it works</p>
             <div className="space-y-1.5 text-[10px] text-white/35">
               <p>1. Add your family's phone numbers above</p>
-              <p>2. Family members text the TŌROA number</p>
-              <p>3. TŌROA responds like a super-organised family assistant</p>
+              <p>2. Family members text the TORO number</p>
+              <p>3. TORO responds like a super-organised family assistant</p>
               <p>4. Try: "What's for dinner?" or "Remind me to pack lunches at 7am"</p>
             </div>
             <div className="mt-3 p-2 rounded bg-white/3">

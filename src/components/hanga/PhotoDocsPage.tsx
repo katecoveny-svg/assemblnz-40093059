@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Upload, MapPin, Clock, Brain, Grid, List, X, Sparkles } from "lucide-react";
+import { Camera, Upload, MapPin, Clock, Layers, Grid, List, X, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { AaaipGuardBadge, useAaaipGuard } from "@/aaaip";
@@ -119,7 +119,7 @@ export default function PhotoDocsPage() {
           style={{ borderColor: "rgba(255,255,255,0.1)" }}>
           {uploading ? (
             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}>
-              <Brain size={40} style={{ color: KOWHAI }} className="mx-auto mb-3" />
+              <Layers size={40} style={{ color: KOWHAI }} className="mx-auto mb-3" />
             </motion.div>
           ) : (
             <Upload size={40} className="text-white/20 mx-auto mb-3" />
@@ -152,7 +152,7 @@ export default function PhotoDocsPage() {
                 {!photo.analyzed && (
                   <div className="mt-2 flex items-center gap-1">
                     <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2 }}>
-                      <Brain size={10} style={{ color: KOWHAI }} />
+                      <Layers size={10} style={{ color: KOWHAI }} />
                     </motion.div>
                     <span className="text-[10px]" style={{ color: KOWHAI }}>Analyzing...</span>
                   </div>

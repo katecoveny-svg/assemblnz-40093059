@@ -109,6 +109,9 @@ const AGENT_KEYWORDS: Record<string, string[]> = {
   // ── TŌROA — Family Navigator (1) ──
   toroa: ["family", "school", "kids", "children", "meal", "bus", "homework", "budget", "grocery", "reminder", "whānau navigator"],
 
+  // ── PILOT — Founder EA (1) ──
+  pilot: ["pilot", "kate", "prospect", "outreach", "pipeline", "weekly briefing", "content schedule", "sales", "founder"],
+
   // ── TE REO (legacy, kept for backward compat) ──
   tereo: ["te reo", "māori language", "macron", "pronunciation", "kupu", "translate", "mihi", "karakia"],
 };
@@ -146,6 +149,8 @@ const AGENT_PACK: Record<string, string> = {
   whakaaro: "te-kahui-reo", hiringa: "te-kahui-reo",
   // Tōroa
   toroa: "toroa",
+  // Pilot
+  pilot: "shared",
   // Legacy
   tereo: "shared",
 };
@@ -173,7 +178,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { message, packId, agentId, messages = [], userId } = await req.json();
+    const { message, packId, agentId, messages = [], userId, systemPromptOverride } = await req.json();
     if (!message) {
       return new Response(JSON.stringify({ error: "message is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -212,6 +217,7 @@ Deno.serve(async (req) => {
     // Load user's shared context (business facts detected across all agents)
     let sharedContextBlock = "";
     let memoryBlock = "";
+    let industryContextBlock = "";
 
     // Extract user ID from auth header if not passed directly
     const authHeader = req.headers.get("authorization");
@@ -276,8 +282,165 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ═══ EXPERT MODE — Active for ALL agents ═══
+    // Confidence scoring, citations, proactive intelligence, handoff, action queue
+    let expertBlock = `\n\n--- EXPERT MODE — ACTIVE ---
+
+CONFIDENCE: For every factual claim, rate your confidence:
+🟢 HIGH: Current rate/law verified. Example: "Minimum wage is $23.15/hr from 1 Apr 2025 🟢"
+🟡 MEDIUM: Likely current but may have changed. Example: "ACC employer levy ~$0.63/$100 — verify at acc.co.nz 🟡"
+🔴 CHECK: May be outdated or region-specific. Example: "Regional council requirement — verify with your local council 🔴"
+
+CITATIONS: Always cite the specific Act, section, and regulation. Not "you might need consent" but "under s9 RMA 1991, this activity requires resource consent as a discretionary activity." Include the full legislative reference.
+
+PROACTIVE: At conversation start, consider:
+- Upcoming deadlines relevant to this user's business
+- Action items from previous conversations
+- Seasonal reminders relevant to your domain
+Surface the top 2-3 items as a brief alert. Don't lecture — just flag.
+
+HANDOFF: If a question is outside your expertise, show:
+"This is a [domain] question — [AGENT_NAME] is better suited. Here's what I'd brief them:"
+[2-3 sentence context summary]
+[Switch to AGENT_NAME →]
+
+AGENTIC: When given a complex goal, present a numbered plan first, then execute each step showing progress. Don't ask "shall I continue?" between steps unless the step requires a decision.
+
+ACTION QUEUE: When the user commits to an action ("I'll update that agreement", "I need to file that"), note it clearly with ✅ ACTION: [description]. These will be tracked and followed up on next visit.
+
+COMPLIANCE FEED: If there's a recent high-impact legislative change relevant to this conversation, mention it proactively: "Heads up — [change] took effect [date]. This affects [specific thing you're discussing]."
+
+MEMORY: If you have context from previous conversations, use it naturally. Don't ask the user to repeat themselves. If you remember something, reference it: "Last time we discussed [topic]..."
+
+OUTPUT VERSIONING: When generating documents or structured outputs, label them as v1.0. If the user requests edits, increment to v1.1. Note the version clearly.`;
+
+    // ═══ TRUTH PROTOCOL — Anti-Hallucination Stack ═══
+    const truthProtocol = `\n\n--- TRUTH PROTOCOL — NON-NEGOTIABLE ---
+
+1. NEVER invent Act names, section numbers, case names, or source URLs.
+2. NEVER state a rate, threshold, or date without checking agent_knowledge_base first.
+3. If unsure → "I believe [X] — verify at [source] 🟡" — NEVER state uncertain facts as certain.
+4. If you don't know → "I don't have verified current information on this. Check [authority]."
+5. Every legislative reference: Act name + section + year. No exceptions.
+6. Every rate/threshold: include effective date. "Minimum wage $23.95/hr (from 1 April 2026 🟢)"
+7. For calculations: use tool functions, not mental arithmetic. Tools can't hallucinate.
+8. Common NZ pitfalls to avoid:
+   - Sick leave: 10 days after 6 MONTHS (not 3)
+   - Trial period: 90 days, employers with FEWER than 20 employees (since Feb 2026 amendment)
+   - KiwiSaver employer: 3.5% from 1 April 2026 (was 3%)
+   - GST: 15% (not 10% or 12.5% — those are old/other countries)
+   - Minimum wage: check agent_knowledge_base — this changes 1 April each year
+9. An honest "I'm not sure — check [authority]" is always better than a confident wrong answer.`;
+
+    // ═══ ASSEMBL PROTOCOL — Mandatory Compliance Layer ═══
+    const assembleProtocol = `\n\n--- ASSEMBL PROTOCOL — MANDATORY COMPLIANCE LAYER ---
+
+KAHU (Guardian): Before responding, check:
+- Does this output reference NZ legislation? → Cite specific Act, section, date
+- Does it involve Māori data, te reo, or tikanga? → Apply cultural safety rules
+- Does it involve a high-risk domain (legal, medical, financial, employment)? → Add disclaimer
+- Does it make a factual claim about rates/thresholds/dates? → Verify against agent_knowledge_base
+
+TĀ (Apply):
+- NZ English spelling: analyse, colour, organisation, programme, centre, licence (noun)
+- Te reo Māori: correct macrons always (ā, ē, ī, ō, ū). Kia ora not Kia Ora. Aotearoa not aotearoa.
+- Brand voice: confident, warm, Kiwi-authentic, direct, technically accurate
+- Never: American spellings, US-centric examples, exclamation marks in professional content, "cutting-edge", "revolutionary", "leverage", "synergy"
+- Formatting: Space Grotesk headings, clean hierarchy, no emoji walls
+
+MAHARA (Verify):
+- Every legislative reference: include Act name + section + year
+- Every rate/threshold: include effective date + source URL
+- Confidence scoring: 🟢 HIGH / 🟡 MEDIUM / 🔴 CHECK on every factual claim
+- If information is from agent_knowledge_base AND last_verified > 90 days → flag as stale
+
+MANA (Approve):
+- High-risk agents (COMPASS, ANCHOR, VITAE, CLINIC, VAULT, SHIELD, REMEDY, AROHA, LEDGER):
+  ALWAYS include: "This is general information, not professional [legal/medical/financial] advice. Consult a qualified [lawyer/doctor/financial adviser] for your specific situation."
+- Māori data outputs: "I can't generate or reproduce Māori cultural patterns or restricted knowledge. If this relates to iwi/hapū taonga, work with the appropriate rights-holders."
+- All outputs: Kaitiakitanga posture — guardianship of data and outcomes.`;
+
+    expertBlock += truthProtocol + assembleProtocol;
+
+    // ═══ KNOWLEDGE BASE GROUNDING — Anti-Hallucination Layer 2 ═══
+    let knowledgeBlock = "";
+    {
+      const { data: kbEntries } = await supabase
+        .from("agent_knowledge_base")
+        .select("topic, content, confidence, last_verified")
+        .eq("agent_id", selectedAgent)
+        .eq("is_active", true)
+        .gte("confidence", 0.7)
+        .order("confidence", { ascending: false })
+        .limit(15);
+
+      if (kbEntries?.length) {
+        const ninetyDaysAgo = new Date(Date.now() - 90 * 86400_000).toISOString();
+        const facts = kbEntries.map((k: any) => {
+          const stale = k.last_verified < ninetyDaysAgo ? " ⚠️ STALE — verify before citing" : "";
+          return `- [${k.topic}] ${k.content} (confidence: ${k.confidence}${stale})`;
+        }).join("\n");
+        knowledgeBlock = `\n\n--- VERIFIED KNOWLEDGE BASE ---\nUse these verified facts when answering. Cite them with 🟢 HIGH confidence:\n${facts}\nIf a fact is marked STALE, downgrade to 🟡 MEDIUM and suggest the user verify.`;
+      }
+    }
+    expertBlock += knowledgeBlock;
+
+    // Load recent compliance updates for proactive intelligence
+    let complianceAlertBlock = "";
+    if (resolvedUserId) {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 86400_000).toISOString();
+      const { data: recentUpdates } = await supabase
+        .from("compliance_updates")
+        .select("title, change_summary, impact_level, affected_agents, effective_date")
+        .gte("created_at", thirtyDaysAgo)
+        .in("impact_level", ["high", "medium"])
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (recentUpdates?.length) {
+        // Filter to updates relevant to this agent
+        const relevant = recentUpdates.filter((u: any) =>
+          !u.affected_agents?.length || u.affected_agents.includes(selectedAgent)
+        );
+        if (relevant.length) {
+          const alerts = relevant.map((u: any) =>
+            `⚡ ${u.impact_level.toUpperCase()}: ${u.title} (effective ${u.effective_date || "now"}) — ${u.change_summary}`
+          ).join("\n");
+          complianceAlertBlock = `\n\n--- RECENT COMPLIANCE CHANGES ---\n${alerts}\nReference these in your response if relevant to the user's question.`;
+        }
+      }
+
+      // Load pending action items for this user
+      const { data: actionItems } = await supabase
+        .from("action_queue")
+        .select("description, created_at")
+        .eq("user_id", resolvedUserId)
+        .eq("agent_id", selectedAgent)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      if (actionItems?.length) {
+        const items = actionItems.map((a: any) => `- ${a.description}`).join("\n");
+        expertBlock += `\n\n--- PENDING ACTION ITEMS ---\nThis user has outstanding items:\n${items}\nMention the most relevant one briefly at conversation start.`;
+      }
+
+      // Load FTS memory for this query
+      const { data: memoryHits } = await supabase
+        .rpc("search_memory", {
+          p_user_id: resolvedUserId,
+          p_query: message,
+          p_agent_id: selectedAgent,
+          p_limit: 3,
+        });
+
+      if (memoryHits?.length) {
+        const memories = memoryHits.map((m: any) => `- ${m.summary}`).join("\n");
+        expertBlock += `\n\n--- RELEVANT PAST CONVERSATIONS ---\n${memories}\nUse this context naturally. Don't repeat what the user already knows.`;
+      }
+    }
+
     // ═══ SYMBIOTIC CONTEXT ═══
-    // Build cross-agent awareness — tell this agent about related kete agents
     const packAgents = Object.entries(AGENT_PACK)
       .filter(([_, pack]) => pack === agentPack && _ !== selectedAgent)
       .map(([name]) => name.toUpperCase());
@@ -285,13 +448,6 @@ Deno.serve(async (req) => {
     const symbioticBlock = packAgents.length > 0
       ? `\n\n--- SYMBIOTIC NETWORK ---\nYou are part of the ${agentPack.toUpperCase()} kete. Your sibling agents are: ${packAgents.join(", ")}. If a user's query would be better handled by a sibling agent, suggest they "switch to [AGENT_NAME]" for specialist help. You can reference their capabilities when relevant.`
       : "";
-
-    // ═══ PREEMPTIVE KNOWLEDGE ═══
-    const preemptiveBlock = `\n\n--- PREEMPTIVE INTELLIGENCE ---\nAfter answering, consider:
-1. Are there compliance deadlines the user should know about?
-2. Would another agent in the network add value here? If so, mention them by name.
-3. Are there related tasks the user hasn't asked about but should consider?
-Add a brief "💡 Also consider..." section at the end if relevant. Keep it to 1-2 items max.`;
 
     // ═══ DESIGN EXCELLENCE LAYER ═══
     // Injected into creative, brand, and design agents to ensure distinctive output
@@ -317,7 +473,7 @@ ANTI-SLOP RULES: Reject generic AI aesthetics. No overused fonts (Inter, Poppins
 Match implementation complexity to vision: maximalist designs need elaborate effects; minimalist designs need precision in spacing, typography, and subtle details. Elegance comes from executing the vision fully.`
       : "";
 
-    const basePrompt = agentPrompt?.system_prompt ||
+    const basePrompt = systemPromptOverride || agentPrompt?.system_prompt ||
       `You are ${selectedAgent.toUpperCase()}, an assembl specialist agent for New Zealand businesses. Help with queries in your area of expertise. Reference relevant NZ legislation where applicable. Write in NZ English with macrons on all Māori words.`;
 
     const complianceRules = (sharedPrompts || []).map(p => p.system_prompt).join("\n\n");
@@ -362,7 +518,7 @@ Trust & compliance:
 - assembl uses shared intelligence — agents collaborate via a shared context bus and unified business profiles.
 `;
 
-    const systemPrompt = `${basePrompt}\n\n${platformContext}\n\n--- COMPLIANCE & GOVERNANCE LAYER ---\n${complianceRules}${sharedContextBlock}${memoryBlock}${symbioticBlock}${preemptiveBlock}${designBlock}\n\nAlways respond in a helpful, professional tone. Use markdown formatting. Reference NZ legislation where applicable. Use NZ English spelling. Include macrons on all Māori words.`;
+    const systemPrompt = `${basePrompt}\n\n${platformContext}\n\n--- COMPLIANCE & GOVERNANCE LAYER ---\n${complianceRules}${sharedContextBlock}${memoryBlock}${expertBlock}${complianceAlertBlock}${symbioticBlock}${designBlock}${industryContextBlock}\n\nAlways respond in a helpful, professional tone. Use markdown formatting. Reference NZ legislation where applicable. Use NZ English spelling. Include macrons on all Māori words.`;
 
     const conversationMessages = [
       { role: "system", content: systemPrompt },
@@ -385,34 +541,213 @@ Trust & compliance:
     const rawPref = agentPrompt?.model_preference || "gemini-3-flash-preview";
     const model = MODEL_MAP[rawPref] || `google/${rawPref}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+
+    // ═══ DYNAMIC TOOL REGISTRY + INDUSTRY-AWARE LOADING ═══
+    let agentTools: any[] = [];
+    {
+      // 1. Load base tools from agent_toolsets
+      const { data: toolLinks } = await supabase
+        .from("agent_toolsets")
+        .select("tool_name")
+        .eq("agent_id", selectedAgent);
+
+      // 2. Industry-aware tool loading: detect user's active packs
+      const packToolNames: string[] = [];
+      if (resolvedUserId) {
+        // Check agent_access for pack subscriptions
+        const { data: accessRows } = await supabase
+          .from("agent_access")
+          .select("pack_id")
+          .eq("is_enabled", true);
+
+        const activePacks: string[] = accessRows?.length
+          ? [...new Set(accessRows.map((a: any) => a.pack_id))] as string[]
+          : [];
+
+        // Fallback: detect industry from shared_context
+        if (!activePacks.length) {
+          const { data: ctxRows } = await supabase
+            .from("shared_context")
+            .select("context_key, context_value")
+            .eq("user_id", resolvedUserId)
+            .like("context_key", "company.industry%")
+            .limit(5);
+
+          const industryMap: Record<string, string> = {
+            hospitality: "manaaki", restaurant: "manaaki", cafe: "manaaki", hotel: "manaaki",
+            construction: "hanga", building: "hanga", contractor: "hanga",
+            creative: "auaha", marketing: "auaha", design: "auaha",
+            automotive: "arataki", dealership: "arataki", workshop: "arataki",
+            freight: "pikau", logistics: "pikau", customs: "pikau",
+            farming: "toro", agriculture: "toro", dairy: "toro",
+          };
+
+          for (const c of ctxRows || []) {
+            const val = String(c.context_value).toLowerCase();
+            for (const [kw, pack] of Object.entries(industryMap)) {
+              if (val.includes(kw) && !activePacks.includes(pack)) activePacks.push(pack);
+            }
+          }
+        }
+
+        // Load pack-specific toolsets for industry packs
+        const INDUSTRY_TOOLSETS: Record<string, string[]> = {
+          manaaki: ["assembl_aura_fcp_daily_check", "assembl_aura_temp_logger", "assembl_aura_verifier_pack", "assembl_aura_liquor_licence_renewal"],
+          hanga: ["assembl_apex_safety_plan", "assembl_kaupapa_progress_claim", "assembl_arai_hazard_register", "assembl_whakaae_consent_checklist"],
+          auaha: ["assembl_prism_brand_scanner", "assembl_prism_campaign_engine", "assembl_echo_content_calendar", "assembl_echo_analytics_feedback"],
+          arataki: ["assembl_forge_ruc_calculator", "assembl_forge_cin_generator", "assembl_forge_wof_tracker", "assembl_forge_service_reminder", "assembl_forge_fleet_dashboard"],
+          pikau: ["assembl_gateway_customs_entry", "assembl_gateway_hs_lookup", "assembl_gateway_tariff_calculator"],
+          toro: ["assembl_toro_nait_tracker", "assembl_toro_fep_builder", "assembl_toro_ets_calculator", "assembl_toro_milk_price", "assembl_toro_weather_ops", "assembl_toro_seasonal_sweep"],
+        };
+
+        // Pack agents membership
+        const PACK_AGENTS: Record<string, string[]> = {
+          manaaki: ["aura", "saffron", "cellar", "luxe", "moana", "coast", "kura", "pau", "summit"],
+          hanga: ["arai", "kaupapa", "ata", "rawa", "whakaae", "pai", "arc", "terra", "pinnacle"],
+          auaha: ["prism", "muse", "pixel", "verse", "echo", "flux", "chromatic", "rhythm", "market"],
+          arataki: ["motor", "transit", "mariner"],
+          pikau: ["gateway", "harvest", "grove"],
+          toro: ["toroa"],
+        };
+
+        for (const pack of activePacks) {
+          const agents = PACK_AGENTS[pack] || [];
+          if (agents.includes(selectedAgent)) {
+            const tools = INDUSTRY_TOOLSETS[pack] || [];
+            packToolNames.push(...tools);
+          }
+        }
+
+        // Shared agents get industry context
+        const SHARED_AGENTS = ["ledger", "aroha", "anchor", "vault", "shield", "nova", "pilot"];
+        if (SHARED_AGENTS.includes(selectedAgent) && activePacks.length > 0) {
+          const packLabels: Record<string, string> = {
+            manaaki: "Hospitality & Tourism", hanga: "Construction", auaha: "Creative & Media",
+            arataki: "Automotive", pikau: "Freight & Customs", toro: "Agriculture & Farming",
+          };
+          const names = activePacks.map(p => packLabels[p] || p).join(", ");
+          industryContextBlock = `\n\n--- INDUSTRY CONTEXT ---\nThis user has active packs: ${names}.\nLoad industry-specific templates and compliance rules for their sector(s). Tailor all advice, calculations, and documents to their industry.`;
+        }
+      }
+
+      // 3. Combine base + industry tools and load schemas
+      const allToolNames = [
+        ...(toolLinks || []).map((t: any) => t.tool_name),
+        ...packToolNames,
+      ];
+      const uniqueToolNames = [...new Set(allToolNames)];
+
+      if (uniqueToolNames.length) {
+        const { data: tools } = await supabase
+          .from("tool_registry")
+          .select("tool_name, tool_schema, requires_integration")
+          .in("tool_name", uniqueToolNames)
+          .eq("is_active", true);
+
+        if (tools?.length) {
+          let userIntegrations: string[] = [];
+          if (resolvedUserId) {
+            const { data: connections } = await supabase
+              .from("tenant_tool_connections")
+              .select("tool_name")
+              .eq("is_active", true);
+            userIntegrations = (connections || []).map((c: any) => c.tool_name);
+          }
+
+          agentTools = tools
+            .filter((t: any) => {
+              if (!t.requires_integration?.length) return true;
+              return t.requires_integration.every((req: string) => userIntegrations.includes(req));
+            })
+            .map((t: any) => t.tool_schema)
+            .filter((schema: any) => schema && Object.keys(schema).length > 0);
+        }
+      }
+    }
+
+    const aiRequestBody: any = {
+      model,
+      messages: conversationMessages,
+      stream: true,
+    };
+    if (agentTools.length > 0) {
+      aiRequestBody.tools = agentTools;
+    }
+
+    // ═══ PRIMARY: Lovable AI Gateway ═══
+    let response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model,
-        messages: conversationMessages,
-        stream: true,
-      }),
+      body: JSON.stringify(aiRequestBody),
     });
 
+    // ═══ FALLBACK: OpenRouter (if Lovable AI fails) ═══
     if (!response.ok) {
       const status = response.status;
+      // Surface rate-limit and credit errors directly — don't fallback for these
       if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited, please try again shortly." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        console.warn("Lovable AI rate-limited, attempting OpenRouter fallback...");
       }
       if (status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please top up." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        console.warn("Lovable AI credits exhausted, attempting OpenRouter fallback...");
       }
-      const errText = await response.text();
-      console.error("AI gateway error:", status, errText);
-      throw new Error(`AI error: ${status}`);
+
+      const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
+      if (OPENROUTER_API_KEY) {
+        console.log(`Primary AI failed (${status}), falling back to OpenRouter...`);
+
+        // Map Lovable model names to OpenRouter equivalents
+        const OPENROUTER_MODEL_MAP: Record<string, string> = {
+          "google/gemini-2.5-flash": "google/gemini-2.5-flash",
+          "google/gemini-2.5-pro": "google/gemini-2.5-pro",
+          "google/gemini-3.1-pro-preview": "google/gemini-2.5-pro",
+          "google/gemini-3-flash-preview": "google/gemini-2.5-flash",
+          "google/gemini-2.5-flash-lite": "google/gemini-2.5-flash",
+          "openai/gpt-5": "openai/gpt-4o",
+          "openai/gpt-5-mini": "openai/gpt-4o-mini",
+        };
+        const fallbackModel = OPENROUTER_MODEL_MAP[model] || "google/gemini-2.5-flash";
+
+        const fallbackBody = { ...aiRequestBody, model: fallbackModel };
+        // Remove tools if not supported by fallback model
+        if (fallbackBody.tools) delete fallbackBody.tools;
+
+        response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://assembl.co.nz",
+            "X-Title": "assembl",
+          },
+          body: JSON.stringify(fallbackBody),
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error("OpenRouter fallback also failed:", response.status, errText);
+          throw new Error(`AI error: both primary and fallback failed`);
+        }
+        console.log("OpenRouter fallback succeeded");
+      } else {
+        // No fallback available — surface original error
+        if (status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limited, please try again shortly." }), {
+            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (status === 402) {
+          return new Response(JSON.stringify({ error: "AI credits exhausted. Please top up." }), {
+            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const errText = await response.text();
+        console.error("AI gateway error:", status, errText);
+        throw new Error(`AI error: ${status}`);
+      }
     }
 
     // ═══ MEMORY PERSISTENCE — extract facts from user message ═══

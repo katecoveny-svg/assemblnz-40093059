@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Zap, ArrowLeft, ToggleLeft, ToggleRight, ChevronRight, Plus, Users, Home, Trophy, Handshake, MessageSquare, BarChart3, AlertTriangle, FileText, CalendarClock, HardHat, Receipt, Ship, Building2, ShieldCheck, Eye, Route, BookOpen, Brain, Scale, Package, Hash, PenTool, FileCheck, Forward, FileDigit, Ban } from "lucide-react";
+import { Zap, ArrowLeft, ToggleLeft, ToggleRight, ChevronRight, Plus, Users, Home, Trophy, Handshake, MessageSquare, BarChart3, AlertTriangle, FileText, CalendarClock, HardHat, Receipt, Ship, Building2, ShieldCheck, Eye, Route, BookOpen, Layers, Scale, Package, Hash, PenTool, FileCheck, Forward, FileDigit, Ban } from "lucide-react";
 import ParticleField from "@/components/ParticleField";
 import BrandNav from "@/components/BrandNav";
 import BrandFooter from "@/components/BrandFooter";
@@ -23,7 +23,7 @@ const PIPELINE_STAGES = [
   { key: "kahu", label: "Kahu", desc: "PII mask", icon: ShieldCheck },
   { key: "iho", label: "Iho", desc: "Route", icon: Route },
   { key: "ta", label: "Tā", desc: "Audit log", icon: BookOpen },
-  { key: "mahara", label: "Mahara", desc: "Memory", icon: Brain },
+  { key: "mahara", label: "Mahara", desc: "Memory", icon: Layers },
   { key: "mana", label: "Mana", desc: "Tikanga · Privacy · Sector Acts", icon: Scale },
 ] as const;
 

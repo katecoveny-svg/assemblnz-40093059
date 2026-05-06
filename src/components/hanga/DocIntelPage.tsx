@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Search, Brain, AlertTriangle, Shield, CheckCircle2, Lightbulb } from "lucide-react";
+import { FileText, Search, Layers, AlertTriangle, Shield, CheckCircle2, Lightbulb } from "lucide-react";
 
 const KOWHAI = "#D4A843";
 const POUNAMU = "#3A7D6E";
@@ -71,7 +71,7 @@ export default function DocIntelPage() {
         <motion.button onClick={analyze} disabled={analyzing || !document} whileHover={{ scale: 1.02 }}
           className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium disabled:opacity-50"
           style={{ background: KOWHAI, color: "#09090F" }}>
-          {analyzing ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Brain size={16} /></motion.div> : <Search size={16} />}
+          {analyzing ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Layers size={16} /></motion.div> : <Search size={16} />}
           {analyzing ? "Analyzing..." : "Analyze Document"}
         </motion.button>
       </Glass>

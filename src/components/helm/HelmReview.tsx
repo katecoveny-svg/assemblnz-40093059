@@ -68,8 +68,8 @@ export default function HelmReview() {
     for (const item of highConf) await approve(item);
   };
 
-  const confidenceColor = (c: number) => c >= 0.7 ? "text-green-400" : c >= 0.4 ? "text-amber-400" : "text-red-400";
-  const confidenceBg = (c: number) => c >= 0.7 ? "bg-green-500/10" : c >= 0.4 ? "bg-amber-500/10" : "bg-red-500/10";
+  const confidenceColor = (c: number) => c >= 0.7 ? "text-[#5AADA0]" : c >= 0.4 ? "text-[#D4A843]" : "text-[#C85A54]";
+  const confidenceBg = (c: number) => c >= 0.7 ? "bg-[#5AADA0]/10" : c >= 0.4 ? "bg-amber-500/10" : "bg-[#C85A54]/10";
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ background: "#09090F" }}>
@@ -113,11 +113,11 @@ export default function HelmReview() {
                   {item.parsed_data?.description && <p className="text-[10px] text-white/20 mt-1 line-clamp-2">{item.parsed_data.description}</p>}
                 </div>
                 <div className="flex gap-1 shrink-0">
-                  <button onClick={() => approve(item)} className="p-1.5 rounded-lg hover:bg-green-500/20 transition" title="Approve">
-                    <Check size={14} className="text-green-400" />
+                  <button onClick={() => approve(item)} className="p-1.5 rounded-lg hover:bg-[#5AADA0]/20 transition" title="Approve">
+                    <Check size={14} className="text-[#5AADA0]" />
                   </button>
-                  <button onClick={() => reject(item.id)} className="p-1.5 rounded-lg hover:bg-red-500/20 transition" title="Reject">
-                    <X size={14} className="text-red-400" />
+                  <button onClick={() => reject(item.id)} className="p-1.5 rounded-lg hover:bg-[#C85A54]/20 transition" title="Reject">
+                    <X size={14} className="text-[#C85A54]" />
                   </button>
                 </div>
               </div>

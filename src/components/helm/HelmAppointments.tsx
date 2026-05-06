@@ -4,12 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Plus, Calendar, Clock, MapPin, User, Bell, Trash2, Check, ChevronLeft, ChevronRight } from "lucide-react";
 
 const CATEGORIES = [
-  { value: "medical", label: "Medical", emoji: "🏥", color: "text-red-400" },
+  { value: "medical", label: "Medical", emoji: "🏥", color: "text-[#C85A54]" },
   { value: "school", label: "School", emoji: "🏫", color: "text-yellow-400" },
-  { value: "sport", label: "Sport", emoji: "⚽", color: "text-green-400" },
+  { value: "sport", label: "Sport", emoji: "⚽", color: "text-[#5AADA0]" },
   { value: "social", label: "Social", emoji: "🎉", color: "text-pink-400" },
   { value: "home", label: "Home", emoji: "🏠", color: "text-blue-400" },
-  { value: "work", label: "Work", emoji: "💼", color: "text-purple-400" },
+  { value: "work", label: "Work", emoji: "💼", color: "text-pounamu" },
   { value: "pet", label: "Pet", emoji: "🐾", color: "text-orange-400" },
   { value: "general", label: "General", emoji: "📌", color: "text-white/60" },
 ] as const;
@@ -127,7 +127,7 @@ export default function HelmAppointments({ familyId }: { familyId: string | null
   if (!familyId) {
     return (
       <div className="text-center py-12">
-        <Calendar className="w-10 h-10 text-purple-400/40 mx-auto mb-3" />
+        <Calendar className="w-10 h-10 text-pounamu/40 mx-auto mb-3" />
         <p className="text-sm text-white/40">Set up your family first to use appointments</p>
       </div>
     );
@@ -138,18 +138,18 @@ export default function HelmAppointments({ familyId }: { familyId: string | null
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-purple-400" />
+          <Calendar className="w-5 h-5 text-pounamu" />
           Appointments
         </h2>
-        <button onClick={() => setShowForm(!showForm)} className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-purple-500 text-white inline-flex items-center gap-1">
+        <button onClick={() => setShowForm(!showForm)} className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-pounamu text-white inline-flex items-center gap-1">
           <Plus className="w-3 h-3" /> Book
         </button>
       </div>
 
       {/* Today's count */}
       {appointments.filter(a => isToday(a.start_time)).length > 0 && (
-        <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl px-4 py-3">
-          <p className="text-sm font-medium text-purple-300">
+        <div className="bg-pounamu/10 border border-pounamu/20 rounded-xl px-4 py-3">
+          <p className="text-sm font-medium text-pounamu">
             {appointments.filter(a => isToday(a.start_time)).length} appointment{appointments.filter(a => isToday(a.start_time)).length !== 1 ? "s" : ""} today
           </p>
         </div>
@@ -162,7 +162,7 @@ export default function HelmAppointments({ familyId }: { familyId: string | null
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder="Appointment title (e.g. Max dentist)"
-            className="w-full text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            className="w-full text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pounamu/50"
             autoFocus
           />
           <div className="flex gap-2">
@@ -170,14 +170,14 @@ export default function HelmAppointments({ familyId }: { familyId: string | null
               value={form.date}
               onChange={(e) => setForm({ ...form, date: e.target.value })}
               type="date"
-              className="flex-1 text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              className="flex-1 text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-pounamu/50"
             />
             {!form.allDay && (
               <input
                 value={form.time}
                 onChange={(e) => setForm({ ...form, time: e.target.value })}
                 type="time"
-                className="w-28 text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                className="w-28 text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-pounamu/50"
               />
             )}
           </div>
@@ -186,19 +186,19 @@ export default function HelmAppointments({ familyId }: { familyId: string | null
               value={form.location}
               onChange={(e) => setForm({ ...form, location: e.target.value })}
               placeholder="Location (optional)"
-              className="flex-1 text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              className="flex-1 text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pounamu/50"
             />
             <input
               value={form.forMember}
               onChange={(e) => setForm({ ...form, forMember: e.target.value })}
               placeholder="For who?"
-              className="w-28 text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              className="w-28 text-sm px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pounamu/50"
             />
           </div>
           <div className="flex gap-1.5 flex-wrap">
             {CATEGORIES.map(c => (
               <button key={c.value} onClick={() => setForm({ ...form, category: c.value })}
-                className={`text-[10px] px-2.5 py-1 rounded-lg border font-medium ${form.category === c.value ? "bg-purple-500 text-white border-purple-500" : "bg-white/5 border-white/10 text-white/50"}`}>
+                className={`text-[10px] px-2.5 py-1 rounded-lg border font-medium ${form.category === c.value ? "bg-pounamu text-white border-pounamu" : "bg-white/5 border-white/10 text-white/50"}`}>
                 {c.emoji} {c.label}
               </button>
             ))}
@@ -207,7 +207,7 @@ export default function HelmAppointments({ familyId }: { familyId: string | null
             <input type="checkbox" checked={form.allDay} onChange={(e) => setForm({ ...form, allDay: e.target.checked })} className="rounded" />
             All day
           </label>
-          <button onClick={handleAdd} className="w-full text-sm py-2 rounded-lg font-semibold bg-purple-500 text-white">
+          <button onClick={handleAdd} className="w-full text-sm py-2 rounded-lg font-semibold bg-pounamu text-white">
             Book Appointment
           </button>
         </div>
@@ -217,7 +217,7 @@ export default function HelmAppointments({ familyId }: { familyId: string | null
       {Object.entries(grouped).length === 0 && (
         <div className="text-center py-8">
           <p className="text-sm text-white/30">No upcoming appointments</p>
-          <p className="text-xs text-purple-400/60 mt-1 font-mono">"Book dentist for Max on Tuesday at 2pm"</p>
+          <p className="text-xs text-pounamu/60 mt-1 font-mono">"Book dentist for Max on Tuesday at 2pm"</p>
         </div>
       )}
 
@@ -228,7 +228,7 @@ export default function HelmAppointments({ familyId }: { familyId: string | null
         return (
           <div key={dateStr} className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className={`text-xs font-semibold uppercase tracking-widest ${todayHighlight ? "text-purple-400" : tomorrowHighlight ? "text-cyan-400" : "text-white/30"}`}>
+              <span className={`text-xs font-semibold uppercase tracking-widest ${todayHighlight ? "text-pounamu" : tomorrowHighlight ? "text-cyan-400" : "text-white/30"}`}>
                 {dateLabel}
               </span>
               <div className="flex-1 h-px bg-white/5" />
@@ -262,7 +262,7 @@ export default function HelmAppointments({ familyId }: { familyId: string | null
                       )}
                     </div>
                   </div>
-                  <button onClick={() => cancelAppt(appt.id)} className="text-white/20 hover:text-red-400 transition-colors shrink-0">
+                  <button onClick={() => cancelAppt(appt.id)} className="text-white/20 hover:text-[#C85A54] transition-colors shrink-0">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

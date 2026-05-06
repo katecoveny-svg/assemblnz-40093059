@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Save, Plus, X, Brain, MessageSquare, FileText, HelpCircle, ShieldCheck } from "lucide-react";
+import { Save, Plus, X, Layers, MessageSquare, FileText, HelpCircle, ShieldCheck } from "lucide-react";
 
 const TONES = ["Professional", "Friendly", "Warm", "Bold", "Casual", "Formal"];
 
@@ -78,7 +78,7 @@ export default function AgentTraining({ agentId, agentName, agentColor }: Props)
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       <div className="flex items-center gap-2">
-        <Brain size={16} style={{ color: agentColor }} />
+        <Layers size={16} style={{ color: agentColor }} />
         <h2 className="text-sm font-display font-bold" style={{ color: "#E4E4EC" }}>Train {agentName}</h2>
       </div>
       <p className="text-[11px] font-body" style={{ color: "rgba(255,255,255,0.4)" }}>

@@ -194,8 +194,8 @@ export default function AuahaPodcastStudio() {
                     </div>
                   </div>
                   <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                    ep.status === "published" ? "bg-emerald-400/20 text-emerald-400" :
-                    ep.status === "editing" ? "bg-amber-400/20 text-amber-400" :
+                    ep.status === "published" ? "bg-[#5AADA0]/20 text-[#5AADA0]" :
+                    ep.status === "editing" ? "bg-[#D4A843]/20 text-[#D4A843]" :
                     "bg-white/10 text-white/40"
                   }`}>{ep.status}</span>
                 </div>

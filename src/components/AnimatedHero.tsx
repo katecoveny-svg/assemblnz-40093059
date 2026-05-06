@@ -617,7 +617,7 @@ const AnimatedHero = ({ onScrollToGrid }: AnimatedHeroProps) => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.45 }}
             >
-              From $590/mo + GST. Talk to us — no commitment required.
+              See how it works — book a walkthrough.
             </motion.p>
 
             {/* Proof strip */}
@@ -660,7 +660,7 @@ const AnimatedHero = ({ onScrollToGrid }: AnimatedHeroProps) => {
             >
               <Link
                 to="/pricing"
-                className="cta-glass-green inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm group"
+                className="cta-glass-gold inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm group"
               >
                 Start free trial <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import BrandNav from "@/components/BrandNav";
+import AdminShell from "@/components/admin/AdminShell";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from "recharts";
 import { Activity, DollarSign, Zap, Users, TrendingUp, Shield, RefreshCw } from "lucide-react";
 
@@ -139,19 +139,19 @@ export default function AdminAnalyticsDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <BrandNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-display font-bold">Analytics & Observability</h1>
-            <p className="text-muted-foreground text-sm mt-1">Real-time AI cost tracking and usage intelligence</p>
-          </div>
-          <button onClick={fetchData} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm transition-colors">
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
-        </div>
+    <AdminShell
+      title="Analytics & Observability"
+      subtitle="Real-time AI cost tracking and usage intelligence"
+      icon={<Activity className="w-5 h-5 text-primary" />}
+      backTo="/admin/dashboard"
+      actions={
+        <button onClick={fetchData} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm transition-colors"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
+      }
+    >
 
         {data && (
           <>
@@ -212,7 +212,6 @@ export default function AdminAnalyticsDashboard() {
             </div>
           </>
         )}
-      </div>
-    </div>
+    </AdminShell>
   );
 }

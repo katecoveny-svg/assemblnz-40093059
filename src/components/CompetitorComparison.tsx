@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import { Check, Layers, Zap, Shield, Brain } from "lucide-react";
+import { Check, Layers, Zap, Scale, FileCheck } from "lucide-react";
 
 const VALUE_PROPS = [
   { icon: Layers, label: "One platform, not six", desc: "CRM, marketing, HR, compliance, finance, and operations — unified under one intelligence layer." },
-  { icon: Brain, label: "NZ legislation built in", desc: "Grounded in NZ legislation and policy workflows — Employment Relations, Privacy Act 2020, Building Act, RTA, and more." },
+  { icon: Scale, label: "NZ legislation built in", desc: "Grounded in NZ legislation and policy workflows — Employment Relations, Privacy Act 2020, Building Act, RTA, and more." },
   { icon: Zap, label: "Five industry kete, one subscription", desc: "Every kete shares context and works together — clear per-seat tiers, no add-on fatigue." },
-  { icon: Shield, label: "NZ-aligned security, SME-priced", desc: "Encrypted in transit and at rest, NZ data residency on Enterprise — from $590/mo." },
+  { icon: FileCheck, label: "NZ-aligned security, SME-priced", desc: "Encrypted in transit and at rest, NZ data residency on Enterprise — from $590/mo." },
 ];
 
 const REPLACES = [
@@ -27,10 +27,10 @@ const CompetitorComparison = () => (
         viewport={{ once: true }}
       >
         <h2 className="text-2xl sm:text-4xl font-display font-light text-foreground mb-3">
-          Replace <span className="text-primary">6+ subscriptions</span> with one platform
+          One platform. <span className="text-primary">Tangible outcomes</span> across every function.
         </h2>
         <p className="text-sm font-body text-muted-foreground max-w-lg mx-auto">
-          Stop paying for fragmented tools that don't talk to each other — and none of them know NZ law.
+          CRM, marketing, HR, compliance, finance — assembl runs them together and hands you evidence packs ready for audits, legal review, or board sign-off.
         </p>
       </motion.div>
 

@@ -63,12 +63,12 @@ const LivePacksHero = () => (
   <section className="relative z-10 py-20 sm:py-28">
     <div className="max-w-6xl mx-auto px-4 sm:px-6">
       <motion.div className="text-center mb-14" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-        <p className="font-mono-jb text-[10px] uppercase tracking-[4px] text-primary/70 mb-3"><p className="font-mono-jb text-[10px] uppercase tracking-[4px] text-primary/70 mb-3">5 Kete · Shared Intelligence · Built in Aotearoa</p></p>
+        <p className="font-mono-jb text-[10px] uppercase tracking-[4px] text-primary/70 mb-3">5 Kete · Tangible Outcomes · Built in Aotearoa</p>
         <h2 style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, fontSize: "2.25rem", letterSpacing: "-0.01em", color: "#FFFFFF" }}>
-          Tell us what's broken. <span style={{ color: "#D4A843" }}>We build your kete.</span>
+          Your industry. <span style={{ color: "#D4A843" }}>Your evidence packs.</span>
         </h2>
         <p className="mt-3 text-sm" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: "rgba(255,255,255,0.55)", maxWidth: "480px", margin: "12px auto 0" }}>
-          Five industry kete grounded in NZ legislation and policy workflows.
+          Five industry kete that increase efficiency, reduce admin, and produce signed packs for audits, legal, and governance.
         </p>
       </motion.div>
 
@@ -108,7 +108,7 @@ const LivePacksHero = () => (
               style={{ background: `${accent}12`, border: `1px solid ${accent}22` }}
             >
               {pack.slug === "toroa" ? (
-                <img src={toroaIcon} alt="Tōroa" className="w-7 h-7 object-contain" />
+                <img src={toroaIcon} alt="Toro" className="w-7 h-7 object-contain" />
               ) : (
                 <div className="w-7 h-7" style={{ filter: `drop-shadow(0 0 8px ${accent}45)` }}>
                   {CONSTELLATION_MARKS[pack.slug]}

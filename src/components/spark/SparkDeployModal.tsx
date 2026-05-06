@@ -172,7 +172,7 @@ export default function SparkDeployModal({ htmlContent, onClose, onDeployed }: S
               </div>
             </div>
 
-            {error && <p className="text-[11px] text-red-400">{error}</p>}
+            {error && <p className="text-[11px] text-[#C85A54]">{error}</p>}
 
             <button onClick={deploy} disabled={!user || !appName.trim() || deploying}
               className="w-full py-3 rounded-xl text-xs font-semibold transition-all hover:scale-[0.98] disabled:opacity-30 flex items-center justify-center gap-2"

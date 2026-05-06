@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { CheckCircle2, Clock, Plug, Layers, Shield, Brain } from "lucide-react";
+import { CheckCircle2, Clock, Plug, Layers, Shield } from "lucide-react";
 import { getAgentFullSkillSet, SHARED_FOUNDATION, type Skill, type MCPConnector } from "@/data/agentSkillConfig";
 
 interface AgentSkillsSectionProps {
@@ -118,7 +118,7 @@ const AgentSkillsSection = ({ agentId, agentColor }: AgentSkillsSectionProps) =>
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-mono-jb tracking-wide mb-3" style={{ background: `${agentColor}10`, color: agentColor, border: `1px solid ${agentColor}20` }}>
-              <Brain size={12} /> IHO ROUTING PIPELINE
+              <Layers size={12} /> IHO ROUTING PIPELINE
             </div>
             <h2 className="font-display font-light text-2xl sm:text-3xl" style={{ color: 'hsl(var(--foreground))' }}>Skill Architecture</h2>
             <p className="font-body text-sm mt-2" style={{ color: 'hsl(var(--muted-foreground))' }}>
@@ -149,7 +149,7 @@ const AgentSkillsSection = ({ agentId, agentColor }: AgentSkillsSectionProps) =>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <SkillGroup title="Shared Foundation" skills={foundation} color={agentColor} icon={Layers} delay={0} />
             {kete.length > 0 && <SkillGroup title="Kete-Specific Skills" skills={kete} color={agentColor} icon={Shield} delay={0.1} />}
-            {agent.length > 0 && <SkillGroup title="Agent-Specific Skills" skills={agent} color={agentColor} icon={Brain} delay={0.2} />}
+            {agent.length > 0 && <SkillGroup title="Agent-Specific Skills" skills={agent} color={agentColor} icon={Layers} delay={0.2} />}
           </div>
         </div>
       </section>

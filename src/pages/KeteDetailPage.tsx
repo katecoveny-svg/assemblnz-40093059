@@ -3,6 +3,17 @@ import { KETE_DATA } from "@/components/kete/keteData";
 import KeteIcon from "@/components/kete/KeteIcon";
 import SEO from "@/components/SEO";
 import GlowIcon from "@/components/GlowIcon";
+import TextUsButton from "@/components/kete/TextUsButton";
+import KeteAgentChat from "@/components/kete/KeteAgentChat";
+
+const SLUG_TO_PACK: Record<string, { packId: string; agentId: string }> = {
+  manaaki: { packId: "manaaki", agentId: "aura" },
+  waihanga: { packId: "hanga", agentId: "kaupapa" },
+  auaha: { packId: "auaha", agentId: "prism" },
+  arataki: { packId: "waka", agentId: "motor" },
+  pikau: { packId: "pikau", agentId: "gateway" },
+  contracts: { packId: "contracts", agentId: "accord" },
+};
 
 const KeteDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -88,14 +99,32 @@ const KeteDetailPage = () => {
           )}
 
           {/* CTA */}
-          <div className="mt-16 text-center">
+          <div className="mt-16 flex flex-col items-center gap-4">
             <button onClick={() => navigate("/contact")} className="px-6 py-3 rounded-xl text-sm font-medium transition-all hover:opacity-80"
               style={{ background: `${kete.accentColor}20`, color: kete.accentColor, border: `1px solid ${kete.accentColor}30`, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               Get started
             </button>
+            <TextUsButton keteName={kete.name} accentColor={kete.accentColor} />
           </div>
         </div>
       </div>
+      {(() => {
+        const pack = SLUG_TO_PACK[kete.slug] || { packId: "assembl", agentId: "echo" };
+        return (
+          <KeteAgentChat
+            keteName={kete.name}
+            keteLabel={kete.englishName}
+            accentColor={kete.accentColor}
+            defaultAgentId={pack.agentId}
+            packId={pack.packId}
+            starterPrompts={[
+              `What can ${kete.name} agents do for my business?`,
+              `How does onboarding work for ${kete.englishName}?`,
+              "What compliance is covered?",
+            ]}
+          />
+        );
+      })()}
     </>
   );
 };

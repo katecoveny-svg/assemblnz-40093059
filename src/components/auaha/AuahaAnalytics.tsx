@@ -57,7 +57,7 @@ export default function AuahaAnalytics() {
           <GlassCard key={m.label} className="p-5">
             <div className="flex items-start justify-between mb-2">
               <m.icon className="w-4 h-4 text-white/30" />
-              <span className="text-xs text-emerald-400">{m.change}</span>
+              <span className="text-xs text-[#5AADA0]">{m.change}</span>
             </div>
             <p className="text-white text-xl font-light" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{m.value}</p>
             <p className="text-white/40 text-xs mt-1">{m.label}</p>

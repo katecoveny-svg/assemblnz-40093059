@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Loader2, BookOpen, Languages, Brain, CheckCircle, XCircle, ChevronDown, ChevronRight, ExternalLink, Music, Shapes, Type, Microscope, CookingPot } from "lucide-react";
+import { Play, Loader2, BookOpen, Languages, Layers, CheckCircle, XCircle, ChevronDown, ChevronRight, ExternalLink, Music, Shapes, Type, Microscope, CookingPot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface VocabItem {
@@ -239,7 +239,7 @@ const TeReoVideoLearner = ({ agentColor, onSendToChat }: Props) => {
               {([
                 { id: "vocab" as const, label: "Kupu (Vocab)", icon: Languages, count: data.vocabulary?.length },
                 { id: "sentences" as const, label: "Rerenga (Sentences)", icon: BookOpen, count: data.sentences?.length },
-                { id: "quiz" as const, label: "Pātai (Quiz)", icon: Brain, count: data.quiz?.length },
+                { id: "quiz" as const, label: "Pātai (Quiz)", icon: Layers, count: data.quiz?.length },
               ]).map(tab => (
                 <button
                   key={tab.id}
