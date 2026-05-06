@@ -827,12 +827,22 @@ export const agentsByPack: Record<string, Agent[]> = {
   manaaki: manaakiAgents,
   hanga: hangaAgents,
   auaha: auahaAgents,
+  // Active kete (locked 2026-04-08) — aliased to existing collections so
+  // agentsForPack() returns non-empty results for the new active slugs.
+  // Arataki ← Waka (both 3 agents; lead agent MOTOR is automotive — clean match).
+  arataki: wakaAgents,
+  // Pikau ← Pakihi (both 11 agents). NOTE: semantic mismatch — Pikau's customer-facing
+  // label is "Freight & Customs" but pakihiAgents are Business & Commerce (LEDGER, VAULT,
+  // CATALYST, …). This alias prevents an empty-list regression but the agent collection
+  // itself needs to be repositioned to actually cover freight/customs. Tracked separately.
+  pikau: pakihiAgents,
+  toroa: toroaAgents,
+  // Retired kete — kept for backward-compat routing.
   pakihi: pakihiAgents,
   waka: wakaAgents,
   hangarau: hangarauAgents,
   hauora: hauoraAgents,
   "te-kahui-reo": teKahuiReoAgents,
-  toroa: toroaAgents,
 };
 
 export const TOTAL_AGENTS = allAgents.length; // 78
