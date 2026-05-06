@@ -18,15 +18,19 @@ export interface Agent {
 // ═══════════════════════════════════════
 
 export const packs = [
+  // ── Active kete (locked 2026-04-08) ──
   { id: "manaaki", name: "Manaaki", label: "Hospitality & Tourism", color: "#D4A843", agentCount: 9 },
   { id: "hanga", name: "Hanga", label: "Construction", color: "#3A7D6E", agentCount: 9 },
   { id: "auaha", name: "Auaha", label: "Creative & Media", color: "#F0D078", agentCount: 9 },
-  { id: "pakihi", name: "Pakihi", label: "Business & Commerce", color: "#5AADA0", agentCount: 11 },
-  { id: "waka", name: "Waka", label: "Transport & Vehicles", color: "#6B8FA3", agentCount: 3 },
-  { id: "hangarau", name: "Hangarau", label: "Technology", color: "#3A6A9C", agentCount: 12 },
-  { id: "hauora", name: "Hauora", label: "Health, Wellbeing, Sport & Lifestyle", color: "#A87D4A", agentCount: 8 },
-  { id: "te-kahui-reo", name: "Te Kāhui Reo", label: "Māori Business Intelligence", color: "#D4A843", agentCount: 8 },
-  { id: "toroa", name: "Toro", label: "Family Navigator", color: "#D4A843", agentCount: 1 },
+  { id: "arataki", name: "Arataki", label: "Automotive", color: "#6B8FA3", agentCount: 3 },
+  { id: "pikau", name: "Pikau", label: "Freight & Customs", color: "#5AADA0", agentCount: 11 },
+  { id: "toroa", name: "Tōroa", label: "Family Navigator", color: "#D4A843", agentCount: 1 },
+  // ── Retired kete — kept for data/routing, hidden from customer-facing surfaces ──
+  { id: "pakihi", name: "Pakihi", label: "Business & Commerce", color: "#5AADA0", agentCount: 11, retired: true },
+  { id: "waka", name: "Waka", label: "Transport & Vehicles", color: "#6B8FA3", agentCount: 3, retired: true },
+  { id: "hangarau", name: "Hangarau", label: "Technology", color: "#3A6A9C", agentCount: 12, retired: true },
+  { id: "hauora", name: "Hauora", label: "Health, Wellbeing, Sport & Lifestyle", color: "#A87D4A", agentCount: 8, retired: true },
+  { id: "te-kahui-reo", name: "Te Kāhui Reo", label: "Māori Business Intelligence", color: "#D4A843", agentCount: 8, retired: true },
 ];
 
 // ═══════════════════════════════════════
@@ -823,12 +827,22 @@ export const agentsByPack: Record<string, Agent[]> = {
   manaaki: manaakiAgents,
   hanga: hangaAgents,
   auaha: auahaAgents,
+  // Active kete (locked 2026-04-08) — aliased to existing collections so
+  // agentsForPack() returns non-empty results for the new active slugs.
+  // Arataki ← Waka (both 3 agents; lead agent MOTOR is automotive — clean match).
+  arataki: wakaAgents,
+  // Pikau ← Pakihi (both 11 agents). NOTE: semantic mismatch — Pikau's customer-facing
+  // label is "Freight & Customs" but pakihiAgents are Business & Commerce (LEDGER, VAULT,
+  // CATALYST, …). This alias prevents an empty-list regression but the agent collection
+  // itself needs to be repositioned to actually cover freight/customs. Tracked separately.
+  pikau: pakihiAgents,
+  toroa: toroaAgents,
+  // Retired kete — kept for backward-compat routing.
   pakihi: pakihiAgents,
   waka: wakaAgents,
   hangarau: hangarauAgents,
   hauora: hauoraAgents,
   "te-kahui-reo": teKahuiReoAgents,
-  toroa: toroaAgents,
 };
 
 export const TOTAL_AGENTS = allAgents.length; // 78

@@ -51,7 +51,7 @@ const SparkSection = () => {
                 <Code2 size={20} className="text-pounamu-light" />
                 <Sparkles size={14} className="text-pounamu-light" />
                 <span className="text-[9px] font-mono-jb px-2 py-0.5 rounded-full bg-pounamu-light/15 text-pounamu-light border border-pounamu-light/30">
-                  HANGARAU PACK
+                  TECHNOLOGY
                 </span>
                 <span className="text-[9px] font-mono-jb px-2 py-0.5 rounded-full flex items-center gap-1 bg-pounamu-light/15 text-pounamu-light border border-pounamu-light/30">
                   <Mic size={8} /> VOICE

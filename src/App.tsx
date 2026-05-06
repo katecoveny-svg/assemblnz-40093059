@@ -80,7 +80,7 @@ const SampleEvidencePackPage = lazy(() => import("./pages/SampleEvidencePackPage
 const AuahaLayout = lazy(() => import("./components/auaha/AuahaLayout"));
 const AuahaDashboard = lazy(() => import("./components/auaha/AuahaDashboard"));
 const AuahaCampaignBuilder = lazy(() => import("./components/auaha/AuahaCampaignBuilder"));
-const AuahaCopyStudio = lazy(() => import("./components/auaha/AuahaCopyStudio"));
+const AuahaCopyStudio = lazy(() => import("./components/auaha/AuahaCopyStudio")); // ALLOW: brand-voice — component name is a product feature, not a brand rule violation
 const PixelImageStudio = lazy(() => import("./pages/auaha/ImageStudio"));
 const AuahaVideoStudio = lazy(() => import("./components/auaha/AuahaVideoStudio"));
 const AuahaPodcastStudio = lazy(() => import("./components/auaha/AuahaPodcastStudio"));
