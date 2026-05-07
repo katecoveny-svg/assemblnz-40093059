@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>assembl — one workflow, end to end</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=IBM+Plex+Mono:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF7F2;
+  --paper-deep:#F4EFE8;
+  --ink:#23211F;
+  --ink-soft:#5A554F;
+  --ink-mute:#8A847C;
+  --pounamu:#2B6B57;
+  --pounamu-mist:#88A89B;
+  --gold:#D4A853;
+  --gold-soft:#E8C77A;
+  --mist:#E8E4DE;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+html,body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;font-weight:300;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+body{overflow-x:hidden}
+
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(212,168,83,0.04), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 90% 80%, rgba(43,107,87,0.04), transparent 60%);
+  z-index:0;
+}
+
+/* nav */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  padding:28px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;
+  letter-spacing:0.08em;color:var(--ink-soft);
+  mix-blend-mode:multiply;
+}
+.brand{
+  font-family:'Cormorant Garamond',serif;
+  font-size:24px;letter-spacing:0.01em;
+  color:var(--ink);font-weight:400;
+}
+.brand-mark{
+  display:inline-block;width:6px;height:6px;
+  background:var(--gold);border-radius:50%;
+  margin-right:10px;vertical-align:middle;
+  box-shadow:0 0 8px rgba(212,168,83,0.4);
+}
+.nav-step{display:flex;align-items:center;gap:14px}
+.nav-step::before{
+  content:'';width:24px;height:1px;background:var(--gold);
+}
+
+/* progress rail */
+.rail{
+  position:fixed;top:50%;right:32px;transform:translateY(-50%);
+  z-index:40;display:flex;flex-direction:column;gap:18px;
+}
+.rail .tick{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(35,33,31,0.18);
+  transition:all .5s ease;cursor:pointer;
+}
+.rail .tick.active{
+  background:var(--gold);
+  box-shadow:0 0 10px rgba(212,168,83,0.5);
+  transform:scale(1.4);
+}
+
+/* scenes */
+.scene{
+  position:relative;z-index:1;
+  min-height:100vh;
+  padding:120px 64px;
+  display:grid;
+  grid-template-columns:0.85fr 1.15fr;
+  gap:80px;align-items:center;
+  max-width:1440px;margin:0 auto;
+}
+.scene .copy{position:sticky;top:30vh;align-self:start;max-width:440px}
+.scene .eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:0.18em;
+  color:var(--pounamu);margin-bottom:28px;
+  display:flex;align-items:center;gap:14px;
+}
+.eyebrow::before{
+  content:'';width:32px;height:1px;background:var(--gold);
+}
+.scene h2{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:300;font-size:clamp(40px,5vw,72px);
+  line-height:1.05;letter-spacing:-0.012em;
+  color:var(--ink);margin-bottom:24px;
+}
+.scene h2 em{font-style:italic;color:var(--pounamu);font-weight:400}
+.scene .body{
+  font-size:17px;line-height:1.7;color:var(--ink-soft);
+}
+
+/* stage */
+.stage{
+  position:relative;
+  width:100%;aspect-ratio:1/1.05;
+  display:flex;align-items:center;justify-content:center;
+  perspective:1200px;
+}
+
+/* ============ SCENE 1 — scattered fragment notes ============ */
+.s1-stage{position:relative;width:100%;height:100%}
+.note{
+  position:absolute;
+  background:var(--paper);
+  border:0.5px solid rgba(212,168,83,0.32);
+  border-radius:2px;
+  padding:14px 16px 12px;
+  box-shadow:
+    0 12px 24px -12px rgba(35,33,31,0.18),
+    0 2px 4px rgba(35,33,31,0.04);
+  min-width:140px;
+  transition:transform .6s cubic-bezier(.2,.8,.2,1);
+}
+.note::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0.5;
+}
+.note .note-tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:0.14em;
+  color:var(--ink-mute);margin-bottom:6px;
+  display:flex;align-items:center;gap:8px;
+}
+.note .note-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:radial-gradient(circle,var(--gold-soft),var(--gold) 70%,transparent);
+  box-shadow:0 0 8px 1px rgba(212,168,83,0.55);
+  animation:dot-pulse 4.5s ease-in-out infinite;
+  flex-shrink:0;
+}
+.note .note-line{
+  height:0.5px;width:60%;
+  background:rgba(35,33,31,0.18);
+  margin-top:4px;
+}
+.note .note-line+.note-line{width:42%;margin-top:5px}
+.note .note-name{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-weight:400;font-size:14px;
+  color:var(--ink);line-height:1.2;
+  margin-top:2px;
+}
+
+/* scattered positions, gentle rotations */
+.n1{ top:4%;  left:4%;   transform:rotate(-5deg)}
+.n2{ top:2%;  left:42%;  transform:rotate(3deg)}
+.n3{ top:6%;  left:74%;  transform:rotate(-2deg)}
+.n4{ top:24%; left:18%;  transform:rotate(4deg)}
+.n5{ top:22%; left:56%;  transform:rotate(-3deg)}
+.n6{ top:38%; left:2%;   transform:rotate(2deg)}
+.n7{ top:42%; left:38%;  transform:rotate(-4deg)}
+.n8{ top:40%; left:72%;  transform:rotate(5deg)}
+.n9{ top:60%; left:14%;  transform:rotate(-2deg)}
+.n10{top:62%; left:48%;  transform:rotate(3deg)}
+.n11{top:78%; left:8%;   transform:rotate(4deg)}
+.n12{top:80%; left:52%;  transform:rotate(-3deg)}
+
+@keyframes dot-pulse{
+  0%,100%{opacity:0.6;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.3)}
+}
+
+/* drift animation for scene 1 */
+.s1-stage .note{
+  animation:note-drift 14s ease-in-out infinite;
+}
+.s1-stage .note:nth-child(odd){animation-delay:-3s;animation-duration:18s}
+.s1-stage .note:nth-child(3n){animation-duration:20s}
+@keyframes note-drift{
+  0%,100%{transform:translate(0,0) rotate(var(--r,0deg))}
+  50%{transform:translate(2px,-3px) rotate(var(--r,0deg))}
+}
+
+/* ============ SCENE 2 — fragments aligning into strata ============ */
+.s2-stage{position:relative;width:100%;height:100%}
+.s2-row{
+  position:absolute;
+  left:4%;right:4%;
+  display:flex;gap:10px;align-items:center;
+  height:48px;
+}
+.s2-row.r1{top:6%}
+.s2-row.r2{top:24%}
+.s2-row.r3{top:42%}
+.s2-row.r4{top:60%}
+.s2-row.r5{top:78%}
+
+.s2-note{
+  position:relative;
+  background:var(--paper);
+  border:0.5px solid rgba(212,168,83,0.32);
+  border-radius:2px;
+  padding:8px 12px;
+  box-shadow:0 8px 16px -10px rgba(35,33,31,0.16);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:0.14em;color:var(--ink-mute);
+  display:flex;align-items:center;gap:8px;
+  white-space:nowrap;
+  transform:rotate(-1deg);
+}
+.s2-note:nth-child(even){transform:rotate(1deg)}
+.s2-note::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:radial-gradient(circle,var(--gold-soft),var(--gold) 70%,transparent);
+  box-shadow:0 0 8px 1px rgba(212,168,83,0.55);
+  flex-shrink:0;
+}
+.s2-note .lbl{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--ink);letter-spacing:0;font-weight:400}
+
+/* row spine label */
+.s2-row .row-tag{
+  position:absolute;left:0;top:-16px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:0.16em;
+  color:var(--pounamu);
+}
+.s2-row .row-tag::before{
+  content:'';display:inline-block;width:14px;height:1px;
+  background:var(--gold);vertical-align:middle;margin-right:8px;
+}
+
+/* brass connectors svg */
+.s2-connectors{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;
+}
+.s2-connectors line{
+  stroke:var(--gold);stroke-width:0.5;
+  vector-effect:non-scaling-stroke;
+  opacity:0.5;
+  stroke-dasharray:2,2;
+}
+
+/* ============ SCENE 3 — fragments becoming translucent panels ============ */
+.s3-stage{position:relative;width:100%;height:100%}
+.s3-stack{
+  position:absolute;inset:8% 10%;
+  transform-style:preserve-3d;
+  transform:rotateX(2deg) rotateY(-4deg);
+}
+.s3-panel{
+  position:absolute;
+  border-radius:6px;
+  pointer-events:none;
+  transition:all 1.2s cubic-bezier(.2,.8,.2,1);
+}
+.s3-panel.l1{ /* deepest pounamu */
+  inset:6% 14% 14% 4%;
+  background:linear-gradient(160deg,rgba(43,107,87,0.42),rgba(43,107,87,0.22) 55%,rgba(136,168,155,0.3));
+  mix-blend-mode:multiply;
+  box-shadow:0 30px 60px -30px rgba(43,107,87,0.4);
+}
+.s3-panel.l2{ /* pounamu mid */
+  inset:14% 8% 18% 12%;
+  background:linear-gradient(180deg,rgba(43,107,87,0.28),rgba(136,168,155,0.18));
+  mix-blend-mode:multiply;
+}
+.s3-panel.l3{ /* silk */
+  inset:18% 4% 8% 18%;
+  background:linear-gradient(200deg,rgba(232,199,122,0.18),rgba(250,247,242,0.55) 50%,rgba(232,228,222,0.4));
+  border:0.5px solid rgba(212,168,83,0.22);
+  box-shadow:inset 0 0 30px rgba(250,247,242,0.4);
+}
+.s3-panel.l4{ /* glass */
+  inset:26% 18% 24% 10%;
+  background:linear-gradient(165deg,rgba(232,228,222,0.6),rgba(250,247,242,0.35) 55%,rgba(43,107,87,0.1));
+  border:0.5px solid rgba(35,33,31,0.08);
+  box-shadow:0 20px 40px -20px rgba(35,33,31,0.18),inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.s3-panel.l5{ /* mist top */
+  inset:32% 28% 34% 22%;
+  background:linear-gradient(180deg,rgba(250,247,242,0.7),rgba(232,228,222,0.4));
+  border:0.5px solid rgba(35,33,31,0.06);
+}
+.s3-panel.l6{ /* gold spine */
+  inset:8% 48% 8% 48%;
+  background:linear-gradient(180deg,rgba(212,168,83,0.16),rgba(212,168,83,0.06) 50%,rgba(212,168,83,0.16));
+  border-left:0.5px solid rgba(212,168,83,0.4);
+  border-right:0.5px solid rgba(212,168,83,0.4);
+  border-radius:0;
+}
+
+.s3-armature{
+  position:absolute;inset:8% 10%;
+  width:80%;height:84%;
+  pointer-events:none;
+  opacity:0.6;
+}
+.s3-armature line,.s3-armature rect,.s3-armature circle{
+  stroke:var(--gold);stroke-width:0.5;fill:none;
+  vector-effect:non-scaling-stroke;
+  opacity:0.7;
+}
+.s3-armature .accent{stroke-width:0.4;opacity:0.4;stroke-dasharray:1.5,2}
+.s3-armature .marker{fill:var(--gold);stroke:none;opacity:0.8}
+
+.s3-dot{
+  position:absolute;width:6px;height:6px;border-radius:50%;
+  background:radial-gradient(circle,var(--gold-soft),var(--gold) 70%,transparent);
+  box-shadow:0 0 12px 2px rgba(212,168,83,0.45);
+  animation:dot-pulse 5s ease-in-out infinite;z-index:6;
+}
+.s3-dot.s{width:4px;height:4px}
+.s3-dot.a{top:32%;left:36%;animation-delay:.2s}
+.s3-dot.b{top:48%;left:54%;animation-delay:1.6s}
+.s3-dot.c{top:62%;left:42%;animation-delay:3.0s}
+.s3-dot.d{top:38%;left:62%;animation-delay:.8s}
+
+/* ============ SCENE 4 — full vessel (matches hero richness) ============ */
+.s4-stage{position:relative;width:100%;height:100%;perspective:1200px}
+.vessel-wrap{
+  position:absolute;inset:6% 14%;
+  transform-style:preserve-3d;
+}
+.vessel{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+  animation:vessel-breathe 22s ease-in-out infinite;
+}
+@keyframes vessel-breathe{
+  0%,100%{transform:rotateY(-5deg) rotateX(2deg)}
+  50%{transform:rotateY(5deg) rotateX(-2deg)}
+}
+
+.v-panel{position:absolute;border-radius:8px;pointer-events:none}
+.v-panel.p-back{
+  inset:4% 14% 16% 4%;
+  background:linear-gradient(160deg,rgba(43,107,87,0.42),rgba(43,107,87,0.22) 45%,rgba(136,168,155,0.28));
+  mix-blend-mode:multiply;
+  box-shadow:
+    0 40px 80px -40px rgba(43,107,87,0.4),
+    inset 0 1px 0 rgba(250,247,242,0.3);
+  transform:translateZ(-30px);
+}
+.v-panel.p-mid{
+  inset:14% 4% 6% 16%;
+  background:linear-gradient(200deg,rgba(232,199,122,0.18),rgba(250,247,242,0.55) 40%,rgba(232,228,222,0.4));
+  border:0.5px solid rgba(212,168,83,0.22);
+  box-shadow:
+    0 20px 50px -25px rgba(35,33,31,0.18),
+    inset 0 0 30px rgba(250,247,242,0.4);
+}
+.v-panel.p-front{
+  inset:24% 22% 24% 12%;
+  background:linear-gradient(165deg,rgba(232,228,222,0.6),rgba(250,247,242,0.35) 55%,rgba(43,107,87,0.1));
+  border:0.5px solid rgba(35,33,31,0.08);
+  box-shadow:
+    0 30px 60px -30px rgba(35,33,31,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  transform:translateZ(40px);
+}
+.v-panel.p-spine{
+  inset:8% 47% 8% 47%;
+  background:linear-gradient(180deg,rgba(212,168,83,0.12),rgba(212,168,83,0.06) 50%,rgba(212,168,83,0.12));
+  border-left:0.5px solid rgba(212,168,83,0.4);
+  border-right:0.5px solid rgba(212,168,83,0.4);
+  border-radius:0;
+  transform:translateZ(20px);
+}
+
+.v-armature{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;transform:translateZ(50px);z-index:5;
+}
+.v-armature line,.v-armature rect,.v-armature circle{
+  stroke:var(--gold);stroke-width:0.6;fill:none;
+  vector-effect:non-scaling-stroke;opacity:0.85;
+}
+.v-armature .accent{stroke-width:0.4;opacity:0.5}
+.v-armature .marker{fill:var(--gold);stroke:none;opacity:0.9}
+
+.v-dot{
+  position:absolute;width:8px;height:8px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,199,122,1),rgba(212,168,83,0.9) 50%,transparent);
+  box-shadow:0 0 14px 3px rgba(212,168,83,0.45),0 0 4px rgba(232,199,122,0.8);
+  animation:dot-pulse 5s ease-in-out infinite;
+  transform:translateZ(60px);z-index:4;
+}
+.v-dot.d1{top:28%;left:34%;animation-delay:0s}
+.v-dot.d2{top:44%;left:58%;animation-delay:1.4s}
+.v-dot.d3{top:60%;left:42%;animation-delay:2.8s}
+.v-dot.d4{top:36%;left:64%;animation-delay:.6s;width:5px;height:5px}
+.v-dot.d5{top:70%;left:50%;animation-delay:3.4s}
+.v-dot.d6{top:52%;left:30%;animation-delay:2.0s;width:5px;height:5px}
+.v-dot.d7{top:22%;left:54%;animation-delay:4.0s;width:4px;height:4px}
+.v-dot.d8{top:78%;left:60%;animation-delay:1.0s;width:4px;height:4px}
+
+.v-shadow{
+  position:absolute;bottom:-2%;left:14%;right:14%;height:28px;
+  background:radial-gradient(ellipse,rgba(35,33,31,0.22),rgba(35,33,31,0.08) 50%,transparent 75%);
+  filter:blur(10px);z-index:0;
+}
+
+.v-label{
+  position:absolute;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:0.14em;
+  color:var(--ink-soft);white-space:nowrap;
+  display:flex;align-items:center;gap:10px;z-index:10;
+}
+.v-label::before{
+  content:'';display:inline-block;width:20px;height:1px;background:var(--gold);
+}
+.v-label.right::before{display:none}
+.v-label.right::after{
+  content:'';display:inline-block;width:20px;height:1px;background:var(--gold);
+}
+.v-label.tl{top:2%;left:0%}
+.v-label.tr{top:14%;right:0%}
+.v-label.bl{bottom:18%;left:0%}
+.v-label.br{bottom:6%;right:0%}
+
+/* ============ SCENE 5 — vessel + decision brief ============ */
+#s5{grid-template-columns:0.7fr 1.3fr}
+#s5 .stage{aspect-ratio:auto;height:74vh;min-height:560px}
+.s5-grid{
+  position:relative;width:100%;height:100%;
+  display:grid;grid-template-columns:0.85fr 1fr;gap:48px;
+}
+.s5-vessel-host{
+  position:relative;height:100%;perspective:1200px;
+}
+.s5-vessel-host .vessel-wrap{inset:4% 8%}
+
+/* brief panel */
+.brief{
+  position:relative;
+  background:var(--paper);
+  border:0.5px solid rgba(35,33,31,0.1);
+  border-radius:2px;
+  padding:32px 32px 28px;
+  display:flex;flex-direction:column;
+  box-shadow:0 40px 80px -40px rgba(35,33,31,0.22);
+  align-self:center;
+  max-height:100%;
+}
+.brief::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.brief-head{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:0.16em;color:var(--ink-mute);
+  padding-bottom:18px;border-bottom:0.5px solid rgba(35,33,31,0.08);
+}
+.brief-head .live{display:flex;align-items:center;gap:10px;color:var(--pounamu)}
+.brief-head .live::before{
+  content:'';width:6px;height:6px;border-radius:50%;background:var(--pounamu);
+  box-shadow:0 0 8px rgba(43,107,87,0.5);
+  animation:dot-pulse 3s ease-in-out infinite;
+}
+.brief-eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:0.18em;
+  color:var(--pounamu);
+  margin:22px 0 12px;
+  display:flex;align-items:center;gap:12px;
+}
+.brief-eyebrow::before{
+  content:'';width:24px;height:1px;background:var(--gold);
+}
+.brief-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:30px;font-weight:300;line-height:1.15;
+  letter-spacing:-0.005em;
+  color:var(--ink);
+  margin-bottom:18px;
+}
+.brief-title em{font-style:italic;color:var(--pounamu);font-weight:400}
+.brief-body{
+  font-size:14px;line-height:1.7;color:var(--ink-soft);
+  padding-bottom:22px;
+  border-bottom:0.5px solid rgba(35,33,31,0.08);
+}
+
+/* timeline */
+.timeline{
+  padding:20px 0 22px;
+  border-bottom:0.5px solid rgba(35,33,31,0.08);
+}
+.timeline-head{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:0.16em;
+  color:var(--ink-mute);margin-bottom:14px;
+  display:flex;justify-content:space-between;
+}
+.timeline-track{
+  position:relative;height:18px;
+}
+.timeline-line{
+  position:absolute;left:0;right:0;top:50%;height:1px;
+  background:linear-gradient(90deg,
+    rgba(35,33,31,0.04),
+    rgba(35,33,31,0.18) 20%,
+    rgba(35,33,31,0.18) 80%,
+    rgba(35,33,31,0.04));
+}
+.tl-mark{
+  position:absolute;top:50%;
+  width:5px;height:5px;border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,var(--gold-soft),var(--gold) 70%,transparent);
+  box-shadow:0 0 8px 1px rgba(212,168,83,0.5);
+}
+.tl-mark.now{
+  width:8px;height:8px;
+  box-shadow:0 0 14px 2px rgba(212,168,83,0.6);
+  animation:dot-pulse 3.4s ease-in-out infinite;
+}
+.tl-axis{
+  display:flex;justify-content:space-between;
+  margin-top:10px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:0.14em;
+  color:var(--ink-mute);
+}
+
+/* meta grid */
+.brief-meta{
+  display:grid;grid-template-columns:1fr 1fr;gap:18px 32px;
+  padding-top:22px;
+}
+.meta-cell dt{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:0.16em;
+  color:var(--ink-mute);margin-bottom:6px;
+  display:flex;align-items:center;gap:8px;
+}
+.meta-cell dt::before{
+  content:'';width:14px;height:1px;background:var(--gold);
+}
+.meta-cell dd{
+  font-family:'Cormorant Garamond',serif;
+  font-size:18px;font-weight:300;
+  color:var(--ink);line-height:1.2;
+}
+.meta-cell dd em{font-style:italic;color:var(--pounamu);font-weight:400}
+
+/* foot */
+.foot{
+  position:relative;z-index:1;
+  max-width:1280px;margin:0 auto;padding:48px 64px 64px;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  letter-spacing:0.14em;color:var(--ink-mute);
+  display:flex;justify-content:space-between;
+  border-top:0.5px solid rgba(35,33,31,0.08);
+}
+
+@media (max-width:980px){
+  .nav{padding:20px 24px}
+  .nav-step{display:none}
+  .scene{grid-template-columns:1fr;gap:48px;padding:80px 24px}
+  .scene .copy{position:relative;top:auto;max-width:100%}
+  .stage{aspect-ratio:1/1}
+  .rail{display:none}
+  #s5{grid-template-columns:1fr}
+  #s5 .stage{height:auto;min-height:0}
+  .s5-grid{grid-template-columns:1fr;gap:24px}
+  .s5-vessel-host{height:50vh}
+  .foot{padding:32px 24px}
+  .v-label.tl,.v-label.tr,.v-label.bl,.v-label.br{font-size:9px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation:none !important;transition:none !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="brand"><span class="brand-mark"></span>assembl</span>
+  <span class="nav-step" id="navStep">scene 01 · the variation</span>
+</nav>
+
+<aside class="rail" aria-hidden="true">
+  <span class="tick" data-scene="0"></span>
+  <span class="tick" data-scene="1"></span>
+  <span class="tick" data-scene="2"></span>
+  <span class="tick" data-scene="3"></span>
+  <span class="tick" data-scene="4"></span>
+</aside>
+
+<!-- ============ SCENE 1 ============ -->
+<section class="scene" id="s1" data-step="scene 01 · the variation">
+  <div class="copy">
+    <div class="eyebrow">scene one</div>
+    <h2>council comes back on <em>the cantilever.</em></h2>
+    <p class="body">
+      bca wants a structural variation on the lounge cantilever.
+      you need the original consent, the calcs, last week's site diary
+      and the subbie programme. they're in four different places.
+    </p>
+  </div>
+  <div class="stage" aria-hidden="true">
+    <div class="s1-stage">
+
+      <div class="note n1"><div class="note-tag"><span class="note-dot"></span>tender · pdf</div>
+        <div class="note-name">welly · stage 2</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n2"><div class="note-tag"><span class="note-dot"></span>mbie · bulletin</div>
+        <div class="note-name">consent dwell</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n3"><div class="note-tag"><span class="note-dot"></span>consent · #4421</div>
+        <div class="note-name">awaiting BCA</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n4"><div class="note-tag"><span class="note-dot"></span>SOC · q2 report</div>
+        <div class="note-name">port of tauranga</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n5"><div class="note-tag"><span class="note-dot"></span>manifest · TUI-3142</div>
+        <div class="note-name">fish, perishable</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n6"><div class="note-tag"><span class="note-dot"></span>cover-count · q2</div>
+        <div class="note-name">wgn cbd · 87.4%</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n7"><div class="note-tag"><span class="note-dot"></span>claim · acc-2046</div>
+        <div class="note-name">site fall · open</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n8"><div class="note-tag"><span class="note-dot"></span>nzfc · slate r19</div>
+        <div class="note-name">scripted · pending</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n9"><div class="note-tag"><span class="note-dot"></span>dwell · TGA</div>
+        <div class="note-name">+1.4 days</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n10"><div class="note-tag"><span class="note-dot"></span>induction · site-c</div>
+        <div class="note-name">expired · 14d</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n11"><div class="note-tag"><span class="note-dot"></span>POS · feed</div>
+        <div class="note-name">repeat-visit ↘</div><div class="note-line"></div><div class="note-line"></div></div>
+
+      <div class="note n12"><div class="note-tag"><span class="note-dot"></span>wage signal · q2</div>
+        <div class="note-name">trades + 4.2%</div><div class="note-line"></div><div class="note-line"></div></div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCENE 2 ============ -->
+<section class="scene" id="s2" data-step="scene 02 · pulling it in">
+  <div class="copy">
+    <div class="eyebrow">scene two</div>
+    <h2>assembl pulls <em>the right pieces in.</em></h2>
+    <p class="body">
+      open the waihanga kete. the consent agent reads the bca notice,
+      finds the original drawings, the structural calcs and the diary,
+      and lays them out by category.
+    </p>
+  </div>
+  <div class="stage" aria-hidden="true">
+    <div class="s2-stage">
+
+      <svg class="s2-connectors" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="20" y1="14" x2="20" y2="32"/>
+        <line x1="48" y1="14" x2="48" y2="32"/>
+        <line x1="78" y1="14" x2="78" y2="32"/>
+        <line x1="14" y1="32" x2="14" y2="50"/>
+        <line x1="42" y1="32" x2="42" y2="50"/>
+        <line x1="70" y1="32" x2="70" y2="50"/>
+        <line x1="22" y1="50" x2="22" y2="68"/>
+        <line x1="50" y1="50" x2="50" y2="68"/>
+        <line x1="78" y1="50" x2="78" y2="68"/>
+        <line x1="18" y1="68" x2="18" y2="86"/>
+        <line x1="46" y1="68" x2="46" y2="86"/>
+        <line x1="72" y1="68" x2="72" y2="86"/>
+      </svg>
+
+      <div class="s2-row r1">
+        <span class="row-tag">regulatory</span>
+        <div class="s2-note">tender · <span class="lbl">welly · stage 2</span></div>
+        <div class="s2-note">consent · <span class="lbl">#4421 awaiting</span></div>
+        <div class="s2-note">mbie · <span class="lbl">bulletin q2</span></div>
+      </div>
+
+      <div class="s2-row r2">
+        <span class="row-tag">operational</span>
+        <div class="s2-note">manifest · <span class="lbl">TUI-3142</span></div>
+        <div class="s2-note">dwell · <span class="lbl">TGA +1.4d</span></div>
+        <div class="s2-note">induction · <span class="lbl">site-c expired</span></div>
+      </div>
+
+      <div class="s2-row r3">
+        <span class="row-tag">market</span>
+        <div class="s2-note">cover · <span class="lbl">wgn 87.4%</span></div>
+        <div class="s2-note">POS · <span class="lbl">repeat-visit ↘</span></div>
+        <div class="s2-note">SOC · <span class="lbl">port q2</span></div>
+      </div>
+
+      <div class="s2-row r4">
+        <span class="row-tag">workforce</span>
+        <div class="s2-note">claim · <span class="lbl">acc-2046</span></div>
+        <div class="s2-note">wage · <span class="lbl">trades +4.2%</span></div>
+        <div class="s2-note">slate · <span class="lbl">nzfc r19</span></div>
+      </div>
+
+      <div class="s2-row r5">
+        <span class="row-tag">cultural · context</span>
+        <div class="s2-note">iwi register · <span class="lbl">live</span></div>
+        <div class="s2-note">tikanga · <span class="lbl">applied</span></div>
+        <div class="s2-note">privacy · <span class="lbl">IPP-3A</span></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCENE 3 ============ -->
+<section class="scene" id="s3" data-step="scene 03 · the workflow">
+  <div class="copy">
+    <div class="eyebrow">scene three</div>
+    <h2>the workflow <em>runs in front of you.</em></h2>
+    <p class="body">
+      the agent re-runs the cantilever calcs, drafts the engineer's
+      response, and flags a 4-day programme hit. every step is cited
+      and reversible. you stay in the seat.
+    </p>
+  </div>
+  <div class="stage" aria-hidden="true">
+    <div class="s3-stage">
+      <div class="s3-stack">
+        <div class="s3-panel l1"></div>
+        <div class="s3-panel l2"></div>
+        <div class="s3-panel l3"></div>
+        <div class="s3-panel l4"></div>
+        <div class="s3-panel l5"></div>
+        <div class="s3-panel l6"></div>
+
+        <span class="s3-dot a"></span>
+        <span class="s3-dot s b"></span>
+        <span class="s3-dot c"></span>
+        <span class="s3-dot s d"></span>
+      </div>
+
+      <svg class="s3-armature" viewBox="0 0 100 105" preserveAspectRatio="none">
+        <rect x="6" y="3" width="88" height="99" rx="3"/>
+        <line x1="6" y1="18" x2="94" y2="18"/>
+        <line x1="6" y1="87" x2="94" y2="87"/>
+        <line class="accent" x1="50" y1="3" x2="50" y2="18"/>
+        <line class="accent" x1="50" y1="87" x2="50" y2="102"/>
+        <circle class="marker" cx="50" cy="10.5" r="0.9"/>
+        <circle class="marker" cx="50" cy="94.5" r="0.9"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCENE 4 — full sculptural vessel ============ -->
+<section class="scene" id="s4" data-step="scene 04 · the pack">
+  <div class="copy">
+    <div class="eyebrow">scene four</div>
+    <h2>everything holds together as <em>one evidence pack.</em></h2>
+    <p class="body">
+      the response, the supporting drawings, the recalcs, the timestamps.
+      one artefact, ready for sign-off, with the trail behind every line.
+    </p>
+  </div>
+  <div class="stage" aria-hidden="true">
+    <div class="s4-stage">
+
+      <div class="vessel-wrap">
+        <div class="vessel">
+
+          <div class="v-panel p-back"></div>
+          <div class="v-panel p-mid"></div>
+          <div class="v-panel p-spine"></div>
+          <div class="v-panel p-front"></div>
+
+          <svg class="v-armature" viewBox="0 0 100 118" preserveAspectRatio="none">
+            <rect x="5" y="3" width="90" height="112" rx="3" ry="3"/>
+            <line x1="5" y1="20" x2="95" y2="20"/>
+            <line x1="5" y1="98" x2="95" y2="98"/>
+            <line class="accent" x1="50" y1="3" x2="50" y2="20" stroke-dasharray="1.5,2"/>
+            <line class="accent" x1="50" y1="98" x2="50" y2="115" stroke-dasharray="1.5,2"/>
+            <line x1="5" y1="3" x2="12" y2="3"/>
+            <line x1="5" y1="3" x2="5" y2="10"/>
+            <line x1="88" y1="3" x2="95" y2="3"/>
+            <line x1="95" y1="3" x2="95" y2="10"/>
+            <line x1="5" y1="115" x2="12" y2="115"/>
+            <line x1="5" y1="108" x2="5" y2="115"/>
+            <line x1="88" y1="115" x2="95" y2="115"/>
+            <line x1="95" y1="108" x2="95" y2="115"/>
+            <circle class="marker" cx="50" cy="11.5" r="0.9"/>
+            <circle class="marker" cx="50" cy="106.5" r="0.9"/>
+            <line class="accent" x1="5" y1="40" x2="9" y2="40"/>
+            <line class="accent" x1="5" y1="60" x2="9" y2="60"/>
+            <line class="accent" x1="5" y1="80" x2="9" y2="80"/>
+            <line class="accent" x1="91" y1="40" x2="95" y2="40"/>
+            <line class="accent" x1="91" y1="60" x2="95" y2="60"/>
+            <line class="accent" x1="91" y1="80" x2="95" y2="80"/>
+          </svg>
+
+          <span class="v-dot d1"></span>
+          <span class="v-dot d2"></span>
+          <span class="v-dot d3"></span>
+          <span class="v-dot d4"></span>
+          <span class="v-dot d5"></span>
+          <span class="v-dot d6"></span>
+          <span class="v-dot d7"></span>
+          <span class="v-dot d8"></span>
+
+          <div class="v-shadow"></div>
+        </div>
+      </div>
+
+      <span class="v-label tl">signal in</span>
+      <span class="v-label tr right">evidence held</span>
+      <span class="v-label bl">decision out</span>
+      <span class="v-label br right">trail kept</span>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCENE 5 — vessel + decision brief ============ -->
+<section class="scene" id="s5" data-step="scene 05 · the handoff">
+  <div class="copy">
+    <div class="eyebrow">scene five</div>
+    <h2>file it, forward it, <em>footnote it.</em></h2>
+    <p class="body">
+      send the variation to council. forward the same pack to your qs,
+      your engineer or your legal team. you made the call; the pack
+      proves the work.
+    </p>
+  </div>
+  <div class="stage" aria-hidden="true">
+    <div class="s5-grid">
+
+      <div class="s5-vessel-host">
+        <div class="vessel-wrap">
+          <div class="vessel">
+            <div class="v-panel p-back"></div>
+            <div class="v-panel p-mid"></div>
+            <div class="v-panel p-spine"></div>
+            <div class="v-panel p-front"></div>
+
+            <svg class="v-armature" viewBox="0 0 100 118" preserveAspectRatio="none">
+              <rect x="5" y="3" width="90" height="112" rx="3" ry="3"/>
+              <line x1="5" y1="20" x2="95" y2="20"/>
+              <line x1="5" y1="98" x2="95" y2="98"/>
+              <line class="accent" x1="50" y1="3" x2="50" y2="20" stroke-dasharray="1.5,2"/>
+              <line class="accent" x1="50" y1="98" x2="50" y2="115" stroke-dasharray="1.5,2"/>
+              <line x1="5" y1="3" x2="12" y2="3"/>
+              <line x1="5" y1="3" x2="5" y2="10"/>
+              <line x1="88" y1="3" x2="95" y2="3"/>
+              <line x1="95" y1="3" x2="95" y2="10"/>
+              <line x1="5" y1="115" x2="12" y2="115"/>
+              <line x1="5" y1="108" x2="5" y2="115"/>
+              <line x1="88" y1="115" x2="95" y2="115"/>
+              <line x1="95" y1="108" x2="95" y2="115"/>
+              <circle class="marker" cx="50" cy="11.5" r="0.9"/>
+              <circle class="marker" cx="50" cy="106.5" r="0.9"/>
+            </svg>
+
+            <span class="v-dot d1"></span>
+            <span class="v-dot d2"></span>
+            <span class="v-dot d3"></span>
+            <span class="v-dot d4"></span>
+            <span class="v-dot d5"></span>
+            <span class="v-dot d6"></span>
+            <span class="v-dot d7"></span>
+
+            <div class="v-shadow"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brief">
+        <div class="brief-head">
+          <span class="live">waihanga · consents · live</span>
+          <span>07 may 2026 · 09:14 nzst</span>
+        </div>
+
+        <div class="brief-eyebrow">evidence pack · ready to file</div>
+        <div class="brief-title">consent #BC-2025-04421 · <em>variation drafted.</em></div>
+
+        <p class="brief-body">
+          bca flagged the lounge cantilever during inspection and asked
+          for a structural variation. the agent re-ran the calcs against
+          the original drawings, drafted the engineer's response, and
+          noted retention exposure if practical completion slips. lbp
+          signature is pending; the pack is ready to forward to legal.
+        </p>
+
+        <div class="timeline">
+          <div class="timeline-head">
+            <span>workflow trail</span>
+            <span>14 steps · each cited</span>
+          </div>
+          <div class="timeline-track">
+            <div class="timeline-line"></div>
+            <span class="tl-mark" style="left:6%"></span>
+            <span class="tl-mark" style="left:18%"></span>
+            <span class="tl-mark" style="left:32%"></span>
+            <span class="tl-mark" style="left:44%"></span>
+            <span class="tl-mark" style="left:58%"></span>
+            <span class="tl-mark" style="left:72%"></span>
+            <span class="tl-mark now" style="left:88%"></span>
+          </div>
+          <div class="tl-axis">
+            <span>intake</span><span>check</span><span>draft</span>
+            <span>review</span><span>file</span>
+          </div>
+        </div>
+
+        <dl class="brief-meta">
+          <div class="meta-cell">
+            <dt>consent</dt>
+            <dd>BC-2025-04421</dd>
+          </div>
+          <div class="meta-cell">
+            <dt>bca</dt>
+            <dd>wellington<em> · city council</em></dd>
+          </div>
+          <div class="meta-cell">
+            <dt>lbp</dt>
+            <dd>signature<em> · pending</em></dd>
+          </div>
+          <div class="meta-cell">
+            <dt>retention</dt>
+            <dd>exposure<em> · flagged</em></dd>
+          </div>
+        </dl>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span>prototype · v0.2 · scroll story</span>
+  <span>intake → sort → workflow → pack → handoff</span>
+</footer>
+
+<script>
+const ticks=document.querySelectorAll('.rail .tick');
+const scenes=[...document.querySelectorAll('.scene')];
+const navStep=document.getElementById('navStep');
+
+ticks.forEach((t,i)=>{
+  t.addEventListener('click',()=>{
+    scenes[i].scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting && en.intersectionRatio>0.4){
+      const idx=scenes.indexOf(en.target);
+      ticks.forEach((t,i)=>t.classList.toggle('active',i===idx));
+      const step=en.target.getAttribute('data-step');
+      if(step) navStep.textContent=step;
+    }
+  });
+},{threshold:[0.4,0.6]});
+
+scenes.forEach(s=>io.observe(s));
+ticks[0]?.classList.add('active');
+</script>
+</body>
+</html>

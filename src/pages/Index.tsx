@@ -1,606 +1,1604 @@
-import React, { lazy, Suspense, useMemo } from "react";
-import { motion, LayoutGroup } from "framer-motion";
-import { ArrowRight, Check } from "lucide-react";
+/* ──────────────────────────────────────────────────────────────────────────
+ * Homepage — Mārama Whenua editorial / "quiet intelligence for aotearoa"
+ *
+ * Holding move while the proper Next.js port is built. Ports three local
+ * prototypes (hero-vessel.html, scroll-story.html, sector-vessels.html)
+ * into the live Vite + React site shell, using a real Midjourney vessel JPG
+ * (public/img/hero/waihanga-vessel.jpg) for the hero band.
+ *
+ * Option A layout: full-bleed dark-green JPG hero band → cream paper
+ * editorial heading → cream paper scroll story → cream paper sector vessels.
+ * The dark-background hero is a deliberate temporary choice; the proper
+ * cream-paper version comes once a spec-aligned MJ vessel is generated.
+ *
+ * BrandNav stays at the top (sticky dark bar) — sits naturally over the dark
+ * hero JPG. BrandFooter stays at the bottom unchanged.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { usePersonalization } from "@/contexts/PersonalizationContext";
-import { useReturnVisitor } from "@/hooks/useReturnVisitor";
-import ContextBar from "@/components/personalized/ContextBar";
 import BrandNav from "@/components/BrandNav";
 import BrandFooter from "@/components/BrandFooter";
 import SEO from "@/components/SEO";
-import KeteWeaveVisual from "@/components/KeteWeaveVisual";
-import KeteAgentChat from "@/components/kete/KeteAgentChat";
-import KeteMiniIcon, { type KeteGlyph } from "@/components/kete/KeteMiniIcon";
-import WharikiFoundation from "@/components/whariki/WharikiFoundation";
-import { KETE } from "@/data/pricing";
-import GlassPanel from "@/components/whariki/GlassPanel";
-import MaungaBorder from "@/components/whariki/MaungaBorder";
-import WovenDivider from "@/components/whariki/WovenDivider";
 
-const Kete3DModel = lazy(() => import("@/components/kete/Kete3DModel"));
-
-/* ─── Tokens ─── */
-const C = {
-  bg: "#0A1628",
-  pounamu: "#3A7D6E",
-  pounamuLight: "#4FE4A7",
-  pounamuGlow: "#7ECFC2",
+const T = {
+  paper: "#FAF7F2",
+  paperDeep: "#F4EFE8",
+  ink: "#23211F",
+  inkSoft: "#5A554F",
+  inkMute: "#8A847C",
+  pounamu: "#2B6B57",
+  pounamuMist: "#88A89B",
   gold: "#D4A853",
-  goldLight: "#F0D078",
-  navy: "#1A3A5C",
-  bone: "#F5F0E8",
-  white: "#FFFFFF",
-  t1: "rgba(245,240,232,0.92)",
-  t2: "rgba(245,240,232,0.75)",
-  t3: "rgba(245,240,232,0.45)",
-  border: "rgba(58,125,110,0.15)",
+  goldSoft: "#E8C77A",
+  mist: "#E8E4DE",
 };
 
-const ease = [0.22, 1, 0.36, 1] as const;
-const fade = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-40px" as const },
-  transition: { duration: 0.4, ease },
-};
-const stagger = (i: number) => ({
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { delay: i * 0.07, duration: 0.4, ease },
-});
+const FONT_DISPLAY = "'Cormorant Garamond', Georgia, serif";
+const FONT_BODY = "'Inter', system-ui, -apple-system, sans-serif";
+const FONT_MONO = "'IBM Plex Mono', ui-monospace, monospace";
 
-/* ─── Data (sourced from pricing.ts) ─── */
-const KETE_COLORS: Record<string, { color: string; accentLight: string; to: string }> = {
-  manaaki: { color: C.pounamu, accentLight: C.pounamuLight, to: "/manaaki" },
-  waihanga: { color: C.navy, accentLight: "#2A5A8C", to: "/waihanga/about" },
-  auaha: { color: C.gold, accentLight: C.goldLight, to: "/auaha/about" },
-  arataki: { color: "#C8C8C8", accentLight: "#A8A8A8", to: "/arataki" },
-  pikau: { color: C.pounamuGlow, accentLight: "#A8E6DA", to: "/pikau" },
-};
-
-const PACKS = [
-  ...KETE.map((k) => ({
-    reo: k.name,
-    en: k.eng,
-    desc: k.desc,
-    ...KETE_COLORS[k.key],
-  })),
-  { reo: "Toro", en: "Family", desc: "School runs, meal planning, family admin — one less thing to worry about.", color: C.bone, accentLight: "#E8DDD0", to: "/toroa" },
-];
-
-const LAYERS = [
-  { name: "Perception", desc: "Reads your real inputs: invoices, emails, sensor data, calendar events." },
-  { name: "Memory", desc: "Separates verified facts from inferred guesses. Keeps a validated knowledge base." },
-  { name: "Reasoning", desc: "Combines pattern recognition with hard compliance rules. Never guesses on legislation." },
-  { name: "Action", desc: "Every action is classified: allowed, needs approval, or forbidden. No rogue moves." },
-  { name: "Explanation", desc: "Logs the reason behind every material decision in plain language." },
-  { name: "Simulation", desc: "Tests workflows against realistic scenarios before they touch production." },
-];
-
-const TRUST_NODES = [
-  { name: "Kahu", desc: "Policy layer — what's allowed" },
-  { name: "Iho", desc: "Routing — picks the right specialist" },
-  { name: "Tā", desc: "Execution — does the work" },
-  { name: "Mahara", desc: "Memory — learns and remembers" },
-  { name: "Mana", desc: "Assurance — proves it was done right" },
-];
-
-const EVIDENCE_PACKS = [
-  {
-    kete: "Manaaki", title: "Monthly Food Safety Report", date: "March 2026",
-    checks: [
-      { label: "Food Control Plan verification", ref: "FCP-2024", pass: true },
-      { label: "Temperature log compliance", ref: "TMP-047", pass: true },
-      { label: "Staff certification check", ref: "CERT-12", pass: true },
-    ],
-  },
-  {
-    kete: "Waihanga", title: "Site Safety Evidence Pack", date: "March 2026",
-    checks: [
-      { label: "H&S site briefing log", ref: "HSB-091", pass: true },
-      { label: "Payment claim schedule verified", ref: "PCS-004", pass: true },
-    ],
-  },
-  {
-    kete: "Arataki", title: "Vehicle Compliance Pack", date: "March 2026",
-    checks: [
-      { label: "WoF/CoF status verified", ref: "VCC-12", pass: true },
-      { label: "Workshop service log", ref: "WSL-033", pass: true },
-    ],
-  },
-];
-
-
-
-
-/* ═══ PAGE ═══ */
+/* ─── PAGE ─── */
 const Index = () => {
-  const isMobile = useIsMobile();
-  const { profile, atmosphere, isPersonalized } = usePersonalization();
-  const hero = profile.preferences.heroVariant;
-  useReturnVisitor();
-
-  const orderedPacks = useMemo(() => {
-    if (!isPersonalized) return PACKS;
-    const keteOrder = profile.preferences.keteOrder;
-    const SLUG_MAP: Record<string, string> = {
-      manaaki: "Manaaki", waihanga: "Waihanga", auaha: "Auaha",
-      arataki: "Arataki", pikau: "Pikau", toro: "Toro",
-    };
-    return [...PACKS].sort((a, b) => {
-      const aIdx = keteOrder.indexOf(Object.entries(SLUG_MAP).find(([_, v]) => v === a.reo)?.[0] as any ?? "");
-      const bIdx = keteOrder.indexOf(Object.entries(SLUG_MAP).find(([_, v]) => v === b.reo)?.[0] as any ?? "");
-      return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
-    });
-  }, [isPersonalized, profile.preferences.keteOrder]);
-
   return (
-    <div className="min-h-screen relative" style={{ background: `linear-gradient(180deg, #0A1628 0%, #0D1E35 30%, #0A1628 60%, #0E1A2E 100%)`, color: C.bone }}>
+    <div style={{ background: T.paper, color: T.ink, fontFamily: FONT_BODY, fontWeight: 300, lineHeight: 1.55 }}>
       <SEO
-        title="assembl — Governed workflow tools for NZ businesses"
-        description="Specialist operational workflows that reduce admin, surface risk earlier, and keep people in control. Built for NZ."
+        title="assembl — quiet intelligence for aotearoa"
+        description="Specialist kete for real NZ operations. Assembl runs each workflow in the open and ends each one with an evidence pack you can file, forward or footnote."
       />
-      <WharikiFoundation />
+      <FontPreload />
+      <BrandNav />
+      <PaperGrain />
 
-      <div className="relative z-10">
-        <BrandNav />
-        <ContextBar />
+      <Hero />
+      <Editorial />
+      <ScrollStory />
+      <SectorVessels />
 
-        {/* ═══ HERO — Full viewport + Kete Particle Canvas ═══ */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 overflow-hidden">
-          {/* Deep luminous background — not flat */}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: `
-              radial-gradient(ellipse 60% 50% at 50% 55%, rgba(79,228,167,0.18) 0%, transparent 60%),
-              radial-gradient(ellipse 40% 40% at 30% 30%, rgba(0,220,200,0.10) 0%, transparent 50%),
-              radial-gradient(ellipse 35% 45% at 70% 60%, rgba(212,168,83,0.07) 0%, transparent 50%),
-              radial-gradient(ellipse 80% 80% at 50% 50%, rgba(10,30,50,0.9) 0%, rgba(6,14,28,1) 100%)
-            `,
-          }} />
-          {/* Breathing glow pulse */}
-          <div className="absolute inset-0 pointer-events-none animate-[glowPulse_4s_ease-in-out_infinite]" style={{
-            background: "radial-gradient(ellipse 55% 45% at 50% 55%, rgba(79,228,167,0.10) 0%, transparent 60%)",
-          }} />
-          <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none">
-            <source src="/hero-woven-video.mp4" type="video/mp4" />
-          </video>
-          {/* Vignette edges */}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: "radial-gradient(ellipse 90% 70% at 50% 50%, transparent 40%, rgba(6,14,28,0.7) 100%)",
-          }} />
-          {/* Dark scrim behind text for legibility */}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(6,14,28,0.6) 0%, transparent 80%)",
-          }} />
-
-          <div className="relative z-10 max-w-3xl">
-            <motion.h1
-              style={{
-                fontFamily: "'Lato', sans-serif",
-                fontWeight: 300,
-                fontSize: isMobile ? "1.75rem" : "3.25rem",
-                lineHeight: 1.1,
-                letterSpacing: isMobile ? "3px" : "6px",
-                textTransform: "uppercase" as const,
-                color: C.white,
-                textShadow: "0 2px 30px rgba(0,0,0,0.8), 0 0 60px rgba(6,14,28,0.9)",
-              }}
-              initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1, ease }}
-            >
-              The operating system for NZ business.
-            </motion.h1>
-
-            <motion.p
-              className="max-w-[640px] mx-auto mt-6 text-base sm:text-lg leading-[1.8]"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: "rgba(245,240,232,0.8)", textShadow: "0 1px 20px rgba(0,0,0,0.7)" }}
-              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.25, ease }}
-            >
-              Specialist operational workflows that reduce admin, surface risk earlier, and keep people in control.
-            </motion.p>
-
-            <motion.div
-              className="flex flex-col sm:flex-row gap-3 mt-10 justify-center"
-              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4, ease }}
-            >
-              <Link to="/contact" className="group inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-semibold rounded-lg transition-all duration-300"
-                style={{ background: "rgba(212,168,83,0.12)", border: "1px solid rgba(212,168,83,0.5)", color: C.goldLight, boxShadow: "0 0 20px rgba(212,168,83,0.15), inset 0 1px 0 rgba(212,168,83,0.2)", fontFamily: "'Plus Jakarta Sans', sans-serif", backdropFilter: "blur(8px)" }}>
-                Get started <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link to="/demos" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-medium rounded-lg transition-all duration-300"
-                style={{ border: `1px solid ${C.pounamu}`, color: C.bone, backdropFilter: "blur(8px)" }}>
-                See it in action →
-              </Link>
-            </motion.div>
-
-            <motion.p
-              className="mt-10 text-[11px] tracking-[3px] uppercase"
-              style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, color: C.gold, textShadow: "0 1px 16px rgba(0,0,0,0.6)" }}
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6, duration: 0.5 }}
-            >
-              Trusted. Intelligent. Aotearoa.
-            </motion.p>
-          </div>
-        </section>
-
-        {/* Weave transition — strands tighten */}
-        <div className="relative h-20 overflow-hidden">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `linear-gradient(45deg, rgba(58,125,110,0.06) 1px, transparent 1px), linear-gradient(-45deg, rgba(58,125,110,0.06) 1px, transparent 1px)`,
-            backgroundSize: "12px 12px",
-          }} />
-          <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent, ${C.bg})` }} />
-        </div>
-
-        {/* ═══ WHAT WE DO ═══ */}
-        <Sect>
-          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div {...fade}>
-              <GlassPanel className="p-8 sm:p-10" goldRim>
-                <p className="text-[15px] sm:text-base leading-[1.9]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: C.t2 }}>
-                  Assembl creates New Zealand business specialist operational workflows, that reduce admin, surface risk earlier, and keep people in control.
-                </p>
-                <WovenDivider className="my-6" />
-                <p className="text-[15px] sm:text-base leading-[1.9]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: C.t2 }}>
-                  We help teams act faster with better information — not replace the people who know the work best.
-                </p>
-              </GlassPanel>
-            </motion.div>
-            {/* Convergence visual — cinematic hero style */}
-            <motion.div {...fade} className="relative flex justify-center items-center rounded-2xl overflow-hidden" style={{ minHeight: 280 }}>
-              {/* Static woven background */}
-              <div className="absolute inset-0 pointer-events-none opacity-50" style={{
-                backgroundImage: `linear-gradient(45deg, ${C.pounamu}12 1px, transparent 1px), linear-gradient(-45deg, ${C.gold}08 1px, transparent 1px), linear-gradient(135deg, ${C.pounamu}06 1px, transparent 1px)`,
-                backgroundSize: "18px 18px, 24px 24px, 12px 12px",
-              }} />
-              {/* Dark scrim */}
-              <div className="absolute inset-0 pointer-events-none" style={{
-                background: "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(6,14,28,0.65) 0%, rgba(6,14,28,0.85) 100%)",
-              }} />
-              {/* Vignette */}
-              <div className="absolute inset-0 pointer-events-none" style={{
-                background: "radial-gradient(ellipse 90% 80% at 50% 50%, transparent 30%, rgba(6,14,28,0.8) 100%)",
-              }} />
-              {/* Convergence nodes */}
-              <div className="relative z-10 flex flex-col items-center py-10">
-                <div className="flex flex-wrap justify-center gap-3 mb-6 max-w-[240px]">
-                  {PACKS.map((p) => (
-                    <span key={p.reo} className="text-[9px] tracking-[2px] uppercase px-2.5 py-1 rounded-full"
-                      style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        color: p.color,
-                        border: `1px solid ${p.color}40`,
-                        background: `${p.color}10`,
-                        textShadow: `0 0 12px ${p.color}60`,
-                      }}>
-                      {p.reo} <span style={{ opacity: 0.55, fontSize: "8px" }}>/ {p.en}</span>
-                    </span>
-                  ))}
-                </div>
-                <div className="w-px h-8" style={{ background: `linear-gradient(to bottom, ${C.pounamu}60, ${C.gold}60)` }} />
-                <div className="w-4 h-4 rounded-full mt-1" style={{
-                  background: `radial-gradient(circle, ${C.gold} 0%, ${C.pounamu}80 100%)`,
-                  boxShadow: `0 0 20px ${C.pounamu}40, 0 0 40px ${C.gold}20`,
-                }} />
-                <p className="mt-3 text-[10px] tracking-[3px] uppercase"
-                  style={{ fontFamily: "'JetBrains Mono', monospace", color: C.gold, textShadow: "0 1px 12px rgba(0,0,0,0.7)" }}>
-                  Iho
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        </Sect>
-
-        {/* ═══ DEMOS SECTION ═══ */}
-        <Sect>
-          <motion.div {...fade} className="text-center mb-12">
-            <Eye color={C.gold}>GOVERNANCE IN ACTION</Eye>
-            <H2>See the governance pipeline in action</H2>
-            <P className="max-w-xl mx-auto">
-              Four 60-second demos showing how Assembl enforces NZ law, tikanga, and human oversight before any output reaches a user.
-            </P>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
-            {[
-              { title: "Pipeline Walkthrough", desc: "Watch a query flow through five governance stages", to: "/demos/pipeline", accent: C.pounamu },
-              { title: "Evidence Pack", desc: "See the structured, watermarked output your team keeps", to: "/demos/evidence-pack", accent: C.gold },
-              { title: "Confidence Scoring", desc: "Every claim tagged with source, confidence, and citation", to: "/demos/confidence-scoring", accent: C.pounamuLight },
-              { title: "Kaitiaki Gate", desc: "Sacred content guardrail and human-in-the-loop escalation", to: "/demos/kaitiaki-gate", accent: "#E87461" },
-            ].map((d, i) => (
-              <motion.div key={d.title} {...stagger(i)}>
-                <Link to={d.to} className="group block h-full">
-                  <GlassPanel className="p-6 h-full" tilt>
-                    <div className="w-3 h-3 rounded-full mb-4" style={{ background: d.accent, boxShadow: `0 0 12px ${d.accent}40` }} />
-                    <h3 className="text-[13px] mb-2" style={{ fontFamily: "'Lato', sans-serif", fontWeight: 400, letterSpacing: "2px", textTransform: "uppercase", color: C.t1 }}>{d.title}</h3>
-                    <p className="text-[12px] mb-3" style={{ color: C.t3 }}>{d.desc}</p>
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium group-hover:gap-3 transition-all" style={{ color: d.accent }}>
-                      Try it <ArrowRight size={10} />
-                    </span>
-                  </GlassPanel>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </Sect>
-
-        {/* ═══ AAAIP CALLOUT ═══ */}
-        <Sect>
-          <motion.div {...fade} className="text-center">
-            <GlassPanel className="p-6 sm:p-8 max-w-2xl mx-auto" goldRim>
-              <p className="text-[10px] tracking-[3px] uppercase mb-2" style={{ fontFamily: "'JetBrains Mono', monospace", color: C.gold }}>Research Lab</p>
-              <p className="text-[15px] leading-relaxed mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: C.t2 }}>
-                Live AAAIP pilots and audit log for the Aotearoa Agentic AI Platform bid.
-              </p>
-              <Link to="/aaaip" className="inline-flex items-center gap-2 text-[13px] font-medium hover:gap-3 transition-all" style={{ color: C.gold }}>
-                View Research Lab <ArrowRight size={12} />
-              </Link>
-            </GlassPanel>
-          </motion.div>
-        </Sect>
-
-        {/* ═══ INDUSTRY KETE ═══ */}
-        <Sect id="industry-packs">
-          <motion.div {...fade} className="text-center mb-12">
-            <Eye color={C.pounamu}>YOUR INDUSTRY</Eye>
-            <H2>Sector-specific workflow packs</H2>
-          </motion.div>
-          <LayoutGroup>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-              {orderedPacks.map((p, i) => {
-                const isDetected = isPersonalized && i === 0;
-                return (
-                  <motion.div key={p.reo} layout layoutId={`kete-${p.reo}`} {...stagger(i)}>
-                    <Link to={p.to} className="group block h-full">
-                      <div className="glass-panel h-full rounded-2xl overflow-hidden transition-all duration-300 group-hover:translate-y-[-4px]"
-                        style={isDetected ? { boxShadow: `0 0 40px ${C.gold}12, inset 0 1px 0 rgba(212,168,83,0.25)` } : undefined}>
-                        <MaungaBorder variant="top" accentColor={p.color} />
-                        <div className="p-6 relative z-[1]">
-                          {isDetected && (
-                            <span className="text-[9px] px-2 py-0.5 rounded-full tracking-[2px] uppercase inline-block mb-3"
-                              style={{ background: `${C.gold}15`, color: `${C.gold}aa`, border: `1px solid ${C.gold}25`, fontFamily: "'JetBrains Mono', monospace" }}>
-                              Recommended for you
-                            </span>
-                          )}
-                          <div className="flex items-center gap-4 mb-4">
-                            <Suspense fallback={<KeteWeaveVisual size={40} accentColor={p.color} accentLight={p.accentLight} showNodes={false} showGlow={false} />}>
-                              <Kete3DModel accentColor={p.color} accentLight={p.accentLight} size={48} />
-                            </Suspense>
-                            <div>
-                              <h3 style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, fontSize: "1.15rem", letterSpacing: "4px", textTransform: "uppercase", color: C.white }}>{p.reo}</h3>
-                              <p className="text-[11px] tracking-[1px] uppercase" style={{ color: "rgba(245,240,232,0.45)", fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500 }}>{p.en}</p>
-                            </div>
-                          </div>
-                          <p className="text-[14px] leading-relaxed mb-4" style={{ color: C.t2 }}>{p.desc}</p>
-                          <span className="inline-flex items-center gap-1.5 text-[13px] font-medium group-hover:gap-3 transition-all" style={{ color: p.color }}>
-                            See a sample pack <ArrowRight size={12} />
-                          </span>
-                        </div>
-                        {/* Fading weave at bottom */}
-                        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-0" style={{
-                          backgroundImage: `linear-gradient(45deg, rgba(58,125,110,0.04) 1px, transparent 1px), linear-gradient(-45deg, rgba(58,125,110,0.04) 1px, transparent 1px)`,
-                          backgroundSize: "12px 12px",
-                          maskImage: "linear-gradient(transparent, rgba(0,0,0,0.3))",
-                          WebkitMaskImage: "linear-gradient(transparent, rgba(0,0,0,0.3))",
-                        }} />
-                      </div>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </LayoutGroup>
-        </Sect>
-
-        {/* ═══ HOW IT WORKS — 6 layers ═══ */}
-        <Sect>
-          <motion.div {...fade} className="text-center mb-12">
-            <Eye color={C.gold}>HOW ASSEMBL WORKS</Eye>
-            <H2>Six layers of governed intelligence, woven together</H2>
-            <P className="max-w-xl mx-auto">
-              Every decision is checked, every action is logged, every output is something you can file.
-            </P>
-          </motion.div>
-          <div className="max-w-2xl mx-auto space-y-1">
-            {LAYERS.map((layer, i) => (
-              <motion.div key={layer.name} {...stagger(i)}>
-                <GlassPanel className="p-5 flex items-center gap-5">
-                  <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `${i % 2 === 0 ? C.pounamu : C.gold}15` }}>
-                    <span className="text-[11px] font-bold" style={{ color: i % 2 === 0 ? C.pounamuLight : C.goldLight, fontFamily: "'JetBrains Mono', monospace" }}>{String(i + 1).padStart(2, "0")}</span>
-                  </div>
-                  <div>
-                    <p className="text-[13px] mb-0.5" style={{ fontFamily: "'Lato', sans-serif", fontWeight: 400, letterSpacing: "2px", textTransform: "uppercase", color: C.t1 }}>{layer.name}</p>
-                    <p className="text-[13px]" style={{ color: C.t3 }}>{layer.desc}</p>
-                  </div>
-                </GlassPanel>
-                {i < LAYERS.length - 1 && (
-                  <div className="flex justify-center">
-                    <svg width="4" height="12" viewBox="0 0 4 12">
-                      <path d="M1 0 Q2 6 3 12" fill="none" stroke={C.pounamu} strokeWidth="1" opacity="0.3" />
-                      <path d="M3 0 Q2 6 1 12" fill="none" stroke={C.gold} strokeWidth="0.8" opacity="0.2" />
-                    </svg>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </Sect>
-
-        {/* ═══ EVIDENCE PACKS ═══ */}
-        <Sect>
-          <motion.div {...fade} className="text-center mb-12">
-            <Eye color={C.gold}>EVIDENCE PACKS</Eye>
-            <H2>Every workflow ends in a pack you can file, forward, or footnote</H2>
-            <P className="max-w-xl mx-auto">
-              Not a chatbot response. A structured, evidence-backed document your auditor, your bank, or your regulator can trust.
-            </P>
-          </motion.div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {EVIDENCE_PACKS.map((pack, i) => (
-              <motion.div key={pack.kete} {...stagger(i)}>
-                <GlassPanel className="p-0 h-full" tilt>
-                   <MaungaBorder variant="top" />
-                   <div className="p-6">
-                     <p className="text-[10px] tracking-[3px] uppercase mb-1" style={{ color: C.gold, fontFamily: "'JetBrains Mono', monospace" }}>Evidence Pack</p>
-                     <h3 className="text-[15px] mb-0.5" style={{ fontFamily: "'Lato', sans-serif", fontWeight: 400, color: C.t1 }}>{pack.title}</h3>
-                     <p className="text-[11px] tracking-[1px] uppercase mb-4" style={{ color: C.pounamu, fontFamily: "'JetBrains Mono', monospace" }}>{pack.kete} · {pack.date}</p>
-                     <div className="space-y-2">
-                       {pack.checks.map((c) => (
-                         <div key={c.ref} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: "rgba(58,125,110,0.06)" }}>
-                           <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: `${C.pounamu}20` }}>
-                             <Check size={10} style={{ color: C.pounamuLight }} />
-                           </div>
-                           <span className="text-[12px] flex-1" style={{ color: C.t2 }}>{c.label}</span>
-                           <span className="text-[9px] tracking-wider" style={{ color: C.t3, fontFamily: "'JetBrains Mono', monospace" }}>{c.ref}</span>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
-                   <MaungaBorder variant="bottom" />
-                </GlassPanel>
-              </motion.div>
-            ))}
-          </div>
-        </Sect>
-
-        {/* ═══ TRUST / COMPLIANCE PIPELINE ═══ */}
-        <Sect>
-          <motion.div {...fade} className="text-center mb-12">
-            <Eye color={C.pounamu}>TRUST</Eye>
-            <H2>Governed from the ground up</H2>
-            <P className="max-w-md mx-auto">Five stages of oversight from policy to proof.</P>
-          </motion.div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-2 max-w-4xl mx-auto">
-            {TRUST_NODES.map((node, i) => (
-              <React.Fragment key={node.name}>
-                <motion.div {...stagger(i)} className="flex flex-col items-center text-center min-w-[80px]">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2" style={{ background: `${C.pounamu}15`, boxShadow: `0 0 12px ${C.pounamu}20` }}>
-                    <div className="w-3 h-3 rounded-full" style={{ background: C.pounamu }} />
-                  </div>
-                  <span className="text-[10px] tracking-[2px] uppercase font-bold" style={{ color: C.pounamuLight, fontFamily: "'JetBrains Mono', monospace" }}>{node.name}</span>
-                  <span className="text-[10px] mt-1 max-w-[120px]" style={{ color: C.t3 }}>{node.desc}</span>
-                </motion.div>
-                {i < TRUST_NODES.length - 1 && (
-                  <svg className="hidden sm:block w-10 h-6 shrink-0" viewBox="0 0 40 6">
-                    <path d="M0 3 Q10 1 20 3 Q30 5 40 3" fill="none" stroke={C.pounamu} strokeWidth="1" opacity="0.3" />
-                    <path d="M0 3 Q10 5 20 3 Q30 1 40 3" fill="none" stroke={C.gold} strokeWidth="0.8" opacity="0.2" />
-                  </svg>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </Sect>
-
-        {/* ═══ CTA to Pricing FAQ ═══ */}
-        <Sect>
-          <motion.div {...fade} className="text-center">
-            <Eye color={C.pounamu}>QUESTIONS?</Eye>
-            <H2>Got questions?</H2>
-            <P className="max-w-md mx-auto mb-8">
-              Check our comprehensive FAQ on the pricing page, or get in touch.
-            </P>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/pricing#faq" className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-medium rounded-lg"
-                style={{ border: `1px solid ${C.pounamu}`, color: C.bone }}>
-                View FAQ
-              </Link>
-              <Link to="/contact" className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-medium rounded-lg"
-                style={{ border: `1px solid ${C.gold}50`, color: C.goldLight }}>
-                Talk to us
-              </Link>
-            </div>
-          </motion.div>
-        </Sect>
-
-        {/* ═══ FINAL CTA ═══ */}
-        <section className="relative px-4 sm:px-6 py-20 sm:py-24 text-center overflow-hidden">
-          {/* Cinematic background */}
-          <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none">
-            <source src="/hero-woven-video.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(6,14,28,0.7) 0%, rgba(6,14,28,0.9) 100%)",
-          }} />
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: "radial-gradient(ellipse 90% 80% at 50% 50%, transparent 30%, rgba(6,14,28,0.85) 100%)",
-          }} />
-          <div className="max-w-xl mx-auto relative z-10">
-            <motion.div {...fade}>
-              <GlassPanel className="p-10 sm:p-16" goldRim>
-                <H2>Ready to see what your industry team looks like?</H2>
-                <P className="mb-10">
-                  Pick your kete. Run the demo. See the evidence pack it produces.
-                </P>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link to="/contact" className="group inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-semibold rounded-lg transition-all duration-300"
-                    style={{
-                      background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
-                      color: C.bg,
-                      boxShadow: `0 4px 24px rgba(212,168,83,0.35), 0 0 40px rgba(212,168,83,0.15)`,
-                      textShadow: "0 1px 2px rgba(0,0,0,0.2)",
-                    }}>
-                    See it in action <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                  <Link to="/contact" className="inline-flex items-center justify-center gap-2 px-10 py-4 text-sm font-medium rounded-lg transition-all duration-300"
-                    style={{ border: `1px solid ${C.pounamu}`, color: C.bone, backdropFilter: "blur(8px)", boxShadow: `0 0 20px ${C.pounamu}15` }}>
-                    Book a walkthrough
-                  </Link>
-                </div>
-              </GlassPanel>
-            </motion.div>
-          </div>
-        </section>
-
-        <BrandFooter />
-      </div>
-
-      <KeteAgentChat
-        keteName="assembl" keteLabel="Platform Concierge" accentColor="#3A7D6E"
-        defaultAgentId="echo" packId="assembl"
-        starterPrompts={["What industry kete is right for my business?", "How does the onboarding process work?", "What's included in the Operator plan?", "How does assembl handle compliance?"]}
-      />
+      <BrandFooter />
     </div>
   );
 };
 
 export default Index;
 
-/* ─── Layout primitives ─── */
-function Sect({ children, id }: { children: React.ReactNode; id?: string }) {
+/* ─── Font preload (Cormorant + Plex Mono are not in the existing site stack) ─── */
+function FontPreload() {
   return (
-    <section id={id} className="px-4 sm:px-6 py-16 sm:py-20 relative">
-      <div className="max-w-5xl mx-auto relative z-10">{children}</div>
-      <div className="absolute bottom-0 left-0 right-0"><WovenDivider /></div>
+    <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=IBM+Plex+Mono:wght@300;400&family=Inter:wght@300;400;500&display=swap"
+      />
+    </>
+  );
+}
+
+/* ─── Soft paper grain (whole page) ─── */
+function PaperGrain() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-0"
+      style={{
+        background:
+          "radial-gradient(ellipse 80% 60% at 20% 10%, rgba(212,168,83,0.04), transparent 60%), radial-gradient(ellipse 80% 60% at 90% 80%, rgba(43,107,87,0.04), transparent 60%)",
+      }}
+    />
+  );
+}
+
+/* ─── HERO — full-bleed dark green vessel JPG with mono labels overlay ─── */
+function Hero() {
+  return (
+    <section
+      aria-label="Waihanga evidence vessel"
+      className="relative w-full overflow-hidden"
+      style={{ background: "#0F2620", aspectRatio: "16 / 9", minHeight: 420, maxHeight: "82vh" }}
+    >
+      <img
+        src="/img/hero/waihanga-vessel.jpg"
+        alt="Sculptural pounamu evidence vessel — Waihanga frame"
+        className="absolute inset-0 w-full h-full object-cover"
+        loading="eager"
+        decoding="async"
+      />
+
+      {/* Soft vignette so labels stay legible against bright vessel */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 90% 70% at 50% 55%, transparent 30%, rgba(15,38,32,0.55) 100%)",
+        }}
+      />
+
+      {/* Mono labels — soft mist over image */}
+      <span className="hero-label hero-label--tl">signal in</span>
+      <span className="hero-label hero-label--tr">evidence held</span>
+      <span className="hero-label hero-label--bl">decision out</span>
+      <span className="hero-label hero-label--br">trail kept</span>
+
+      <span className="hero-cred">prototype · v0.1 · paper, pounamu, brass</span>
+
+      <style>{`
+        .hero-label {
+          position: absolute;
+          font-family: ${FONT_MONO};
+          font-size: 11px;
+          font-weight: 300;
+          letter-spacing: 0.18em;
+          color: rgba(232, 228, 222, 0.85);
+          text-transform: lowercase;
+          white-space: nowrap;
+          display: flex; align-items: center; gap: 12px;
+          z-index: 2;
+          text-shadow: 0 1px 12px rgba(0,0,0,0.6);
+        }
+        .hero-label::before {
+          content: "";
+          display: inline-block;
+          width: 28px; height: 1px;
+          background: ${T.gold};
+          opacity: 0.85;
+        }
+        .hero-label--tr::before, .hero-label--br::before { display: none; }
+        .hero-label--tr::after, .hero-label--br::after {
+          content: ""; display: inline-block; width: 28px; height: 1px;
+          background: ${T.gold}; opacity: 0.85;
+        }
+        .hero-label--tl { top: 7%; left: 5%; }
+        .hero-label--tr { top: 7%; right: 5%; }
+        .hero-label--bl { bottom: 9%; left: 5%; }
+        .hero-label--br { bottom: 9%; right: 5%; }
+        .hero-cred {
+          position: absolute;
+          bottom: 18px; left: 50%; transform: translateX(-50%);
+          font-family: ${FONT_MONO};
+          font-size: 10px; letter-spacing: 0.16em;
+          color: rgba(232, 228, 222, 0.45);
+          z-index: 2;
+        }
+        @media (max-width: 720px) {
+          .hero-label { font-size: 9px; gap: 8px; }
+          .hero-label::before, .hero-label--tr::after, .hero-label--br::after { width: 18px; }
+          .hero-cred { font-size: 9px; bottom: 12px; }
+        }
+      `}</style>
     </section>
   );
 }
 
-function Eye({ children, color = "#3A7D6E" }: { children: string; color?: string }) {
+/* ─── EDITORIAL — cream paper, "quiet intelligence for aotearoa" ─── */
+function Editorial() {
   return (
-    <p className="text-[10px] font-bold tracking-[4px] uppercase mb-4"
-      style={{ color, fontFamily: "'JetBrains Mono', monospace" }}>
-      — {children} —
-    </p>
+    <section className="ed-section">
+      <div style={{ maxWidth: 720 }}>
+        <div className="ed-eyebrow">specialist kete · real nz operations</div>
+        <h1 className="ed-title">
+          quiet intelligence
+          <br />
+          for <em>aotearoa</em>.
+        </h1>
+        <p className="ed-lede">
+          new zealanders use ai widely and trust it warily. assembl runs each workflow in the open and
+          ends each one with an evidence pack you can file, forward or footnote.
+        </p>
+        <div className="ed-cta-row">
+          <Link to="/demos/pipeline" className="ed-cta ed-cta--primary">
+            See it run on a real workflow
+          </Link>
+          <Link to="/demos/evidence-pack" className="ed-cta ed-cta--secondary">
+            Read the evidence model
+          </Link>
+        </div>
+      </div>
+
+      <style>{`
+        .ed-section {
+          position: relative; z-index: 10;
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 112px 48px 96px;
+        }
+        .ed-eyebrow {
+          font-family: ${FONT_MONO};
+          font-size: 11px; letter-spacing: 0.18em;
+          color: ${T.pounamu};
+          margin-bottom: 36px;
+          display: flex; align-items: center; gap: 14px;
+          text-transform: lowercase;
+        }
+        .ed-eyebrow::before {
+          content: ""; width: 32px; height: 1px; background: ${T.gold};
+        }
+        .ed-title {
+          font-family: ${FONT_DISPLAY};
+          font-weight: 300;
+          font-size: clamp(44px, 6.6vw, 96px);
+          line-height: 1.02;
+          letter-spacing: -0.012em;
+          color: ${T.ink};
+          margin: 0 0 36px;
+          text-transform: lowercase;
+        }
+        .ed-title em { font-style: italic; font-weight: 400; color: ${T.pounamu}; }
+        .ed-lede {
+          font-family: ${FONT_BODY};
+          font-size: 19px; line-height: 1.7;
+          color: ${T.inkSoft};
+          max-width: 540px;
+          margin: 0 0 52px;
+          font-weight: 300;
+        }
+        .ed-cta-row { display: flex; gap: 20px; flex-wrap: wrap; }
+        .ed-cta {
+          font-family: ${FONT_BODY};
+          font-size: 13.5px; letter-spacing: 0.04em;
+          padding: 16px 30px;
+          border-radius: 1px;
+          text-decoration: none;
+          display: inline-block;
+          transition: background .4s, color .4s, transform .4s, border-color .4s;
+          font-weight: 400;
+        }
+        .ed-cta--primary {
+          background: ${T.ink}; color: ${T.paper};
+          border: 1px solid ${T.ink};
+        }
+        .ed-cta--primary:hover {
+          background: ${T.pounamu}; border-color: ${T.pounamu};
+          transform: translateY(-1px);
+        }
+        .ed-cta--secondary {
+          border: 1px solid ${T.ink}; color: ${T.ink}; background: transparent;
+        }
+        .ed-cta--secondary:hover { background: ${T.ink}; color: ${T.paper}; }
+        @media (max-width: 720px) {
+          .ed-section { padding: 72px 24px 64px; }
+        }
+      `}</style>
+    </section>
   );
 }
 
-function H2({ children }: { children: React.ReactNode }) {
+/* ─── SCROLL STORY — five scenes following one Waihanga PM ─── */
+type Scene = {
+  id: string;
+  step: string;
+  eyebrow: string;
+  title: React.ReactNode;
+  body: string;
+  visual: React.ReactNode;
+};
+
+function ScrollStory() {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const sceneRefs = useRef<(HTMLElement | null)[]>([]);
+
+  const scenes: Scene[] = [
+    {
+      id: "story-s1",
+      step: "scene 01 · the variation",
+      eyebrow: "scene one",
+      title: (
+        <>
+          council comes back on <em>the cantilever.</em>
+        </>
+      ),
+      body:
+        "bca wants a structural variation on the lounge cantilever. you need the original consent, the calcs, last week's site diary and the subbie programme. they're in four different places.",
+      visual: <SceneFragments />,
+    },
+    {
+      id: "story-s2",
+      step: "scene 02 · pulling it in",
+      eyebrow: "scene two",
+      title: (
+        <>
+          assembl pulls <em>the right pieces in.</em>
+        </>
+      ),
+      body:
+        "open the waihanga kete. the consent agent reads the bca notice, finds the original drawings, the structural calcs and the diary, and lays them out by category.",
+      visual: <SceneStrata />,
+    },
+    {
+      id: "story-s3",
+      step: "scene 03 · the workflow",
+      eyebrow: "scene three",
+      title: (
+        <>
+          the workflow <em>runs in front of you.</em>
+        </>
+      ),
+      body:
+        "the agent re-runs the cantilever calcs, drafts the engineer's response, and flags a 4-day programme hit. every step is cited and reversible. you stay in the seat.",
+      visual: <SceneStack />,
+    },
+    {
+      id: "story-s4",
+      step: "scene 04 · the pack",
+      eyebrow: "scene four",
+      title: (
+        <>
+          everything holds together as <em>one evidence pack.</em>
+        </>
+      ),
+      body:
+        "the response, the supporting drawings, the recalcs, the timestamps. one artefact, ready for sign-off, with the trail behind every line.",
+      visual: <SceneVessel />,
+    },
+    {
+      id: "story-s5",
+      step: "scene 05 · the handoff",
+      eyebrow: "scene five",
+      title: (
+        <>
+          file it, forward it, <em>footnote it.</em>
+        </>
+      ),
+      body:
+        "send the variation to council. forward the same pack to your qs, your engineer or your legal team. you made the call; the pack proves the work.",
+      visual: <SceneBrief />,
+    },
+  ];
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting && en.intersectionRatio > 0.4) {
+            const idx = sceneRefs.current.findIndex((el) => el === en.target);
+            if (idx >= 0) setActiveIdx(idx);
+          }
+        });
+      },
+      { threshold: [0.4, 0.6] }
+    );
+    sceneRefs.current.forEach((el) => el && obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <h2 className="text-2xl sm:text-3xl lg:text-[36px] mb-4"
-      style={{ fontFamily: "'Lato', sans-serif", fontWeight: 300, letterSpacing: "4px", textTransform: "uppercase", lineHeight: 1.15, color: "rgba(245,240,232,0.9)" }}>
-      {children}
-    </h2>
+    <div className="story-root" style={{ background: T.paper, position: "relative", zIndex: 1 }}>
+      {/* progress rail */}
+      <aside className="story-rail" aria-hidden>
+        {scenes.map((s, i) => (
+          <button
+            key={s.id}
+            className={`story-tick ${i === activeIdx ? "is-active" : ""}`}
+            onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            aria-label={`Jump to ${s.step}`}
+          />
+        ))}
+      </aside>
+
+      {scenes.map((s, i) => (
+        <section
+          key={s.id}
+          id={s.id}
+          ref={(el) => (sceneRefs.current[i] = el)}
+          className="story-scene"
+        >
+          <div className="story-copy">
+            <div className="story-eyebrow">{s.eyebrow}</div>
+            <h2 className="story-h2">{s.title}</h2>
+            <p className="story-body">{s.body}</p>
+          </div>
+          <div className="story-stage" aria-hidden>
+            {s.visual}
+          </div>
+        </section>
+      ))}
+
+      <style>{`
+        .story-rail {
+          position: fixed; top: 50%; right: 32px; transform: translateY(-50%);
+          z-index: 30; display: flex; flex-direction: column; gap: 18px;
+        }
+        .story-tick {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: rgba(35,33,31,0.18);
+          transition: all .5s ease; cursor: pointer;
+          border: 0; padding: 0;
+        }
+        .story-tick.is-active {
+          background: ${T.gold};
+          box-shadow: 0 0 10px rgba(212,168,83,0.5);
+          transform: scale(1.4);
+        }
+        .story-scene {
+          position: relative;
+          min-height: 100vh;
+          padding: 120px 64px;
+          display: grid;
+          grid-template-columns: 0.85fr 1.15fr;
+          gap: 80px;
+          align-items: center;
+          max-width: 1440px;
+          margin: 0 auto;
+        }
+        .story-copy { position: sticky; top: 30vh; align-self: start; max-width: 440px; }
+        .story-eyebrow {
+          font-family: ${FONT_MONO};
+          font-size: 11px; letter-spacing: 0.18em;
+          color: ${T.pounamu};
+          margin-bottom: 28px;
+          display: flex; align-items: center; gap: 14px;
+          text-transform: lowercase;
+        }
+        .story-eyebrow::before {
+          content: ""; width: 32px; height: 1px; background: ${T.gold};
+        }
+        .story-h2 {
+          font-family: ${FONT_DISPLAY};
+          font-weight: 300;
+          font-size: clamp(38px, 5vw, 72px);
+          line-height: 1.05; letter-spacing: -0.012em;
+          color: ${T.ink};
+          margin: 0 0 24px;
+          text-transform: lowercase;
+        }
+        .story-h2 em { font-style: italic; color: ${T.pounamu}; font-weight: 400; }
+        .story-body {
+          font-family: ${FONT_BODY};
+          font-size: 17px; line-height: 1.7;
+          color: ${T.inkSoft};
+        }
+        .story-stage {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 1 / 1.05;
+          display: flex; align-items: center; justify-content: center;
+          perspective: 1200px;
+        }
+        @media (max-width: 980px) {
+          .story-rail { display: none; }
+          .story-scene {
+            grid-template-columns: 1fr; gap: 48px; padding: 80px 24px;
+            min-height: auto;
+          }
+          .story-copy { position: relative; top: auto; max-width: 100%; }
+          .story-stage { aspect-ratio: 1 / 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .story-root *, .story-root *::before, .story-root *::after {
+            animation: none !important; transition: none !important;
+          }
+        }
+      `}</style>
+    </div>
   );
 }
 
-function P({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+/* ── Scene 1: scattered fragment notes ── */
+function SceneFragments() {
+  const notes: Array<{ tag: string; name: string; top: string; left: string; rot: number }> = [
+    { tag: "tender · pdf", name: "welly · stage 2", top: "4%", left: "4%", rot: -5 },
+    { tag: "mbie · bulletin", name: "consent dwell", top: "2%", left: "42%", rot: 3 },
+    { tag: "consent · #4421", name: "awaiting BCA", top: "6%", left: "74%", rot: -2 },
+    { tag: "SOC · q2 report", name: "port of tauranga", top: "24%", left: "18%", rot: 4 },
+    { tag: "manifest · TUI-3142", name: "fish, perishable", top: "22%", left: "56%", rot: -3 },
+    { tag: "cover-count · q2", name: "wgn cbd · 87.4%", top: "38%", left: "2%", rot: 2 },
+    { tag: "claim · acc-2046", name: "site fall · open", top: "42%", left: "38%", rot: -4 },
+    { tag: "nzfc · slate r19", name: "scripted · pending", top: "40%", left: "72%", rot: 5 },
+    { tag: "dwell · TGA", name: "+1.4 days", top: "60%", left: "14%", rot: -2 },
+    { tag: "induction · site-c", name: "expired · 14d", top: "62%", left: "48%", rot: 3 },
+    { tag: "POS · feed", name: "repeat-visit ↘", top: "78%", left: "8%", rot: 4 },
+    { tag: "wage signal · q2", name: "trades + 4.2%", top: "80%", left: "52%", rot: -3 },
+  ];
   return (
-    <p className={`text-[15px] sm:text-base leading-relaxed ${className}`}
-      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: "rgba(245,240,232,0.75)" }}>
-      {children}
-    </p>
+    <div className="s1-stage">
+      {notes.map((n, i) => (
+        <div
+          key={i}
+          className="s1-note"
+          style={{ top: n.top, left: n.left, transform: `rotate(${n.rot}deg)` }}
+        >
+          <div className="s1-tag">
+            <span className="s1-dot" />
+            {n.tag}
+          </div>
+          <div className="s1-name">{n.name}</div>
+          <div className="s1-line" />
+          <div className="s1-line s1-line--short" />
+        </div>
+      ))}
+      <style>{`
+        .s1-stage { position: relative; width: 100%; height: 100%; }
+        .s1-note {
+          position: absolute;
+          background: ${T.paper};
+          border: 0.5px solid rgba(212,168,83,0.32);
+          border-radius: 2px;
+          padding: 14px 16px 12px;
+          box-shadow: 0 12px 24px -12px rgba(35,33,31,0.18), 0 2px 4px rgba(35,33,31,0.04);
+          min-width: 140px;
+          animation: s1-drift 14s ease-in-out infinite;
+        }
+        .s1-note:nth-child(odd) { animation-delay: -3s; animation-duration: 18s; }
+        .s1-note:nth-child(3n) { animation-duration: 20s; }
+        .s1-note::before {
+          content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+          background: linear-gradient(90deg, transparent, ${T.gold}, transparent);
+          opacity: 0.5;
+        }
+        .s1-tag {
+          font-family: ${FONT_MONO};
+          font-size: 9px; letter-spacing: 0.14em;
+          color: ${T.inkMute};
+          margin-bottom: 6px;
+          display: flex; align-items: center; gap: 8px;
+          text-transform: lowercase;
+        }
+        .s1-dot {
+          width: 5px; height: 5px; border-radius: 50%;
+          background: radial-gradient(circle, ${T.goldSoft}, ${T.gold} 70%, transparent);
+          box-shadow: 0 0 8px 1px rgba(212,168,83,0.55);
+          animation: dot-pulse 4.5s ease-in-out infinite;
+          flex-shrink: 0;
+        }
+        .s1-name {
+          font-family: ${FONT_DISPLAY};
+          font-style: italic; font-weight: 400; font-size: 14px;
+          color: ${T.ink}; line-height: 1.2; margin-top: 2px;
+        }
+        .s1-line {
+          height: 0.5px; width: 60%;
+          background: rgba(35,33,31,0.18);
+          margin-top: 4px;
+        }
+        .s1-line--short { width: 42%; }
+        @keyframes s1-drift {
+          0%, 100% { translate: 0 0; }
+          50% { translate: 2px -3px; }
+        }
+        @keyframes dot-pulse {
+          0%, 100% { opacity: 0.6; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.3); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* ── Scene 2: aligning into strata ── */
+function SceneStrata() {
+  const rows = [
+    { tag: "regulatory", items: ["tender · welly · stage 2", "consent · #4421 awaiting", "mbie · bulletin q2"] },
+    { tag: "operational", items: ["manifest · TUI-3142", "dwell · TGA +1.4d", "induction · site-c expired"] },
+    { tag: "market", items: ["cover · wgn 87.4%", "POS · repeat-visit ↘", "SOC · port q2"] },
+    { tag: "workforce", items: ["claim · acc-2046", "wage · trades +4.2%", "slate · nzfc r19"] },
+    { tag: "cultural · context", items: ["iwi register · live", "tikanga · applied", "privacy · IPP-3A"] },
+  ];
+  return (
+    <div className="s2-stage">
+      <svg className="s2-connectors" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="20" y1="14" x2="20" y2="32" />
+        <line x1="48" y1="14" x2="48" y2="32" />
+        <line x1="78" y1="14" x2="78" y2="32" />
+        <line x1="14" y1="32" x2="14" y2="50" />
+        <line x1="42" y1="32" x2="42" y2="50" />
+        <line x1="70" y1="32" x2="70" y2="50" />
+        <line x1="22" y1="50" x2="22" y2="68" />
+        <line x1="50" y1="50" x2="50" y2="68" />
+        <line x1="78" y1="50" x2="78" y2="68" />
+        <line x1="18" y1="68" x2="18" y2="86" />
+        <line x1="46" y1="68" x2="46" y2="86" />
+        <line x1="72" y1="68" x2="72" y2="86" />
+      </svg>
+      {rows.map((row, ri) => (
+        <div key={row.tag} className="s2-row" style={{ top: `${6 + ri * 18}%` }}>
+          <span className="s2-rowtag">{row.tag}</span>
+          {row.items.map((item, ii) => (
+            <div key={ii} className="s2-note">
+              <span className="s2-note-dot" />
+              {item}
+            </div>
+          ))}
+        </div>
+      ))}
+      <style>{`
+        .s2-stage { position: relative; width: 100%; height: 100%; }
+        .s2-connectors {
+          position: absolute; inset: 0; width: 100%; height: 100%;
+          pointer-events: none; z-index: 0;
+        }
+        .s2-connectors line {
+          stroke: ${T.gold}; stroke-width: 0.5;
+          vector-effect: non-scaling-stroke;
+          opacity: 0.5; stroke-dasharray: 2,2;
+        }
+        .s2-row {
+          position: absolute;
+          left: 4%; right: 4%;
+          display: flex; gap: 10px; align-items: center;
+          height: 48px;
+        }
+        .s2-rowtag {
+          position: absolute; left: 0; top: -16px;
+          font-family: ${FONT_MONO};
+          font-size: 9px; letter-spacing: 0.16em;
+          color: ${T.pounamu};
+          text-transform: lowercase;
+        }
+        .s2-rowtag::before {
+          content: ""; display: inline-block; width: 14px; height: 1px;
+          background: ${T.gold};
+          vertical-align: middle; margin-right: 8px;
+        }
+        .s2-note {
+          position: relative;
+          background: ${T.paper};
+          border: 0.5px solid rgba(212,168,83,0.32);
+          border-radius: 2px;
+          padding: 8px 12px;
+          box-shadow: 0 8px 16px -10px rgba(35,33,31,0.16);
+          font-family: ${FONT_MONO};
+          font-size: 9px; letter-spacing: 0.14em;
+          color: ${T.inkMute};
+          display: flex; align-items: center; gap: 8px;
+          white-space: nowrap;
+          transform: rotate(-1deg);
+          text-transform: lowercase;
+        }
+        .s2-note:nth-child(even) { transform: rotate(1deg); }
+        .s2-note-dot {
+          width: 5px; height: 5px; border-radius: 50%;
+          background: radial-gradient(circle, ${T.goldSoft}, ${T.gold} 70%, transparent);
+          box-shadow: 0 0 8px 1px rgba(212,168,83,0.55);
+          flex-shrink: 0;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* ── Scene 3: translucent stack ── */
+function SceneStack() {
+  return (
+    <div className="s3-stage">
+      <div className="s3-stack">
+        <div className="s3-panel s3-l1" />
+        <div className="s3-panel s3-l2" />
+        <div className="s3-panel s3-l3" />
+        <div className="s3-panel s3-l4" />
+        <div className="s3-panel s3-l5" />
+        <div className="s3-panel s3-l6" />
+
+        <span className="s3-dot s3-dot-a" />
+        <span className="s3-dot s3-dot-s s3-dot-b" />
+        <span className="s3-dot s3-dot-c" />
+        <span className="s3-dot s3-dot-s s3-dot-d" />
+      </div>
+
+      <svg className="s3-armature" viewBox="0 0 100 105" preserveAspectRatio="none">
+        <rect x="6" y="3" width="88" height="99" rx="3" />
+        <line x1="6" y1="18" x2="94" y2="18" />
+        <line x1="6" y1="87" x2="94" y2="87" />
+        <line className="accent" x1="50" y1="3" x2="50" y2="18" />
+        <line className="accent" x1="50" y1="87" x2="50" y2="102" />
+        <circle className="marker" cx="50" cy="10.5" r="0.9" />
+        <circle className="marker" cx="50" cy="94.5" r="0.9" />
+      </svg>
+
+      <style>{`
+        .s3-stage { position: relative; width: 100%; height: 100%; }
+        .s3-stack {
+          position: absolute; inset: 8% 10%;
+          transform-style: preserve-3d;
+          transform: rotateX(2deg) rotateY(-4deg);
+        }
+        .s3-panel { position: absolute; border-radius: 6px; pointer-events: none; }
+        .s3-l1 {
+          inset: 6% 14% 14% 4%;
+          background: linear-gradient(160deg, rgba(43,107,87,0.42), rgba(43,107,87,0.22) 55%, rgba(136,168,155,0.3));
+          mix-blend-mode: multiply;
+          box-shadow: 0 30px 60px -30px rgba(43,107,87,0.4);
+        }
+        .s3-l2 {
+          inset: 14% 8% 18% 12%;
+          background: linear-gradient(180deg, rgba(43,107,87,0.28), rgba(136,168,155,0.18));
+          mix-blend-mode: multiply;
+        }
+        .s3-l3 {
+          inset: 18% 4% 8% 18%;
+          background: linear-gradient(200deg, rgba(232,199,122,0.18), rgba(250,247,242,0.55) 50%, rgba(232,228,222,0.4));
+          border: 0.5px solid rgba(212,168,83,0.22);
+          box-shadow: inset 0 0 30px rgba(250,247,242,0.4);
+        }
+        .s3-l4 {
+          inset: 26% 18% 24% 10%;
+          background: linear-gradient(165deg, rgba(232,228,222,0.6), rgba(250,247,242,0.35) 55%, rgba(43,107,87,0.1));
+          border: 0.5px solid rgba(35,33,31,0.08);
+          box-shadow: 0 20px 40px -20px rgba(35,33,31,0.18), inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        .s3-l5 {
+          inset: 32% 28% 34% 22%;
+          background: linear-gradient(180deg, rgba(250,247,242,0.7), rgba(232,228,222,0.4));
+          border: 0.5px solid rgba(35,33,31,0.06);
+        }
+        .s3-l6 {
+          inset: 8% 48% 8% 48%;
+          background: linear-gradient(180deg, rgba(212,168,83,0.16), rgba(212,168,83,0.06) 50%, rgba(212,168,83,0.16));
+          border-left: 0.5px solid rgba(212,168,83,0.4);
+          border-right: 0.5px solid rgba(212,168,83,0.4);
+          border-radius: 0;
+        }
+        .s3-armature {
+          position: absolute; inset: 8% 10%;
+          width: 80%; height: 84%;
+          pointer-events: none;
+          opacity: 0.6;
+        }
+        .s3-armature line, .s3-armature rect, .s3-armature circle {
+          stroke: ${T.gold}; stroke-width: 0.5; fill: none;
+          vector-effect: non-scaling-stroke; opacity: 0.7;
+        }
+        .s3-armature .accent { stroke-width: 0.4; opacity: 0.4; stroke-dasharray: 1.5,2; }
+        .s3-armature .marker { fill: ${T.gold}; stroke: none; opacity: 0.8; }
+        .s3-dot {
+          position: absolute; width: 6px; height: 6px; border-radius: 50%;
+          background: radial-gradient(circle, ${T.goldSoft}, ${T.gold} 70%, transparent);
+          box-shadow: 0 0 12px 2px rgba(212,168,83,0.45);
+          animation: dot-pulse 5s ease-in-out infinite; z-index: 6;
+        }
+        .s3-dot-s { width: 4px; height: 4px; }
+        .s3-dot-a { top: 32%; left: 36%; animation-delay: .2s; }
+        .s3-dot-b { top: 48%; left: 54%; animation-delay: 1.6s; }
+        .s3-dot-c { top: 62%; left: 42%; animation-delay: 3.0s; }
+        .s3-dot-d { top: 38%; left: 62%; animation-delay: .8s; }
+      `}</style>
+    </div>
+  );
+}
+
+/* ── Scene 4: full sculptural vessel ── */
+function SceneVessel() {
+  return (
+    <div className="s4-stage">
+      <div className="s4-vessel-wrap">
+        <div className="s4-vessel">
+          <div className="v-panel v-back" />
+          <div className="v-panel v-mid" />
+          <div className="v-panel v-spine" />
+          <div className="v-panel v-front" />
+
+          <svg className="v-armature" viewBox="0 0 100 118" preserveAspectRatio="none">
+            <rect x="5" y="3" width="90" height="112" rx="3" ry="3" />
+            <line x1="5" y1="20" x2="95" y2="20" />
+            <line x1="5" y1="98" x2="95" y2="98" />
+            <line className="accent" x1="50" y1="3" x2="50" y2="20" strokeDasharray="1.5,2" />
+            <line className="accent" x1="50" y1="98" x2="50" y2="115" strokeDasharray="1.5,2" />
+            <line x1="5" y1="3" x2="12" y2="3" />
+            <line x1="5" y1="3" x2="5" y2="10" />
+            <line x1="88" y1="3" x2="95" y2="3" />
+            <line x1="95" y1="3" x2="95" y2="10" />
+            <line x1="5" y1="115" x2="12" y2="115" />
+            <line x1="5" y1="108" x2="5" y2="115" />
+            <line x1="88" y1="115" x2="95" y2="115" />
+            <line x1="95" y1="108" x2="95" y2="115" />
+            <circle className="marker" cx="50" cy="11.5" r="0.9" />
+            <circle className="marker" cx="50" cy="106.5" r="0.9" />
+            <line className="accent" x1="5" y1="40" x2="9" y2="40" />
+            <line className="accent" x1="5" y1="60" x2="9" y2="60" />
+            <line className="accent" x1="5" y1="80" x2="9" y2="80" />
+            <line className="accent" x1="91" y1="40" x2="95" y2="40" />
+            <line className="accent" x1="91" y1="60" x2="95" y2="60" />
+            <line className="accent" x1="91" y1="80" x2="95" y2="80" />
+          </svg>
+
+          <span className="v-dot v-d1" />
+          <span className="v-dot v-d2" />
+          <span className="v-dot v-d3" />
+          <span className="v-dot v-d4" />
+          <span className="v-dot v-d5" />
+          <span className="v-dot v-d6" />
+          <span className="v-dot v-d7" />
+          <span className="v-dot v-d8" />
+
+          <div className="v-shadow" />
+        </div>
+      </div>
+
+      <span className="v-label v-label-tl">signal in</span>
+      <span className="v-label v-label-tr v-label-right">evidence held</span>
+      <span className="v-label v-label-bl">decision out</span>
+      <span className="v-label v-label-br v-label-right">trail kept</span>
+
+      <style>{vesselStyles}</style>
+    </div>
+  );
+}
+
+/* ── Scene 5: vessel + decision brief ── */
+function SceneBrief() {
+  return (
+    <div className="s5-grid">
+      <div className="s5-vessel-host">
+        <div className="s4-vessel-wrap">
+          <div className="s4-vessel">
+            <div className="v-panel v-back" />
+            <div className="v-panel v-mid" />
+            <div className="v-panel v-spine" />
+            <div className="v-panel v-front" />
+
+            <svg className="v-armature" viewBox="0 0 100 118" preserveAspectRatio="none">
+              <rect x="5" y="3" width="90" height="112" rx="3" ry="3" />
+              <line x1="5" y1="20" x2="95" y2="20" />
+              <line x1="5" y1="98" x2="95" y2="98" />
+              <circle className="marker" cx="50" cy="11.5" r="0.9" />
+              <circle className="marker" cx="50" cy="106.5" r="0.9" />
+            </svg>
+
+            <span className="v-dot v-d1" />
+            <span className="v-dot v-d2" />
+            <span className="v-dot v-d3" />
+            <span className="v-dot v-d4" />
+            <span className="v-dot v-d5" />
+            <span className="v-dot v-d6" />
+            <span className="v-dot v-d7" />
+
+            <div className="v-shadow" />
+          </div>
+        </div>
+      </div>
+
+      <div className="brief">
+        <div className="brief-head">
+          <span className="brief-live">waihanga · consents · live</span>
+          <span>07 may 2026 · 09:14 nzst</span>
+        </div>
+
+        <div className="brief-eyebrow">evidence pack · ready to file</div>
+        <div className="brief-title">
+          consent #BC-2025-04421 · <em>variation drafted.</em>
+        </div>
+
+        <p className="brief-body">
+          bca flagged the lounge cantilever during inspection and asked for a structural variation.
+          the agent re-ran the calcs against the original drawings, drafted the engineer's response,
+          and noted retention exposure if practical completion slips. lbp signature is pending; the
+          pack is ready to forward to legal.
+        </p>
+
+        <div className="brief-timeline">
+          <div className="brief-timeline-head">
+            <span>workflow trail</span>
+            <span>14 steps · each cited</span>
+          </div>
+          <div className="brief-timeline-track">
+            <div className="brief-timeline-line" />
+            <span className="brief-tl-mark" style={{ left: "6%" }} />
+            <span className="brief-tl-mark" style={{ left: "18%" }} />
+            <span className="brief-tl-mark" style={{ left: "32%" }} />
+            <span className="brief-tl-mark" style={{ left: "44%" }} />
+            <span className="brief-tl-mark" style={{ left: "58%" }} />
+            <span className="brief-tl-mark" style={{ left: "72%" }} />
+            <span className="brief-tl-mark brief-tl-mark--now" style={{ left: "88%" }} />
+          </div>
+          <div className="brief-tl-axis">
+            <span>intake</span>
+            <span>check</span>
+            <span>draft</span>
+            <span>review</span>
+            <span>file</span>
+          </div>
+        </div>
+
+        <dl className="brief-meta">
+          <div className="brief-cell">
+            <dt>consent</dt>
+            <dd>BC-2025-04421</dd>
+          </div>
+          <div className="brief-cell">
+            <dt>bca</dt>
+            <dd>
+              wellington<em> · city council</em>
+            </dd>
+          </div>
+          <div className="brief-cell">
+            <dt>lbp</dt>
+            <dd>
+              signature<em> · pending</em>
+            </dd>
+          </div>
+          <div className="brief-cell">
+            <dt>retention</dt>
+            <dd>
+              exposure<em> · flagged</em>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <style>{vesselStyles}</style>
+      <style>{`
+        .s5-grid {
+          position: relative; width: 100%; height: 100%;
+          display: grid; grid-template-columns: 0.85fr 1fr; gap: 48px;
+        }
+        .s5-vessel-host {
+          position: relative; height: 100%; perspective: 1200px; min-height: 480px;
+        }
+        .brief {
+          position: relative;
+          background: ${T.paper};
+          border: 0.5px solid rgba(35,33,31,0.1);
+          border-radius: 2px;
+          padding: 32px 32px 28px;
+          display: flex; flex-direction: column;
+          box-shadow: 0 40px 80px -40px rgba(35,33,31,0.22);
+          align-self: center;
+        }
+        .brief::before {
+          content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+          background: linear-gradient(90deg, transparent, ${T.gold}, transparent);
+        }
+        .brief-head {
+          display: flex; justify-content: space-between; align-items: center;
+          font-family: ${FONT_MONO};
+          font-size: 10px; letter-spacing: 0.16em; color: ${T.inkMute};
+          padding-bottom: 18px; border-bottom: 0.5px solid rgba(35,33,31,0.08);
+          text-transform: lowercase;
+        }
+        .brief-live { display: flex; align-items: center; gap: 10px; color: ${T.pounamu}; }
+        .brief-live::before {
+          content: ""; width: 6px; height: 6px; border-radius: 50%; background: ${T.pounamu};
+          box-shadow: 0 0 8px rgba(43,107,87,0.5);
+          animation: dot-pulse 3s ease-in-out infinite;
+        }
+        .brief-eyebrow {
+          font-family: ${FONT_MONO};
+          font-size: 10px; letter-spacing: 0.18em;
+          color: ${T.pounamu};
+          margin: 22px 0 12px;
+          display: flex; align-items: center; gap: 12px;
+          text-transform: lowercase;
+        }
+        .brief-eyebrow::before {
+          content: ""; width: 24px; height: 1px; background: ${T.gold};
+        }
+        .brief-title {
+          font-family: ${FONT_DISPLAY};
+          font-size: 30px; font-weight: 300; line-height: 1.15;
+          letter-spacing: -0.005em; color: ${T.ink};
+          margin-bottom: 18px;
+          text-transform: lowercase;
+        }
+        .brief-title em { font-style: italic; color: ${T.pounamu}; font-weight: 400; }
+        .brief-body {
+          font-size: 14px; line-height: 1.7; color: ${T.inkSoft};
+          padding-bottom: 22px;
+          border-bottom: 0.5px solid rgba(35,33,31,0.08);
+        }
+        .brief-timeline { padding: 20px 0 22px; border-bottom: 0.5px solid rgba(35,33,31,0.08); }
+        .brief-timeline-head {
+          font-family: ${FONT_MONO};
+          font-size: 10px; letter-spacing: 0.16em; color: ${T.inkMute};
+          margin-bottom: 14px;
+          display: flex; justify-content: space-between;
+          text-transform: lowercase;
+        }
+        .brief-timeline-track { position: relative; height: 18px; }
+        .brief-timeline-line {
+          position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+          background: linear-gradient(90deg, rgba(35,33,31,0.04), rgba(35,33,31,0.18) 20%, rgba(35,33,31,0.18) 80%, rgba(35,33,31,0.04));
+        }
+        .brief-tl-mark {
+          position: absolute; top: 50%;
+          width: 5px; height: 5px; border-radius: 50%;
+          transform: translate(-50%, -50%);
+          background: radial-gradient(circle, ${T.goldSoft}, ${T.gold} 70%, transparent);
+          box-shadow: 0 0 8px 1px rgba(212,168,83,0.5);
+        }
+        .brief-tl-mark--now {
+          width: 8px; height: 8px;
+          box-shadow: 0 0 14px 2px rgba(212,168,83,0.6);
+          animation: dot-pulse 3.4s ease-in-out infinite;
+        }
+        .brief-tl-axis {
+          display: flex; justify-content: space-between; margin-top: 10px;
+          font-family: ${FONT_MONO};
+          font-size: 9px; letter-spacing: 0.14em; color: ${T.inkMute};
+          text-transform: lowercase;
+        }
+        .brief-meta {
+          display: grid; grid-template-columns: 1fr 1fr; gap: 18px 32px; padding-top: 22px;
+          margin: 0;
+        }
+        .brief-cell dt {
+          font-family: ${FONT_MONO};
+          font-size: 10px; letter-spacing: 0.16em; color: ${T.inkMute};
+          margin-bottom: 6px;
+          display: flex; align-items: center; gap: 8px;
+          text-transform: lowercase;
+        }
+        .brief-cell dt::before {
+          content: ""; width: 14px; height: 1px; background: ${T.gold};
+        }
+        .brief-cell dd {
+          font-family: ${FONT_DISPLAY};
+          font-size: 18px; font-weight: 300;
+          color: ${T.ink}; line-height: 1.2;
+          margin: 0;
+          text-transform: lowercase;
+        }
+        .brief-cell dd em { font-style: italic; color: ${T.pounamu}; font-weight: 400; }
+        @media (max-width: 980px) {
+          .s5-grid { grid-template-columns: 1fr; gap: 24px; }
+          .s5-vessel-host { height: 50vh; min-height: 360px; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* ── Shared vessel styles (Scene 4 + Scene 5) ── */
+const vesselStyles = `
+  .s4-stage { position: relative; width: 100%; height: 100%; perspective: 1200px; }
+  .s4-vessel-wrap { position: absolute; inset: 6% 14%; transform-style: preserve-3d; }
+  .s4-vessel {
+    position: absolute; inset: 0; transform-style: preserve-3d;
+    animation: vessel-breathe 22s ease-in-out infinite;
+  }
+  @keyframes vessel-breathe {
+    0%, 100% { transform: rotateY(-5deg) rotateX(2deg); }
+    50% { transform: rotateY(5deg) rotateX(-2deg); }
+  }
+  .v-panel { position: absolute; border-radius: 8px; pointer-events: none; }
+  .v-back {
+    inset: 4% 14% 16% 4%;
+    background: linear-gradient(160deg, rgba(43,107,87,0.42), rgba(43,107,87,0.22) 45%, rgba(136,168,155,0.28));
+    mix-blend-mode: multiply;
+    box-shadow: 0 40px 80px -40px rgba(43,107,87,0.4), inset 0 1px 0 rgba(250,247,242,0.3);
+    transform: translateZ(-30px);
+  }
+  .v-mid {
+    inset: 14% 4% 6% 16%;
+    background: linear-gradient(200deg, rgba(232,199,122,0.18), rgba(250,247,242,0.55) 40%, rgba(232,228,222,0.4));
+    border: 0.5px solid rgba(212,168,83,0.22);
+    box-shadow: 0 20px 50px -25px rgba(35,33,31,0.18), inset 0 0 30px rgba(250,247,242,0.4);
+  }
+  .v-front {
+    inset: 24% 22% 24% 12%;
+    background: linear-gradient(165deg, rgba(232,228,222,0.6), rgba(250,247,242,0.35) 55%, rgba(43,107,87,0.1));
+    border: 0.5px solid rgba(35,33,31,0.08);
+    box-shadow: 0 30px 60px -30px rgba(35,33,31,0.15), inset 0 1px 0 rgba(255,255,255,0.5);
+    transform: translateZ(40px);
+  }
+  .v-spine {
+    inset: 8% 47% 8% 47%;
+    background: linear-gradient(180deg, rgba(212,168,83,0.12), rgba(212,168,83,0.06) 50%, rgba(212,168,83,0.12));
+    border-left: 0.5px solid rgba(212,168,83,0.4);
+    border-right: 0.5px solid rgba(212,168,83,0.4);
+    border-radius: 0;
+    transform: translateZ(20px);
+  }
+  .v-armature {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; transform: translateZ(50px); z-index: 5;
+  }
+  .v-armature line, .v-armature rect, .v-armature circle {
+    stroke: #D4A853; stroke-width: 0.6; fill: none;
+    vector-effect: non-scaling-stroke; opacity: 0.85;
+  }
+  .v-armature .accent { stroke-width: 0.4; opacity: 0.5; }
+  .v-armature .marker { fill: #D4A853; stroke: none; opacity: 0.9; }
+  .v-dot {
+    position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,199,122,1), rgba(212,168,83,0.9) 50%, transparent);
+    box-shadow: 0 0 14px 3px rgba(212,168,83,0.45), 0 0 4px rgba(232,199,122,0.8);
+    animation: dot-pulse 5s ease-in-out infinite;
+    transform: translateZ(60px); z-index: 4;
+  }
+  .v-d1 { top: 28%; left: 34%; animation-delay: 0s; }
+  .v-d2 { top: 44%; left: 58%; animation-delay: 1.4s; }
+  .v-d3 { top: 60%; left: 42%; animation-delay: 2.8s; }
+  .v-d4 { top: 36%; left: 64%; animation-delay: .6s; width: 5px; height: 5px; }
+  .v-d5 { top: 70%; left: 50%; animation-delay: 3.4s; }
+  .v-d6 { top: 52%; left: 30%; animation-delay: 2.0s; width: 5px; height: 5px; }
+  .v-d7 { top: 22%; left: 54%; animation-delay: 4.0s; width: 4px; height: 4px; }
+  .v-d8 { top: 78%; left: 60%; animation-delay: 1.0s; width: 4px; height: 4px; }
+  .v-shadow {
+    position: absolute; bottom: -2%; left: 14%; right: 14%; height: 28px;
+    background: radial-gradient(ellipse, rgba(35,33,31,0.22), rgba(35,33,31,0.08) 50%, transparent 75%);
+    filter: blur(10px); z-index: 0;
+  }
+  .v-label {
+    position: absolute;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.14em;
+    color: #5A554F; white-space: nowrap;
+    display: flex; align-items: center; gap: 10px; z-index: 10;
+    text-transform: lowercase;
+  }
+  .v-label::before {
+    content: ""; display: inline-block; width: 20px; height: 1px; background: #D4A853;
+  }
+  .v-label-right::before { display: none; }
+  .v-label-right::after {
+    content: ""; display: inline-block; width: 20px; height: 1px; background: #D4A853;
+  }
+  .v-label-tl { top: 2%; left: 0%; }
+  .v-label-tr { top: 14%; right: 0%; }
+  .v-label-bl { bottom: 18%; left: 0%; }
+  .v-label-br { bottom: 6%; right: 0%; }
+`;
+
+/* ─── SECTOR VESSELS — four cards ─── */
+type Sector = {
+  key: string;
+  reo: string;
+  en: string;
+  index: string;
+  color: string;
+  to: string;
+  blurb: string;
+  signals: string;
+  evidence: string;
+  context: string;
+  action: string;
+  vessel: React.ReactNode;
+};
+
+function SectorVessels() {
+  const sectors: Sector[] = [
+    {
+      key: "waihanga",
+      reo: "waihanga",
+      en: "construction",
+      index: "01 / 04",
+      color: "#2B6B57",
+      to: "/waihanga/about",
+      blurb: "mineral, structural, weight-bearing. consents, capacity, compliance and crew movement — laid out like quarried stone.",
+      signals: "BCA backlogs, residential consent volume, materials index",
+      evidence: "3,412 living data points across 17 territorial authorities",
+      context: "Q2 consent issuance trending 8.4% below five-year mean",
+      action: "review subcontractor pipeline · brief commercial team",
+      vessel: <VesselWaihanga />,
+    },
+    {
+      key: "pikau",
+      reo: "pīkau",
+      en: "freight & customs",
+      index: "02 / 04",
+      color: "#2C4A7A",
+      to: "/pikau",
+      blurb: "cobalt clear, in motion. ports, manifests, dwell times and duty risk — held in glass capsules you can read end-to-end.",
+      signals: "port dwell time, container TEU flow, customs clearance lag",
+      evidence: "live feed from Auckland, Tauranga, Lyttelton, Otago",
+      context: "Tauranga dwell up 1.4 days · flow-on risk to perishables",
+      action: "flag at-risk consignees · prepare client briefing",
+      vessel: <VesselPikau />,
+    },
+    {
+      key: "manaaki",
+      reo: "manaaki",
+      en: "hospitality",
+      index: "03 / 04",
+      color: "#B85C3C",
+      to: "/manaaki",
+      blurb: "warm, welcoming, layered. covers, dwell, repeat custom and sentiment — gathered like silk petals around a single guest.",
+      signals: "cover counts, repeat-visit rate, regional sentiment, F&B price index",
+      evidence: "POS, booking, review and visitation feeds — anonymised",
+      context: "winter shoulder dwell strong in CHC · Auckland CBD softening",
+      action: "tighten staff roster · hold price · brief operators",
+      vessel: <VesselManaaki />,
+    },
+    {
+      key: "auaha",
+      reo: "auaha",
+      en: "creative",
+      index: "04 / 04",
+      color: "#3D2D5C",
+      to: "/auaha/about",
+      blurb: "archive deep, signal bright. funding rounds, festival circuits, IP movement and cultural tides — stratified for reading.",
+      signals: "NZFC slates, NZ On Air rounds, festival selections, agency awards",
+      evidence: "open funding registers + curated industry feeds",
+      context: "doc + scripted features both compressed · post-prod capacity tight",
+      action: "pre-position studio bid · convene a writers' room",
+      vessel: <VesselAuaha />,
+    },
+  ];
+
+  return (
+    <section className="sv-root" id="sectors">
+      <header className="sv-head">
+        <div className="sv-eyebrow">four sectors · four vessels</div>
+        <h2 className="sv-title">
+          each sector, <em>its own</em> evidence vessel.
+        </h2>
+        <p className="sv-lede">
+          every industry holds its signals differently — pounamu hard, glass clear, silk warm,
+          archive deep. assembl renders each sector as a sculptural object you can read at a glance,
+          then interrogate at depth.
+        </p>
+      </header>
+
+      <div className="sv-grid">
+        {sectors.map((s) => (
+          <Link to={s.to} key={s.key} className="sv-card" style={{ ["--tag" as string]: s.color }} tabIndex={0}>
+            <div className="sv-card-head">
+              <span className="sv-card-tag">
+                {s.reo} · {s.en}
+              </span>
+              <span>{s.index}</span>
+            </div>
+            <div className={`sv-vessel sv-v-${s.key}`}>
+              <div className="sv-vessel-form">{s.vessel}</div>
+            </div>
+            <h3 className="sv-card-name">
+              {s.reo} <em>· {s.en}</em>
+            </h3>
+            <p className="sv-card-blurb">{s.blurb}</p>
+            <dl className="sv-reveal">
+              <div className="sv-row"><dt>signals</dt><dd>{s.signals}</dd></div>
+              <div className="sv-row"><dt>evidence</dt><dd>{s.evidence}</dd></div>
+              <div className="sv-row"><dt>context</dt><dd>{s.context}</dd></div>
+              <div className="sv-row"><dt>suggested action</dt><dd>{s.action}</dd></div>
+            </dl>
+          </Link>
+        ))}
+      </div>
+
+      <div className="sv-foot">
+        <span>prototype · v0.1 · sector vessels</span>
+        <span>hover · interrogate · brief</span>
+      </div>
+
+      <style>{`
+        .sv-root { position: relative; z-index: 1; background: ${T.paper}; padding: 48px 0 96px; }
+        .sv-head { max-width: 1100px; margin: 80px auto 64px; padding: 0 48px; }
+        .sv-eyebrow {
+          font-family: ${FONT_MONO};
+          font-size: 11px; letter-spacing: 0.18em;
+          color: ${T.pounamu};
+          margin-bottom: 32px;
+          display: flex; align-items: center; gap: 14px;
+          text-transform: lowercase;
+        }
+        .sv-eyebrow::before {
+          content: ""; width: 32px; height: 1px; background: ${T.gold};
+        }
+        .sv-title {
+          font-family: ${FONT_DISPLAY};
+          font-weight: 300;
+          font-size: clamp(36px, 5.4vw, 76px);
+          line-height: 1.05; letter-spacing: -0.012em;
+          color: ${T.ink};
+          margin: 0 0 24px;
+          text-transform: lowercase;
+        }
+        .sv-title em { font-style: italic; color: ${T.pounamu}; font-weight: 400; }
+        .sv-lede {
+          font-family: ${FONT_BODY};
+          font-size: 18px; line-height: 1.7; color: ${T.inkSoft};
+          max-width: 560px; margin: 0;
+        }
+        .sv-grid {
+          max-width: 1280px; margin: 0 auto 120px; padding: 0 48px;
+          display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px;
+        }
+        .sv-card {
+          position: relative;
+          background: ${T.paper};
+          border: 0.5px solid rgba(35,33,31,0.08);
+          border-radius: 2px;
+          padding: 48px 40px 40px;
+          display: flex; flex-direction: column; gap: 24px;
+          transition: all 0.6s cubic-bezier(.2,.8,.2,1);
+          overflow: hidden;
+          text-decoration: none;
+          color: ${T.ink};
+        }
+        .sv-card::before {
+          content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+          background: linear-gradient(90deg, transparent, ${T.gold}, transparent);
+          opacity: 0.4; transition: opacity .4s;
+        }
+        .sv-card:hover, .sv-card:focus-within {
+          border-color: rgba(35,33,31,0.18);
+          box-shadow: 0 30px 80px -40px rgba(35,33,31,0.18);
+          transform: translateY(-2px);
+        }
+        .sv-card:hover::before, .sv-card:focus-within::before { opacity: 1; }
+        .sv-card-head {
+          display: flex; justify-content: space-between; align-items: flex-start;
+          font-family: ${FONT_MONO};
+          font-size: 11px; letter-spacing: 0.14em; color: ${T.inkMute};
+          text-transform: lowercase;
+        }
+        .sv-card-tag { display: flex; align-items: center; gap: 10px; }
+        .sv-card-tag::before {
+          content: ""; width: 6px; height: 6px; border-radius: 50%;
+          background: var(--tag, ${T.gold});
+        }
+        .sv-vessel {
+          position: relative; width: 100%; aspect-ratio: 1.2 / 1;
+          display: flex; align-items: center; justify-content: center;
+          margin: 8px 0 16px;
+        }
+        .sv-vessel-form {
+          position: relative; width: 78%; height: 88%;
+          transform: rotateX(2deg);
+          transition: transform .8s cubic-bezier(.2,.8,.2,1);
+        }
+        .sv-card:hover .sv-vessel-form, .sv-card:focus-within .sv-vessel-form {
+          transform: rotateX(-2deg) rotateY(3deg);
+        }
+        .sv-card-name {
+          font-family: ${FONT_DISPLAY};
+          font-size: 38px; line-height: 1; letter-spacing: -0.005em;
+          color: ${T.ink}; font-weight: 300;
+          display: flex; align-items: baseline; gap: 14px;
+          margin: 0;
+          text-transform: lowercase;
+        }
+        .sv-card-name em {
+          font-family: ${FONT_MONO}; font-style: normal;
+          font-size: 11px; letter-spacing: 0.14em; color: ${T.inkMute};
+          font-weight: 400;
+        }
+        .sv-card-blurb {
+          color: ${T.inkSoft}; font-size: 15px; line-height: 1.65;
+          max-width: 38ch; margin: 0;
+        }
+        .sv-reveal {
+          display: grid; grid-template-columns: 1fr 1fr; gap: 18px 28px;
+          padding-top: 24px;
+          border-top: 0.5px solid rgba(35,33,31,0.1);
+          max-height: 0; opacity: 0; overflow: hidden;
+          transition: max-height .7s cubic-bezier(.2,.8,.2,1), opacity .5s ease, padding-top .7s;
+          margin: 0;
+        }
+        .sv-card:hover .sv-reveal, .sv-card:focus-within .sv-reveal {
+          max-height: 320px; opacity: 1;
+        }
+        .sv-row { display: flex; flex-direction: column; gap: 6px; }
+        .sv-row dt {
+          font-family: ${FONT_MONO};
+          font-size: 10px; letter-spacing: 0.16em; color: ${T.inkMute};
+          text-transform: lowercase;
+        }
+        .sv-row dt::before {
+          content: ""; display: inline-block; width: 14px; height: 1px;
+          background: ${T.gold}; vertical-align: middle; margin-right: 8px;
+        }
+        .sv-row dd { font-size: 13.5px; line-height: 1.55; color: ${T.ink}; margin: 0; }
+        .sv-foot {
+          max-width: 1280px; margin: 0 auto; padding: 0 48px;
+          font-family: ${FONT_MONO};
+          font-size: 11px; letter-spacing: 0.14em; color: ${T.inkMute};
+          display: flex; justify-content: space-between; align-items: center;
+          text-transform: lowercase;
+        }
+
+        /* armature shared */
+        .sv-arm { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .sv-arm line, .sv-arm rect, .sv-arm circle, .sv-arm path {
+          stroke: ${T.gold}; stroke-width: 0.6; fill: none;
+          vector-effect: non-scaling-stroke; opacity: 0.85;
+        }
+        .sv-arm .accent { stroke-width: 0.4; opacity: 0.5; }
+        .sv-arm .marker { fill: ${T.gold}; stroke: none; opacity: 0.9; }
+        .sv-pt {
+          position: absolute; width: 6px; height: 6px; border-radius: 50%;
+          background: radial-gradient(circle, ${T.goldSoft}, ${T.gold} 70%, transparent);
+          box-shadow: 0 0 10px 2px rgba(212,168,83,0.45);
+          animation: dot-pulse 5s ease-in-out infinite; z-index: 4;
+        }
+        .sv-pt-s { width: 4px; height: 4px; }
+
+        /* Waihanga blocky panels */
+        .sv-v-waihanga .sv-pn-1 {
+          position: absolute; inset: 6% 12% 16% 6%; border-radius: 6px;
+          background: linear-gradient(155deg, rgba(43,107,87,0.5), rgba(43,107,87,0.25) 60%, rgba(136,168,155,0.32));
+          mix-blend-mode: multiply;
+          box-shadow: 0 30px 60px -30px rgba(43,107,87,0.4);
+        }
+        .sv-v-waihanga .sv-pn-2 {
+          position: absolute; inset: 18% 6% 10% 18%; border-radius: 6px;
+          background: linear-gradient(190deg, rgba(232,228,222,0.55), rgba(250,247,242,0.3) 60%, rgba(43,107,87,0.1));
+          border: 0.5px solid rgba(212,168,83,0.2);
+        }
+        .sv-v-waihanga .sv-pn-3 {
+          position: absolute; inset: 28% 24% 24% 14%; border-radius: 6px;
+          background: linear-gradient(160deg, rgba(232,228,222,0.6), rgba(250,247,242,0.35));
+          border: 0.5px solid rgba(35,33,31,0.06);
+        }
+
+        /* Pikau capsule */
+        .sv-v-pikau .sv-pn-1 {
+          position: absolute; inset: 4% 28% 12% 28%; border-radius: 60px;
+          background: linear-gradient(180deg, rgba(44,74,122,0.42), rgba(44,74,122,0.22) 50%, rgba(122,146,181,0.3));
+          mix-blend-mode: multiply;
+          box-shadow: 0 30px 60px -30px rgba(44,74,122,0.42);
+        }
+        .sv-v-pikau .sv-pn-2 {
+          position: absolute; inset: 10% 32% 18% 32%; border-radius: 50px;
+          background: linear-gradient(180deg, rgba(232,228,222,0.5), rgba(250,247,242,0.35) 60%, rgba(44,74,122,0.12));
+          border: 0.5px solid rgba(212,168,83,0.3);
+        }
+        .sv-v-pikau .sv-pn-3 {
+          position: absolute; inset: 18% 38% 26% 38%; border-radius: 36px;
+          background: linear-gradient(180deg, rgba(250,247,242,0.55), rgba(232,228,222,0.4));
+          border: 0.5px solid rgba(35,33,31,0.08);
+        }
+
+        /* Manaaki petals */
+        .sv-v-manaaki .sv-pn-1 {
+          position: absolute; inset: 8% 18% 18% 18%;
+          border-radius: 50% 50% 45% 45%;
+          background: linear-gradient(155deg, rgba(184,92,60,0.45), rgba(184,92,60,0.22) 55%, rgba(224,168,142,0.32));
+          mix-blend-mode: multiply;
+          box-shadow: 0 30px 60px -30px rgba(184,92,60,0.4);
+          transform: rotate(-4deg);
+        }
+        .sv-v-manaaki .sv-pn-2 {
+          position: absolute; inset: 14% 12% 14% 22%;
+          border-radius: 50% 50% 40% 40%;
+          background: linear-gradient(195deg, rgba(232,199,122,0.32), rgba(250,247,242,0.45) 55%, rgba(232,228,222,0.35));
+          border: 0.5px solid rgba(212,168,83,0.28);
+          transform: rotate(2deg);
+        }
+        .sv-v-manaaki .sv-pn-3 {
+          position: absolute; inset: 24% 26% 24% 22%;
+          border-radius: 50% 50% 35% 35%;
+          background: linear-gradient(160deg, rgba(232,228,222,0.6), rgba(250,247,242,0.32));
+          border: 0.5px solid rgba(35,33,31,0.07);
+          transform: rotate(-2deg);
+        }
+
+        /* Auaha archive */
+        .sv-v-auaha .sv-pn-1 {
+          position: absolute; inset: 8% 10% 14% 10%; border-radius: 4px;
+          background: linear-gradient(160deg, rgba(61,45,92,0.45), rgba(61,45,92,0.22) 55%, rgba(154,138,181,0.3));
+          mix-blend-mode: multiply;
+          box-shadow: 0 30px 60px -30px rgba(61,45,92,0.4);
+        }
+        .sv-v-auaha .sv-pn-2 {
+          position: absolute; inset: 14% 14% 8% 16%; border-radius: 3px;
+          background: linear-gradient(200deg, rgba(232,199,122,0.18), rgba(250,247,242,0.5) 50%, rgba(154,138,181,0.18));
+          border: 0.5px solid rgba(212,168,83,0.24);
+        }
+        .sv-v-auaha .sv-pn-3 {
+          position: absolute; inset: 22% 22% 22% 22%; border-radius: 2px;
+          background: linear-gradient(165deg, rgba(232,228,222,0.55), rgba(250,247,242,0.35));
+          border: 0.5px solid rgba(35,33,31,0.08);
+        }
+        .sv-v-auaha .sv-pn-4 {
+          position: absolute; inset: 28% 38% 28% 38%;
+          background: linear-gradient(180deg, rgba(212,168,83,0.12), rgba(212,168,83,0.04));
+          border-left: 0.5px solid rgba(212,168,83,0.4);
+          border-right: 0.5px solid rgba(212,168,83,0.4);
+          border-radius: 0;
+        }
+
+        @media (max-width: 980px) {
+          .sv-grid { grid-template-columns: 1fr; padding: 0 24px; gap: 24px; }
+          .sv-card { padding: 36px 28px 32px; }
+          .sv-card-name { font-size: 32px; }
+          .sv-reveal { grid-template-columns: 1fr; }
+          .sv-head { padding: 0 24px; margin: 48px auto 40px; }
+          .sv-foot { padding: 0 24px; flex-direction: column; gap: 12px; align-items: flex-start; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .sv-root *, .sv-root *::before, .sv-root *::after {
+            animation: none !important; transition: none !important;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+function VesselWaihanga() {
+  return (
+    <>
+      <div className="sv-pn-1" />
+      <div className="sv-pn-2" />
+      <div className="sv-pn-3" />
+      <svg className="sv-arm" viewBox="0 0 100 84" preserveAspectRatio="none">
+        <rect x="5" y="3" width="90" height="78" rx="2" />
+        <line x1="5" y1="18" x2="95" y2="18" />
+        <line x1="5" y1="66" x2="95" y2="66" />
+        <line className="accent" x1="50" y1="3" x2="50" y2="18" strokeDasharray="1.5,2" />
+        <line className="accent" x1="50" y1="66" x2="50" y2="81" strokeDasharray="1.5,2" />
+        <circle className="marker" cx="50" cy="10.5" r="0.8" />
+        <circle className="marker" cx="50" cy="73.5" r="0.8" />
+      </svg>
+      <span className="sv-pt" style={{ top: "30%", left: "38%", animationDelay: ".2s" }} />
+      <span className="sv-pt sv-pt-s" style={{ top: "48%", left: "58%", animationDelay: "1.4s" }} />
+      <span className="sv-pt" style={{ top: "64%", left: "44%", animationDelay: "2.8s" }} />
+      <span className="sv-pt sv-pt-s" style={{ top: "38%", left: "62%", animationDelay: ".8s" }} />
+    </>
+  );
+}
+
+function VesselPikau() {
+  return (
+    <>
+      <div className="sv-pn-1" />
+      <div className="sv-pn-2" />
+      <div className="sv-pn-3" />
+      <svg className="sv-arm" viewBox="0 0 100 84" preserveAspectRatio="none">
+        <rect x="28" y="3" width="44" height="78" rx="22" />
+        <line x1="28" y1="20" x2="72" y2="20" />
+        <line x1="28" y1="64" x2="72" y2="64" />
+        <line className="accent" x1="50" y1="3" x2="50" y2="20" strokeDasharray="1.5,2" />
+        <line className="accent" x1="50" y1="64" x2="50" y2="81" strokeDasharray="1.5,2" />
+        <circle className="marker" cx="50" cy="11.5" r="0.8" />
+        <circle className="marker" cx="50" cy="72.5" r="0.8" />
+        <line className="accent" x1="22" y1="42" x2="28" y2="42" />
+        <line className="accent" x1="72" y1="42" x2="78" y2="42" />
+      </svg>
+      <span className="sv-pt" style={{ top: "28%", left: "48%", animationDelay: ".4s" }} />
+      <span className="sv-pt sv-pt-s" style={{ top: "46%", left: "46%", animationDelay: "1.8s" }} />
+      <span className="sv-pt" style={{ top: "60%", left: "50%", animationDelay: "3.2s" }} />
+    </>
+  );
+}
+
+function VesselManaaki() {
+  return (
+    <>
+      <div className="sv-pn-1" />
+      <div className="sv-pn-2" />
+      <div className="sv-pn-3" />
+      <svg className="sv-arm" viewBox="0 0 100 84" preserveAspectRatio="none">
+        <path d="M 12 70 Q 50 6 88 70 Z" />
+        <line x1="12" y1="70" x2="88" y2="70" />
+        <line className="accent" x1="50" y1="3" x2="50" y2="14" strokeDasharray="1.5,2" />
+        <line className="accent" x1="50" y1="70" x2="50" y2="81" strokeDasharray="1.5,2" />
+        <circle className="marker" cx="50" cy="9" r="0.8" />
+        <circle className="marker" cx="50" cy="76" r="0.8" />
+        <line className="accent" x1="20" y1="56" x2="14" y2="56" />
+        <line className="accent" x1="80" y1="56" x2="86" y2="56" />
+      </svg>
+      <span
+        className="sv-pt"
+        style={{ top: "36%", left: "46%", animationDelay: ".4s", background: "radial-gradient(circle, #E8C77A, #B85C3C 70%, transparent)" }}
+      />
+      <span
+        className="sv-pt sv-pt-s"
+        style={{ top: "52%", left: "38%", animationDelay: "2.0s", background: "radial-gradient(circle, #E8C77A, #B85C3C 70%, transparent)" }}
+      />
+      <span
+        className="sv-pt sv-pt-s"
+        style={{ top: "50%", left: "58%", animationDelay: "3.4s", background: "radial-gradient(circle, #E8C77A, #B85C3C 70%, transparent)" }}
+      />
+    </>
+  );
+}
+
+function VesselAuaha() {
+  return (
+    <>
+      <div className="sv-pn-1" />
+      <div className="sv-pn-2" />
+      <div className="sv-pn-3" />
+      <div className="sv-pn-4" />
+      <svg className="sv-arm" viewBox="0 0 100 84" preserveAspectRatio="none">
+        <rect x="6" y="3" width="88" height="78" rx="1" />
+        <line x1="6" y1="22" x2="94" y2="22" />
+        <line x1="6" y1="42" x2="94" y2="42" />
+        <line x1="6" y1="62" x2="94" y2="62" />
+        <line className="accent" x1="50" y1="3" x2="50" y2="81" strokeDasharray="1,2.5" />
+        <circle className="marker" cx="50" cy="12.5" r="0.7" />
+        <circle className="marker" cx="50" cy="32" r="0.7" />
+        <circle className="marker" cx="50" cy="52" r="0.7" />
+        <circle className="marker" cx="50" cy="71.5" r="0.7" />
+      </svg>
+      <span className="sv-pt sv-pt-s" style={{ top: "18%", left: "36%", animationDelay: ".4s" }} />
+      <span className="sv-pt sv-pt-s" style={{ top: "32%", left: "64%", animationDelay: "1.6s" }} />
+      <span className="sv-pt" style={{ top: "48%", left: "44%", animationDelay: "2.4s" }} />
+      <span className="sv-pt sv-pt-s" style={{ top: "62%", left: "58%", animationDelay: "3.6s" }} />
+      <span className="sv-pt sv-pt-s" style={{ top: "74%", left: "40%", animationDelay: "4.4s" }} />
+    </>
   );
 }

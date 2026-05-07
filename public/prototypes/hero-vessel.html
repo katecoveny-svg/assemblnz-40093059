@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>assembl — quiet intelligence for aotearoa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=IBM+Plex+Mono:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF7F2;
+  --paper-deep:#F4EFE8;
+  --ink:#23211F;
+  --ink-soft:#5A554F;
+  --ink-mute:#8A847C;
+  --pounamu:#2B6B57;
+  --pounamu-mist:#88A89B;
+  --gold:#D4A853;
+  --gold-soft:#E8C77A;
+  --mist:#E8E4DE;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  font-weight:300;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+body{overflow-x:hidden}
+
+/* paper grain */
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(212,168,83,0.04), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 90% 80%, rgba(43,107,87,0.05), transparent 60%);
+  z-index:0;
+}
+
+/* nav */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  padding:28px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  letter-spacing:0.08em;
+  color:var(--ink-soft);
+  mix-blend-mode:multiply;
+}
+.nav-links{display:flex;gap:32px}
+.nav a{color:inherit;text-decoration:none;transition:color .3s}
+.nav a:hover{color:var(--pounamu)}
+.brand{
+  font-family:'Cormorant Garamond',serif;
+  font-size:24px;letter-spacing:0.01em;
+  color:var(--ink);font-weight:400;
+}
+.brand-mark{
+  display:inline-block;width:6px;height:6px;
+  background:var(--gold);border-radius:50%;
+  margin-right:10px;vertical-align:middle;
+  box-shadow:0 0 8px rgba(212,168,83,0.4);
+}
+
+/* hero */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;
+  padding:140px 64px 100px;
+  display:grid;
+  grid-template-columns:1.05fr 1fr;
+  gap:80px;
+  align-items:center;
+  max-width:1440px;
+  margin:0 auto;
+}
+.hero-text .eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:0.18em;
+  color:var(--pounamu);
+  margin-bottom:36px;
+  display:flex;align-items:center;gap:14px;
+}
+.eyebrow::before{
+  content:'';width:32px;height:1px;background:var(--gold);
+}
+.hero-text h1{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:300;
+  font-size:clamp(48px, 6.6vw, 96px);
+  line-height:1.02;
+  letter-spacing:-0.012em;
+  color:var(--ink);
+  margin-bottom:36px;
+}
+.hero-text h1 em{
+  font-style:italic;
+  font-weight:400;
+  color:var(--pounamu);
+}
+.hero-text .lede{
+  font-size:19px;
+  line-height:1.7;
+  color:var(--ink-soft);
+  max-width:480px;
+  margin-bottom:52px;
+  font-weight:300;
+}
+.cta-row{display:flex;gap:20px;flex-wrap:wrap}
+.cta{
+  font-family:'Inter',sans-serif;
+  font-size:13.5px;
+  letter-spacing:0.04em;
+  padding:16px 30px;
+  border-radius:1px;
+  text-decoration:none;
+  transition:all 0.5s cubic-bezier(.2,.8,.2,1);
+  display:inline-block;
+}
+.cta.primary{
+  background:var(--ink);color:var(--paper);
+  border:1px solid var(--ink);
+}
+.cta.primary:hover{
+  background:var(--pounamu);
+  border-color:var(--pounamu);
+  transform:translateY(-1px);
+}
+.cta.secondary{
+  border:1px solid var(--ink);
+  color:var(--ink);background:transparent;
+}
+.cta.secondary:hover{
+  background:var(--ink);color:var(--paper);
+}
+
+/* vessel stage */
+.vessel-stage{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1.18;
+  display:flex;align-items:center;justify-content:center;
+  perspective:1200px;
+}
+.vessel-wrap{
+  position:relative;
+  width:78%;
+  height:90%;
+  transform-style:preserve-3d;
+}
+.vessel{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+  animation:vessel-breathe 22s ease-in-out infinite;
+  transition:transform .8s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes vessel-breathe{
+  0%,100%{transform:rotateY(-5deg) rotateX(2deg)}
+  50%{transform:rotateY(5deg) rotateX(-2deg)}
+}
+
+/* translucent panels — layered like museum specimens */
+.panel{
+  position:absolute;
+  border-radius:8px;
+  pointer-events:none;
+  transition:transform .8s ease;
+}
+.panel.p-back{
+  inset:4% 14% 16% 4%;
+  background:
+    linear-gradient(160deg,
+      rgba(43,107,87,0.42) 0%,
+      rgba(43,107,87,0.22) 45%,
+      rgba(136,168,155,0.28) 100%);
+  mix-blend-mode:multiply;
+  box-shadow:
+    0 40px 80px -40px rgba(43,107,87,0.4),
+    inset 0 1px 0 rgba(250,247,242,0.3);
+  transform:translateZ(-30px);
+}
+.panel.p-mid{
+  inset:14% 4% 6% 16%;
+  background:
+    linear-gradient(200deg,
+      rgba(232,199,122,0.18) 0%,
+      rgba(250,247,242,0.55) 40%,
+      rgba(232,228,222,0.4) 100%);
+  border:0.5px solid rgba(212,168,83,0.22);
+  box-shadow:
+    0 20px 50px -25px rgba(35,33,31,0.18),
+    inset 0 0 30px rgba(250,247,242,0.4);
+  transform:translateZ(0);
+}
+.panel.p-front{
+  inset:24% 22% 24% 12%;
+  background:
+    linear-gradient(165deg,
+      rgba(232,228,222,0.6) 0%,
+      rgba(250,247,242,0.35) 55%,
+      rgba(43,107,87,0.1) 100%);
+  border:0.5px solid rgba(35,33,31,0.08);
+  box-shadow:
+    0 30px 60px -30px rgba(35,33,31,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  transform:translateZ(40px);
+}
+.panel.p-spine{
+  inset:8% 47% 8% 47%;
+  background:linear-gradient(180deg,
+    rgba(212,168,83,0.12) 0%,
+    rgba(212,168,83,0.06) 50%,
+    rgba(212,168,83,0.12) 100%);
+  border-left:0.5px solid rgba(212,168,83,0.4);
+  border-right:0.5px solid rgba(212,168,83,0.4);
+  border-radius:0;
+  transform:translateZ(20px);
+}
+
+/* brass armature SVG — the structural frame */
+.armature{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  transform:translateZ(50px);
+  z-index:5;
+}
+.armature path,.armature line,.armature rect{
+  stroke:var(--gold);
+  stroke-width:0.6;
+  fill:none;
+  vector-effect:non-scaling-stroke;
+  opacity:0.85;
+}
+.armature .accent{stroke-width:0.4;opacity:0.5}
+.armature .marker{fill:var(--gold);stroke:none;opacity:0.9}
+
+/* evidence dots — soft, embedded, breathing */
+.dot{
+  position:absolute;
+  width:8px;height:8px;border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(232,199,122,1) 0%,
+    rgba(212,168,83,0.9) 50%,
+    transparent 100%);
+  box-shadow:
+    0 0 14px 3px rgba(212,168,83,0.45),
+    0 0 4px rgba(232,199,122,0.8);
+  animation:dot-pulse 5s ease-in-out infinite;
+  transform:translateZ(60px);
+  z-index:4;
+}
+.dot.d1{top:30%;left:36%;animation-delay:0s}
+.dot.d2{top:46%;left:58%;animation-delay:1.4s}
+.dot.d3{top:62%;left:42%;animation-delay:2.8s}
+.dot.d4{top:38%;left:64%;animation-delay:0.6s;width:5px;height:5px}
+.dot.d5{top:72%;left:52%;animation-delay:3.4s}
+.dot.d6{top:54%;left:32%;animation-delay:2.0s;width:5px;height:5px}
+.dot.d7{top:24%;left:54%;animation-delay:4.0s;width:4px;height:4px}
+@keyframes dot-pulse{
+  0%,100%{opacity:0.55;transform:translateZ(60px) scale(1)}
+  50%{opacity:1;transform:translateZ(60px) scale(1.3)}
+}
+
+/* mono labels around vessel */
+.label{
+  position:absolute;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  letter-spacing:0.14em;
+  color:var(--ink-soft);
+  white-space:nowrap;
+  display:flex;align-items:center;gap:10px;
+  z-index:10;
+}
+.label::before{
+  content:'';
+  display:inline-block;
+  width:22px;height:1px;
+  background:var(--gold);
+}
+.label.right::before{display:none}
+.label.right::after{
+  content:'';
+  display:inline-block;
+  width:22px;height:1px;
+  background:var(--gold);
+}
+.label.l-tl{top:6%;left:-4%}
+.label.l-tr{top:18%;right:-2%}
+.label.l-bl{bottom:22%;left:-2%}
+.label.l-br{bottom:8%;right:-4%}
+
+/* base shadow */
+.vessel-shadow{
+  position:absolute;
+  bottom:-2%;left:14%;right:14%;height:28px;
+  background:radial-gradient(ellipse,
+    rgba(35,33,31,0.22) 0%,
+    rgba(35,33,31,0.08) 50%,
+    transparent 75%);
+  filter:blur(10px);
+  z-index:0;
+}
+
+/* footer cred + scroll prompt */
+.cred{
+  position:fixed;bottom:24px;left:48px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;letter-spacing:0.16em;
+  color:var(--ink-mute);
+  z-index:20;
+}
+.scroll-prompt{
+  position:fixed;bottom:24px;right:48px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;letter-spacing:0.16em;
+  color:var(--ink-mute);
+  display:flex;align-items:center;gap:10px;
+  z-index:20;
+}
+.scroll-prompt::after{
+  content:'';width:1px;height:20px;
+  background:var(--gold);
+  animation:scroll-line 2.4s ease-in-out infinite;
+}
+@keyframes scroll-line{
+  0%,100%{transform:scaleY(0.4);transform-origin:top}
+  50%{transform:scaleY(1);transform-origin:top}
+}
+
+@media (max-width:980px){
+  .nav{padding:20px 24px}
+  .nav-links{display:none}
+  .hero{
+    grid-template-columns:1fr;
+    padding:120px 24px 80px;
+    gap:48px;
+  }
+  .vessel-stage{height:520px;aspect-ratio:auto}
+  .cred,.scroll-prompt{display:none}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation:none !important;
+    transition:none !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="brand"><span class="brand-mark"></span>assembl</span>
+  <div class="nav-links">
+    <a href="#system">the system</a>
+    <a href="#sectors">sectors</a>
+    <a href="#evidence">evidence</a>
+    <a href="#contact">contact</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-text">
+    <div class="eyebrow">specialist kete · real nz operations</div>
+    <h1>quiet intelligence<br>for <em>aotearoa</em></h1>
+    <p class="lede">
+      new zealanders use ai widely and trust it warily. assembl runs each workflow in the open and ends each one with an evidence pack you can file, forward or footnote.
+    </p>
+    <div class="cta-row">
+      <a class="cta primary" href="#system">See it run on a real workflow</a>
+      <a class="cta secondary" href="#evidence">Read the evidence model</a>
+    </div>
+  </div>
+
+  <div class="vessel-stage" id="stage">
+    <div class="vessel-wrap">
+      <div class="vessel" id="vessel">
+
+        <div class="panel p-back"></div>
+        <div class="panel p-mid"></div>
+        <div class="panel p-spine"></div>
+        <div class="panel p-front"></div>
+
+        <svg class="armature" viewBox="0 0 100 118" preserveAspectRatio="none">
+          <!-- outer plinth frame -->
+          <rect x="5" y="3" width="90" height="112" rx="3" ry="3"/>
+          <!-- horizontal rails -->
+          <line x1="5" y1="20" x2="95" y2="20"/>
+          <line x1="5" y1="98" x2="95" y2="98"/>
+          <!-- spine seam -->
+          <line class="accent" x1="50" y1="3" x2="50" y2="20" stroke-dasharray="1.5,2"/>
+          <line class="accent" x1="50" y1="98" x2="50" y2="115" stroke-dasharray="1.5,2"/>
+          <!-- corner ticks -->
+          <line x1="5" y1="3" x2="12" y2="3"/>
+          <line x1="5" y1="3" x2="5" y2="10"/>
+          <line x1="88" y1="3" x2="95" y2="3"/>
+          <line x1="95" y1="3" x2="95" y2="10"/>
+          <line x1="5" y1="115" x2="12" y2="115"/>
+          <line x1="5" y1="108" x2="5" y2="115"/>
+          <line x1="88" y1="115" x2="95" y2="115"/>
+          <line x1="95" y1="108" x2="95" y2="115"/>
+          <!-- central plinth markers -->
+          <circle class="marker" cx="50" cy="11.5" r="0.9"/>
+          <circle class="marker" cx="50" cy="106.5" r="0.9"/>
+          <!-- side measure marks -->
+          <line class="accent" x1="5" y1="40" x2="9" y2="40"/>
+          <line class="accent" x1="5" y1="60" x2="9" y2="60"/>
+          <line class="accent" x1="5" y1="80" x2="9" y2="80"/>
+          <line class="accent" x1="91" y1="40" x2="95" y2="40"/>
+          <line class="accent" x1="91" y1="60" x2="95" y2="60"/>
+          <line class="accent" x1="91" y1="80" x2="95" y2="80"/>
+        </svg>
+
+        <span class="dot d1"></span>
+        <span class="dot d2"></span>
+        <span class="dot d3"></span>
+        <span class="dot d4"></span>
+        <span class="dot d5"></span>
+        <span class="dot d6"></span>
+        <span class="dot d7"></span>
+
+        <div class="vessel-shadow"></div>
+      </div>
+    </div>
+
+    <span class="label l-tl">signal in</span>
+    <span class="label l-tr right">evidence held</span>
+    <span class="label l-bl">decision out</span>
+    <span class="label l-br right">trail kept</span>
+  </div>
+</section>
+
+<div class="cred">prototype · v0.1 · paper, pounamu, brass</div>
+<div class="scroll-prompt">scroll to begin</div>
+
+<script>
+const stage=document.getElementById('stage');
+const vessel=document.getElementById('vessel');
+const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+if(!reduced){
+  let raf;
+  let tx=0,ty=0,cx=0,cy=0;
+
+  stage.addEventListener('mousemove',(e)=>{
+    const r=stage.getBoundingClientRect();
+    tx=((e.clientX-r.left)/r.width-0.5)*10;
+    ty=((e.clientY-r.top)/r.height-0.5)*8;
+  });
+  stage.addEventListener('mouseleave',()=>{
+    tx=0;ty=0;
+    vessel.style.transform='';
+    vessel.style.animation='vessel-breathe 22s ease-in-out infinite';
+  });
+  stage.addEventListener('mouseenter',()=>{
+    vessel.style.animation='none';
+  });
+
+  const tick=()=>{
+    cx+=(tx-cx)*0.08;
+    cy+=(ty-cy)*0.08;
+    if(Math.abs(tx)>0.01||Math.abs(ty)>0.01){
+      vessel.style.transform=`rotateY(${cx}deg) rotateX(${-cy}deg)`;
+    }
+    raf=requestAnimationFrame(tick);
+  };
+  tick();
+}
+</script>
+</body>
+</html>
