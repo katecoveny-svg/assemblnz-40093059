@@ -3,10 +3,21 @@
  *
  * Holding move while the proper Next.js port is built. Ports three local
  * prototypes (hero-vessel.html, scroll-story.html, sector-vessels.html)
- * into the live Vite + React site shell, using a real Midjourney vessel JPG
- * (public/img/hero/waihanga-vessel.jpg) for the hero band.
+ * into the live Vite + React site shell.
  *
- * Option A layout: full-bleed dark-green JPG hero band → cream paper
+ * Brand direction (current):
+ *   - Vessels are self-supporting organic translucent forms — NO brushed
+ *     brass armatures, hairline frames, or gold "rail" treatments around
+ *     vessel imagery. Soft gold #D4A853 stays only as: hover accents, fine
+ *     borders on cards, evidence-point dots, gold-italic emphasis text.
+ *   - Mono labels use thin pounamu underlines, not gold rails.
+ *
+ * Sector vessel cards: only Waihanga has a locked MJ render
+ * (/img/hero/waihanga-vessel.jpg). Manaaki, Pīkau, Auaha render placeholder
+ * tiles with a "vessel forthcoming" mono label until their renders are
+ * approved — we don't fake the imagery.
+ *
+ * Option A hero layout: full-bleed dark-green JPG hero band → cream paper
  * editorial heading → cream paper scroll story → cream paper sector vessels.
  * The dark-background hero is a deliberate temporary choice; the proper
  * cream-paper version comes once a spec-aligned MJ vessel is generated.
@@ -142,13 +153,13 @@ function Hero() {
           content: "";
           display: inline-block;
           width: 28px; height: 1px;
-          background: ${T.gold};
-          opacity: 0.85;
+          background: ${T.pounamuMist};
+          opacity: 0.7;
         }
         .hero-label--tr::before, .hero-label--br::before { display: none; }
         .hero-label--tr::after, .hero-label--br::after {
           content: ""; display: inline-block; width: 28px; height: 1px;
-          background: ${T.gold}; opacity: 0.85;
+          background: ${T.pounamuMist}; opacity: 0.7;
         }
         .hero-label--tl { top: 7%; left: 5%; }
         .hero-label--tr { top: 7%; right: 5%; }
@@ -213,7 +224,7 @@ function Editorial() {
           text-transform: lowercase;
         }
         .ed-eyebrow::before {
-          content: ""; width: 32px; height: 1px; background: ${T.gold};
+          content: ""; width: 32px; height: 1px; background: ${T.pounamu}; opacity: 0.5;
         }
         .ed-title {
           font-family: ${FONT_DISPLAY};
@@ -432,7 +443,7 @@ function ScrollStory() {
           text-transform: lowercase;
         }
         .story-eyebrow::before {
-          content: ""; width: 32px; height: 1px; background: ${T.gold};
+          content: ""; width: 32px; height: 1px; background: ${T.pounamu}; opacity: 0.5;
         }
         .story-h2 {
           font-family: ${FONT_DISPLAY};
@@ -609,9 +620,9 @@ function SceneStrata() {
           pointer-events: none; z-index: 0;
         }
         .s2-connectors line {
-          stroke: ${T.gold}; stroke-width: 0.5;
+          stroke: ${T.inkMute}; stroke-width: 0.5;
           vector-effect: non-scaling-stroke;
-          opacity: 0.5; stroke-dasharray: 2,2;
+          opacity: 0.35; stroke-dasharray: 2,2;
         }
         .s2-row {
           position: absolute;
@@ -628,7 +639,7 @@ function SceneStrata() {
         }
         .s2-rowtag::before {
           content: ""; display: inline-block; width: 14px; height: 1px;
-          background: ${T.gold};
+          background: ${T.pounamu}; opacity: 0.5;
           vertical-align: middle; margin-right: 8px;
         }
         .s2-note {
@@ -658,7 +669,7 @@ function SceneStrata() {
   );
 }
 
-/* ── Scene 3: translucent stack ── */
+/* ── Scene 3: translucent stack (organic, no armature) ── */
 function SceneStack() {
   return (
     <div className="s3-stage">
@@ -668,23 +679,12 @@ function SceneStack() {
         <div className="s3-panel s3-l3" />
         <div className="s3-panel s3-l4" />
         <div className="s3-panel s3-l5" />
-        <div className="s3-panel s3-l6" />
 
         <span className="s3-dot s3-dot-a" />
         <span className="s3-dot s3-dot-s s3-dot-b" />
         <span className="s3-dot s3-dot-c" />
         <span className="s3-dot s3-dot-s s3-dot-d" />
       </div>
-
-      <svg className="s3-armature" viewBox="0 0 100 105" preserveAspectRatio="none">
-        <rect x="6" y="3" width="88" height="99" rx="3" />
-        <line x1="6" y1="18" x2="94" y2="18" />
-        <line x1="6" y1="87" x2="94" y2="87" />
-        <line className="accent" x1="50" y1="3" x2="50" y2="18" />
-        <line className="accent" x1="50" y1="87" x2="50" y2="102" />
-        <circle className="marker" cx="50" cy="10.5" r="0.9" />
-        <circle className="marker" cx="50" cy="94.5" r="0.9" />
-      </svg>
 
       <style>{`
         .s3-stage { position: relative; width: 100%; height: 100%; }
@@ -722,25 +722,6 @@ function SceneStack() {
           background: linear-gradient(180deg, rgba(250,247,242,0.7), rgba(232,228,222,0.4));
           border: 0.5px solid rgba(35,33,31,0.06);
         }
-        .s3-l6 {
-          inset: 8% 48% 8% 48%;
-          background: linear-gradient(180deg, rgba(212,168,83,0.16), rgba(212,168,83,0.06) 50%, rgba(212,168,83,0.16));
-          border-left: 0.5px solid rgba(212,168,83,0.4);
-          border-right: 0.5px solid rgba(212,168,83,0.4);
-          border-radius: 0;
-        }
-        .s3-armature {
-          position: absolute; inset: 8% 10%;
-          width: 80%; height: 84%;
-          pointer-events: none;
-          opacity: 0.6;
-        }
-        .s3-armature line, .s3-armature rect, .s3-armature circle {
-          stroke: ${T.gold}; stroke-width: 0.5; fill: none;
-          vector-effect: non-scaling-stroke; opacity: 0.7;
-        }
-        .s3-armature .accent { stroke-width: 0.4; opacity: 0.4; stroke-dasharray: 1.5,2; }
-        .s3-armature .marker { fill: ${T.gold}; stroke: none; opacity: 0.8; }
         .s3-dot {
           position: absolute; width: 6px; height: 6px; border-radius: 50%;
           background: radial-gradient(circle, ${T.goldSoft}, ${T.gold} 70%, transparent);
@@ -757,7 +738,7 @@ function SceneStack() {
   );
 }
 
-/* ── Scene 4: full sculptural vessel ── */
+/* ── Scene 4: full sculptural vessel (organic translucent form) ── */
 function SceneVessel() {
   return (
     <div className="s4-stage">
@@ -765,32 +746,7 @@ function SceneVessel() {
         <div className="s4-vessel">
           <div className="v-panel v-back" />
           <div className="v-panel v-mid" />
-          <div className="v-panel v-spine" />
           <div className="v-panel v-front" />
-
-          <svg className="v-armature" viewBox="0 0 100 118" preserveAspectRatio="none">
-            <rect x="5" y="3" width="90" height="112" rx="3" ry="3" />
-            <line x1="5" y1="20" x2="95" y2="20" />
-            <line x1="5" y1="98" x2="95" y2="98" />
-            <line className="accent" x1="50" y1="3" x2="50" y2="20" strokeDasharray="1.5,2" />
-            <line className="accent" x1="50" y1="98" x2="50" y2="115" strokeDasharray="1.5,2" />
-            <line x1="5" y1="3" x2="12" y2="3" />
-            <line x1="5" y1="3" x2="5" y2="10" />
-            <line x1="88" y1="3" x2="95" y2="3" />
-            <line x1="95" y1="3" x2="95" y2="10" />
-            <line x1="5" y1="115" x2="12" y2="115" />
-            <line x1="5" y1="108" x2="5" y2="115" />
-            <line x1="88" y1="115" x2="95" y2="115" />
-            <line x1="95" y1="108" x2="95" y2="115" />
-            <circle className="marker" cx="50" cy="11.5" r="0.9" />
-            <circle className="marker" cx="50" cy="106.5" r="0.9" />
-            <line className="accent" x1="5" y1="40" x2="9" y2="40" />
-            <line className="accent" x1="5" y1="60" x2="9" y2="60" />
-            <line className="accent" x1="5" y1="80" x2="9" y2="80" />
-            <line className="accent" x1="91" y1="40" x2="95" y2="40" />
-            <line className="accent" x1="91" y1="60" x2="95" y2="60" />
-            <line className="accent" x1="91" y1="80" x2="95" y2="80" />
-          </svg>
 
           <span className="v-dot v-d1" />
           <span className="v-dot v-d2" />
@@ -824,16 +780,7 @@ function SceneBrief() {
           <div className="s4-vessel">
             <div className="v-panel v-back" />
             <div className="v-panel v-mid" />
-            <div className="v-panel v-spine" />
             <div className="v-panel v-front" />
-
-            <svg className="v-armature" viewBox="0 0 100 118" preserveAspectRatio="none">
-              <rect x="5" y="3" width="90" height="112" rx="3" ry="3" />
-              <line x1="5" y1="20" x2="95" y2="20" />
-              <line x1="5" y1="98" x2="95" y2="98" />
-              <circle className="marker" cx="50" cy="11.5" r="0.9" />
-              <circle className="marker" cx="50" cy="106.5" r="0.9" />
-            </svg>
 
             <span className="v-dot v-d1" />
             <span className="v-dot v-d2" />
@@ -961,7 +908,7 @@ function SceneBrief() {
           text-transform: lowercase;
         }
         .brief-eyebrow::before {
-          content: ""; width: 24px; height: 1px; background: ${T.gold};
+          content: ""; width: 24px; height: 1px; background: ${T.pounamu}; opacity: 0.5;
         }
         .brief-title {
           font-family: ${FONT_DISPLAY};
@@ -1019,7 +966,7 @@ function SceneBrief() {
           text-transform: lowercase;
         }
         .brief-cell dt::before {
-          content: ""; width: 14px; height: 1px; background: ${T.gold};
+          content: ""; width: 14px; height: 1px; background: ${T.pounamu}; opacity: 0.5;
         }
         .brief-cell dd {
           font-family: ${FONT_DISPLAY};
@@ -1071,24 +1018,6 @@ const vesselStyles = `
     box-shadow: 0 30px 60px -30px rgba(35,33,31,0.15), inset 0 1px 0 rgba(255,255,255,0.5);
     transform: translateZ(40px);
   }
-  .v-spine {
-    inset: 8% 47% 8% 47%;
-    background: linear-gradient(180deg, rgba(212,168,83,0.12), rgba(212,168,83,0.06) 50%, rgba(212,168,83,0.12));
-    border-left: 0.5px solid rgba(212,168,83,0.4);
-    border-right: 0.5px solid rgba(212,168,83,0.4);
-    border-radius: 0;
-    transform: translateZ(20px);
-  }
-  .v-armature {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    pointer-events: none; transform: translateZ(50px); z-index: 5;
-  }
-  .v-armature line, .v-armature rect, .v-armature circle {
-    stroke: #D4A853; stroke-width: 0.6; fill: none;
-    vector-effect: non-scaling-stroke; opacity: 0.85;
-  }
-  .v-armature .accent { stroke-width: 0.4; opacity: 0.5; }
-  .v-armature .marker { fill: #D4A853; stroke: none; opacity: 0.9; }
   .v-dot {
     position: absolute; width: 8px; height: 8px; border-radius: 50%;
     background: radial-gradient(circle, rgba(232,199,122,1), rgba(212,168,83,0.9) 50%, transparent);
@@ -1118,11 +1047,11 @@ const vesselStyles = `
     text-transform: lowercase;
   }
   .v-label::before {
-    content: ""; display: inline-block; width: 20px; height: 1px; background: #D4A853;
+    content: ""; display: inline-block; width: 20px; height: 1px; background: #2B6B57; opacity: 0.6;
   }
   .v-label-right::before { display: none; }
   .v-label-right::after {
-    content: ""; display: inline-block; width: 20px; height: 1px; background: #D4A853;
+    content: ""; display: inline-block; width: 20px; height: 1px; background: #2B6B57; opacity: 0.6;
   }
   .v-label-tl { top: 2%; left: 0%; }
   .v-label-tr { top: 14%; right: 0%; }
@@ -1130,7 +1059,11 @@ const vesselStyles = `
   .v-label-br { bottom: 6%; right: 0%; }
 `;
 
-/* ─── SECTOR VESSELS — four cards ─── */
+/* ─── SECTOR VESSELS — four cards
+ * Only Waihanga is locked. Manaaki/Pīkau/Auaha render placeholder tiles
+ * (cream wash + accent dot + "vessel forthcoming" mono label) until their
+ * MJ vessel renders are approved.
+ * ─── */
 type Sector = {
   key: string;
   reo: string;
@@ -1143,7 +1076,8 @@ type Sector = {
   evidence: string;
   context: string;
   action: string;
-  vessel: React.ReactNode;
+  image?: string;
+  status: "locked" | "forthcoming";
 };
 
 function SectorVessels() {
@@ -1160,7 +1094,8 @@ function SectorVessels() {
       evidence: "3,412 living data points across 17 territorial authorities",
       context: "Q2 consent issuance trending 8.4% below five-year mean",
       action: "review subcontractor pipeline · brief commercial team",
-      vessel: <VesselWaihanga />,
+      image: "/img/hero/waihanga-vessel.jpg",
+      status: "locked",
     },
     {
       key: "pikau",
@@ -1174,7 +1109,7 @@ function SectorVessels() {
       evidence: "live feed from Auckland, Tauranga, Lyttelton, Otago",
       context: "Tauranga dwell up 1.4 days · flow-on risk to perishables",
       action: "flag at-risk consignees · prepare client briefing",
-      vessel: <VesselPikau />,
+      status: "forthcoming",
     },
     {
       key: "manaaki",
@@ -1188,7 +1123,7 @@ function SectorVessels() {
       evidence: "POS, booking, review and visitation feeds — anonymised",
       context: "winter shoulder dwell strong in CHC · Auckland CBD softening",
       action: "tighten staff roster · hold price · brief operators",
-      vessel: <VesselManaaki />,
+      status: "forthcoming",
     },
     {
       key: "auaha",
@@ -1202,7 +1137,7 @@ function SectorVessels() {
       evidence: "open funding registers + curated industry feeds",
       context: "doc + scripted features both compressed · post-prod capacity tight",
       action: "pre-position studio bid · convene a writers' room",
-      vessel: <VesselAuaha />,
+      status: "forthcoming",
     },
   ];
 
@@ -1214,24 +1149,40 @@ function SectorVessels() {
           each sector, <em>its own</em> evidence vessel.
         </h2>
         <p className="sv-lede">
-          every industry holds its signals differently — pounamu hard, glass clear, silk warm,
-          archive deep. assembl renders each sector as a sculptural object you can read at a glance,
-          then interrogate at depth.
+          every industry holds its signals differently. assembl renders each sector as its own
+          translucent vessel — read at a glance, then interrogated at depth. waihanga is the first
+          rendered; the rest are forthcoming.
         </p>
       </header>
 
       <div className="sv-grid">
         {sectors.map((s) => (
-          <Link to={s.to} key={s.key} className="sv-card" style={{ ["--tag" as string]: s.color }} tabIndex={0}>
+          <Link
+            to={s.to}
+            key={s.key}
+            className="sv-card"
+            style={{ ["--tag" as never]: s.color, ["--accent-wash" as never]: hexToRgba(s.color, 0.08) }}
+            tabIndex={0}
+          >
             <div className="sv-card-head">
               <span className="sv-card-tag">
                 {s.reo} · {s.en}
               </span>
               <span>{s.index}</span>
             </div>
-            <div className={`sv-vessel sv-v-${s.key}`}>
-              <div className="sv-vessel-form">{s.vessel}</div>
+
+            <div className="sv-tile">
+              {s.status === "locked" && s.image ? (
+                <img src={s.image} alt={`${s.reo} vessel`} className="sv-tile-img" loading="lazy" decoding="async" />
+              ) : (
+                <div className="sv-tile-placeholder" aria-label={`${s.reo} vessel forthcoming`}>
+                  <span className="sv-tile-dot" aria-hidden />
+                  <span className="sv-tile-name">{s.reo}</span>
+                  <span className="sv-tile-status">vessel forthcoming</span>
+                </div>
+              )}
             </div>
+
             <h3 className="sv-card-name">
               {s.reo} <em>· {s.en}</em>
             </h3>
@@ -1263,7 +1214,7 @@ function SectorVessels() {
           text-transform: lowercase;
         }
         .sv-eyebrow::before {
-          content: ""; width: 32px; height: 1px; background: ${T.gold};
+          content: ""; width: 32px; height: 1px; background: ${T.pounamu}; opacity: 0.5;
         }
         .sv-title {
           font-family: ${FONT_DISPLAY};
@@ -1289,24 +1240,18 @@ function SectorVessels() {
           background: ${T.paper};
           border: 0.5px solid rgba(35,33,31,0.08);
           border-radius: 2px;
-          padding: 48px 40px 40px;
+          padding: 40px 40px 40px;
           display: flex; flex-direction: column; gap: 24px;
-          transition: all 0.6s cubic-bezier(.2,.8,.2,1);
+          transition: border-color .5s ease, box-shadow .5s ease, transform .5s ease;
           overflow: hidden;
           text-decoration: none;
           color: ${T.ink};
         }
-        .sv-card::before {
-          content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-          background: linear-gradient(90deg, transparent, ${T.gold}, transparent);
-          opacity: 0.4; transition: opacity .4s;
-        }
         .sv-card:hover, .sv-card:focus-within {
-          border-color: rgba(35,33,31,0.18);
+          border-color: var(--tag, ${T.pounamu});
           box-shadow: 0 30px 80px -40px rgba(35,33,31,0.18);
           transform: translateY(-2px);
         }
-        .sv-card:hover::before, .sv-card:focus-within::before { opacity: 1; }
         .sv-card-head {
           display: flex; justify-content: space-between; align-items: flex-start;
           font-family: ${FONT_MONO};
@@ -1316,21 +1261,59 @@ function SectorVessels() {
         .sv-card-tag { display: flex; align-items: center; gap: 10px; }
         .sv-card-tag::before {
           content: ""; width: 6px; height: 6px; border-radius: 50%;
-          background: var(--tag, ${T.gold});
+          background: var(--tag, ${T.pounamu});
         }
-        .sv-vessel {
-          position: relative; width: 100%; aspect-ratio: 1.2 / 1;
-          display: flex; align-items: center; justify-content: center;
-          margin: 8px 0 16px;
+
+        /* tile — image (locked) or placeholder (forthcoming) */
+        .sv-tile {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 1.2 / 1;
+          border-radius: 2px;
+          overflow: hidden;
+          background: ${T.paperDeep};
+          box-shadow: inset 0 0 0 0.5px rgba(35,33,31,0.06);
         }
-        .sv-vessel-form {
-          position: relative; width: 78%; height: 88%;
-          transform: rotateX(2deg);
-          transition: transform .8s cubic-bezier(.2,.8,.2,1);
+        .sv-tile-img {
+          width: 100%; height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 1.2s cubic-bezier(.2,.8,.2,1);
         }
-        .sv-card:hover .sv-vessel-form, .sv-card:focus-within .sv-vessel-form {
-          transform: rotateX(-2deg) rotateY(3deg);
+        .sv-card:hover .sv-tile-img, .sv-card:focus-within .sv-tile-img {
+          transform: scale(1.02);
         }
+        .sv-tile-placeholder {
+          position: absolute; inset: 0;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          gap: 14px;
+          background:
+            radial-gradient(ellipse 70% 60% at 50% 55%, var(--accent-wash, rgba(43,107,87,0.08)), transparent 70%),
+            ${T.paperDeep};
+          color: ${T.inkSoft};
+          padding: 24px;
+          text-align: center;
+        }
+        .sv-tile-dot {
+          width: 8px; height: 8px; border-radius: 50%;
+          background: var(--tag, ${T.pounamu});
+          opacity: 0.55;
+          box-shadow: 0 0 14px 2px var(--accent-wash, rgba(43,107,87,0.2));
+        }
+        .sv-tile-name {
+          font-family: ${FONT_DISPLAY};
+          font-style: italic; font-weight: 400;
+          font-size: 26px; line-height: 1;
+          color: ${T.ink};
+          text-transform: lowercase;
+        }
+        .sv-tile-status {
+          font-family: ${FONT_MONO};
+          font-size: 10px; letter-spacing: 0.18em;
+          color: ${T.inkMute};
+          text-transform: lowercase;
+        }
+
         .sv-card-name {
           font-family: ${FONT_DISPLAY};
           font-size: 38px; line-height: 1; letter-spacing: -0.005em;
@@ -1367,7 +1350,8 @@ function SectorVessels() {
         }
         .sv-row dt::before {
           content: ""; display: inline-block; width: 14px; height: 1px;
-          background: ${T.gold}; vertical-align: middle; margin-right: 8px;
+          background: ${T.pounamu}; opacity: 0.55;
+          vertical-align: middle; margin-right: 8px;
         }
         .sv-row dd { font-size: 13.5px; line-height: 1.55; color: ${T.ink}; margin: 0; }
         .sv-foot {
@@ -1378,110 +1362,9 @@ function SectorVessels() {
           text-transform: lowercase;
         }
 
-        /* armature shared */
-        .sv-arm { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-        .sv-arm line, .sv-arm rect, .sv-arm circle, .sv-arm path {
-          stroke: ${T.gold}; stroke-width: 0.6; fill: none;
-          vector-effect: non-scaling-stroke; opacity: 0.85;
-        }
-        .sv-arm .accent { stroke-width: 0.4; opacity: 0.5; }
-        .sv-arm .marker { fill: ${T.gold}; stroke: none; opacity: 0.9; }
-        .sv-pt {
-          position: absolute; width: 6px; height: 6px; border-radius: 50%;
-          background: radial-gradient(circle, ${T.goldSoft}, ${T.gold} 70%, transparent);
-          box-shadow: 0 0 10px 2px rgba(212,168,83,0.45);
-          animation: dot-pulse 5s ease-in-out infinite; z-index: 4;
-        }
-        .sv-pt-s { width: 4px; height: 4px; }
-
-        /* Waihanga blocky panels */
-        .sv-v-waihanga .sv-pn-1 {
-          position: absolute; inset: 6% 12% 16% 6%; border-radius: 6px;
-          background: linear-gradient(155deg, rgba(43,107,87,0.5), rgba(43,107,87,0.25) 60%, rgba(136,168,155,0.32));
-          mix-blend-mode: multiply;
-          box-shadow: 0 30px 60px -30px rgba(43,107,87,0.4);
-        }
-        .sv-v-waihanga .sv-pn-2 {
-          position: absolute; inset: 18% 6% 10% 18%; border-radius: 6px;
-          background: linear-gradient(190deg, rgba(232,228,222,0.55), rgba(250,247,242,0.3) 60%, rgba(43,107,87,0.1));
-          border: 0.5px solid rgba(212,168,83,0.2);
-        }
-        .sv-v-waihanga .sv-pn-3 {
-          position: absolute; inset: 28% 24% 24% 14%; border-radius: 6px;
-          background: linear-gradient(160deg, rgba(232,228,222,0.6), rgba(250,247,242,0.35));
-          border: 0.5px solid rgba(35,33,31,0.06);
-        }
-
-        /* Pikau capsule */
-        .sv-v-pikau .sv-pn-1 {
-          position: absolute; inset: 4% 28% 12% 28%; border-radius: 60px;
-          background: linear-gradient(180deg, rgba(44,74,122,0.42), rgba(44,74,122,0.22) 50%, rgba(122,146,181,0.3));
-          mix-blend-mode: multiply;
-          box-shadow: 0 30px 60px -30px rgba(44,74,122,0.42);
-        }
-        .sv-v-pikau .sv-pn-2 {
-          position: absolute; inset: 10% 32% 18% 32%; border-radius: 50px;
-          background: linear-gradient(180deg, rgba(232,228,222,0.5), rgba(250,247,242,0.35) 60%, rgba(44,74,122,0.12));
-          border: 0.5px solid rgba(212,168,83,0.3);
-        }
-        .sv-v-pikau .sv-pn-3 {
-          position: absolute; inset: 18% 38% 26% 38%; border-radius: 36px;
-          background: linear-gradient(180deg, rgba(250,247,242,0.55), rgba(232,228,222,0.4));
-          border: 0.5px solid rgba(35,33,31,0.08);
-        }
-
-        /* Manaaki petals */
-        .sv-v-manaaki .sv-pn-1 {
-          position: absolute; inset: 8% 18% 18% 18%;
-          border-radius: 50% 50% 45% 45%;
-          background: linear-gradient(155deg, rgba(184,92,60,0.45), rgba(184,92,60,0.22) 55%, rgba(224,168,142,0.32));
-          mix-blend-mode: multiply;
-          box-shadow: 0 30px 60px -30px rgba(184,92,60,0.4);
-          transform: rotate(-4deg);
-        }
-        .sv-v-manaaki .sv-pn-2 {
-          position: absolute; inset: 14% 12% 14% 22%;
-          border-radius: 50% 50% 40% 40%;
-          background: linear-gradient(195deg, rgba(232,199,122,0.32), rgba(250,247,242,0.45) 55%, rgba(232,228,222,0.35));
-          border: 0.5px solid rgba(212,168,83,0.28);
-          transform: rotate(2deg);
-        }
-        .sv-v-manaaki .sv-pn-3 {
-          position: absolute; inset: 24% 26% 24% 22%;
-          border-radius: 50% 50% 35% 35%;
-          background: linear-gradient(160deg, rgba(232,228,222,0.6), rgba(250,247,242,0.32));
-          border: 0.5px solid rgba(35,33,31,0.07);
-          transform: rotate(-2deg);
-        }
-
-        /* Auaha archive */
-        .sv-v-auaha .sv-pn-1 {
-          position: absolute; inset: 8% 10% 14% 10%; border-radius: 4px;
-          background: linear-gradient(160deg, rgba(61,45,92,0.45), rgba(61,45,92,0.22) 55%, rgba(154,138,181,0.3));
-          mix-blend-mode: multiply;
-          box-shadow: 0 30px 60px -30px rgba(61,45,92,0.4);
-        }
-        .sv-v-auaha .sv-pn-2 {
-          position: absolute; inset: 14% 14% 8% 16%; border-radius: 3px;
-          background: linear-gradient(200deg, rgba(232,199,122,0.18), rgba(250,247,242,0.5) 50%, rgba(154,138,181,0.18));
-          border: 0.5px solid rgba(212,168,83,0.24);
-        }
-        .sv-v-auaha .sv-pn-3 {
-          position: absolute; inset: 22% 22% 22% 22%; border-radius: 2px;
-          background: linear-gradient(165deg, rgba(232,228,222,0.55), rgba(250,247,242,0.35));
-          border: 0.5px solid rgba(35,33,31,0.08);
-        }
-        .sv-v-auaha .sv-pn-4 {
-          position: absolute; inset: 28% 38% 28% 38%;
-          background: linear-gradient(180deg, rgba(212,168,83,0.12), rgba(212,168,83,0.04));
-          border-left: 0.5px solid rgba(212,168,83,0.4);
-          border-right: 0.5px solid rgba(212,168,83,0.4);
-          border-radius: 0;
-        }
-
         @media (max-width: 980px) {
           .sv-grid { grid-template-columns: 1fr; padding: 0 24px; gap: 24px; }
-          .sv-card { padding: 36px 28px 32px; }
+          .sv-card { padding: 32px 28px 32px; }
           .sv-card-name { font-size: 32px; }
           .sv-reveal { grid-template-columns: 1fr; }
           .sv-head { padding: 0 24px; margin: 48px auto 40px; }
@@ -1497,108 +1380,10 @@ function SectorVessels() {
   );
 }
 
-function VesselWaihanga() {
-  return (
-    <>
-      <div className="sv-pn-1" />
-      <div className="sv-pn-2" />
-      <div className="sv-pn-3" />
-      <svg className="sv-arm" viewBox="0 0 100 84" preserveAspectRatio="none">
-        <rect x="5" y="3" width="90" height="78" rx="2" />
-        <line x1="5" y1="18" x2="95" y2="18" />
-        <line x1="5" y1="66" x2="95" y2="66" />
-        <line className="accent" x1="50" y1="3" x2="50" y2="18" strokeDasharray="1.5,2" />
-        <line className="accent" x1="50" y1="66" x2="50" y2="81" strokeDasharray="1.5,2" />
-        <circle className="marker" cx="50" cy="10.5" r="0.8" />
-        <circle className="marker" cx="50" cy="73.5" r="0.8" />
-      </svg>
-      <span className="sv-pt" style={{ top: "30%", left: "38%", animationDelay: ".2s" }} />
-      <span className="sv-pt sv-pt-s" style={{ top: "48%", left: "58%", animationDelay: "1.4s" }} />
-      <span className="sv-pt" style={{ top: "64%", left: "44%", animationDelay: "2.8s" }} />
-      <span className="sv-pt sv-pt-s" style={{ top: "38%", left: "62%", animationDelay: ".8s" }} />
-    </>
-  );
-}
-
-function VesselPikau() {
-  return (
-    <>
-      <div className="sv-pn-1" />
-      <div className="sv-pn-2" />
-      <div className="sv-pn-3" />
-      <svg className="sv-arm" viewBox="0 0 100 84" preserveAspectRatio="none">
-        <rect x="28" y="3" width="44" height="78" rx="22" />
-        <line x1="28" y1="20" x2="72" y2="20" />
-        <line x1="28" y1="64" x2="72" y2="64" />
-        <line className="accent" x1="50" y1="3" x2="50" y2="20" strokeDasharray="1.5,2" />
-        <line className="accent" x1="50" y1="64" x2="50" y2="81" strokeDasharray="1.5,2" />
-        <circle className="marker" cx="50" cy="11.5" r="0.8" />
-        <circle className="marker" cx="50" cy="72.5" r="0.8" />
-        <line className="accent" x1="22" y1="42" x2="28" y2="42" />
-        <line className="accent" x1="72" y1="42" x2="78" y2="42" />
-      </svg>
-      <span className="sv-pt" style={{ top: "28%", left: "48%", animationDelay: ".4s" }} />
-      <span className="sv-pt sv-pt-s" style={{ top: "46%", left: "46%", animationDelay: "1.8s" }} />
-      <span className="sv-pt" style={{ top: "60%", left: "50%", animationDelay: "3.2s" }} />
-    </>
-  );
-}
-
-function VesselManaaki() {
-  return (
-    <>
-      <div className="sv-pn-1" />
-      <div className="sv-pn-2" />
-      <div className="sv-pn-3" />
-      <svg className="sv-arm" viewBox="0 0 100 84" preserveAspectRatio="none">
-        <path d="M 12 70 Q 50 6 88 70 Z" />
-        <line x1="12" y1="70" x2="88" y2="70" />
-        <line className="accent" x1="50" y1="3" x2="50" y2="14" strokeDasharray="1.5,2" />
-        <line className="accent" x1="50" y1="70" x2="50" y2="81" strokeDasharray="1.5,2" />
-        <circle className="marker" cx="50" cy="9" r="0.8" />
-        <circle className="marker" cx="50" cy="76" r="0.8" />
-        <line className="accent" x1="20" y1="56" x2="14" y2="56" />
-        <line className="accent" x1="80" y1="56" x2="86" y2="56" />
-      </svg>
-      <span
-        className="sv-pt"
-        style={{ top: "36%", left: "46%", animationDelay: ".4s", background: "radial-gradient(circle, #E8C77A, #B85C3C 70%, transparent)" }}
-      />
-      <span
-        className="sv-pt sv-pt-s"
-        style={{ top: "52%", left: "38%", animationDelay: "2.0s", background: "radial-gradient(circle, #E8C77A, #B85C3C 70%, transparent)" }}
-      />
-      <span
-        className="sv-pt sv-pt-s"
-        style={{ top: "50%", left: "58%", animationDelay: "3.4s", background: "radial-gradient(circle, #E8C77A, #B85C3C 70%, transparent)" }}
-      />
-    </>
-  );
-}
-
-function VesselAuaha() {
-  return (
-    <>
-      <div className="sv-pn-1" />
-      <div className="sv-pn-2" />
-      <div className="sv-pn-3" />
-      <div className="sv-pn-4" />
-      <svg className="sv-arm" viewBox="0 0 100 84" preserveAspectRatio="none">
-        <rect x="6" y="3" width="88" height="78" rx="1" />
-        <line x1="6" y1="22" x2="94" y2="22" />
-        <line x1="6" y1="42" x2="94" y2="42" />
-        <line x1="6" y1="62" x2="94" y2="62" />
-        <line className="accent" x1="50" y1="3" x2="50" y2="81" strokeDasharray="1,2.5" />
-        <circle className="marker" cx="50" cy="12.5" r="0.7" />
-        <circle className="marker" cx="50" cy="32" r="0.7" />
-        <circle className="marker" cx="50" cy="52" r="0.7" />
-        <circle className="marker" cx="50" cy="71.5" r="0.7" />
-      </svg>
-      <span className="sv-pt sv-pt-s" style={{ top: "18%", left: "36%", animationDelay: ".4s" }} />
-      <span className="sv-pt sv-pt-s" style={{ top: "32%", left: "64%", animationDelay: "1.6s" }} />
-      <span className="sv-pt" style={{ top: "48%", left: "44%", animationDelay: "2.4s" }} />
-      <span className="sv-pt sv-pt-s" style={{ top: "62%", left: "58%", animationDelay: "3.6s" }} />
-      <span className="sv-pt sv-pt-s" style={{ top: "74%", left: "40%", animationDelay: "4.4s" }} />
-    </>
-  );
+function hexToRgba(hex: string, alpha: number) {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
