@@ -23,10 +23,10 @@ Locked 2026-04-24.
 | Paper | `#FAF7F2` | Dominant background. Should fill ≥80% of every page. |
 | Ink | `#23211F` | Body text. |
 | Pounamu | `#2B6B57` | Primary accent. The evidence vessel green. |
-| Soft gold | `#D4A853` | Gold light points, brass armature, hairline borders. |
+| Soft gold | `#D4A853` | Embedded gold light points, hairline borders. |
 | Mist | `#E8E4DE` | Surfaces and secondary cards. |
 
-Paper carries the page. Ink reads against it. Pounamu is the only saturated colour that gets to be loud, and even then it appears in small areas — a vessel, a label, a hairline. Soft gold is reserved for the embedded light points and brass armatures in the visual language; it should never become a fill.
+Paper carries the page. Ink reads against it. Pounamu is the only saturated colour that gets to be loud, and even then it appears in small areas — a vessel, a label, a hairline. Soft gold is reserved for the embedded light points inside the vessels and for hairline borders; it should never become a fill.
 
 ### Kete accents
 
@@ -99,7 +99,9 @@ If a draft contains any of the above, rewrite the sentence rather than swapping 
 
 ## 6. Visual language — sculptural evidence vessels
 
-The signature motif is a sculptural evidence vessel: translucent pounamu mineral, frosted glass, sheer silk organza, fine brushed brass armatures, soft gold light points embedded in the material, cream paper backdrop, natural sunlight, editorial product photography.
+The signature motif is a sculptural evidence vessel: translucent pounamu mineral, frosted glass, sheer silk organza, soft gold light points embedded in the material, cream paper backdrop, natural sunlight, editorial product photography.
+
+Vessels are self-supporting organic forms — no brass cage, no rails, no metal framing. Each kete keeps its distinctive material and form metaphor (constructed Waihanga, drifting Pīkau, blooming Manaaki, archive Auaha) but holds itself.
 
 Reference points: Aesop product photography, Joby Aviation cinematic scroll storytelling, Linear's interface clarity.
 
@@ -119,21 +121,29 @@ Reference points: Aesop product photography, Joby Aviation cinematic scroll stor
 
 Each kete has a fixed material recipe. These are the presets the Vessel Studio works from. Do not improvise new materials per piece.
 
-**Waihanga (Construction).** Translucent jade pounamu mineral panels stacked into architectural block forms. Fine brushed brass armature cage in a geometric grid. Six embedded gold light points.
-
-**Pīkau (Freight & Customs).** Translucent cobalt and ice blue glass elongated capsule forms. Fine brushed brass rails. Eight gold points suggesting movement and route data.
-
-**Manaaki (Hospitality).** Translucent terracotta and warm rose silk organza petals layered into an organic blooming form. Brass armature. Warm amber and soft gold points.
-
-**Auaha (Creative).** Translucent deep violet and dusty plum membranes layered like archive folios. Brass armature spine. Ten gold flecks.
+- **Waihanga (Construction)** — translucent jade pounamu mineral folded into a monolithic organic form, iridescent layered surfaces with luminous green and cream marbled depths, six embedded soft gold light points
+- **Pīkau (Freight & Customs)** — translucent cobalt and ice blue glass-organza folded into an elongated drifting form, refractive wave-like layers, eight embedded soft gold light points suggesting movement and route data
+- **Manaaki (Hospitality)** — translucent terracotta and warm rose silk organza petals layered into an organic self-supporting blooming form, embedded warm amber and soft gold light points like welcoming candle glow
+- **Auaha (Creative)** — translucent deep violet and dusty plum silk-membrane folded into a layered archive-bloom form, ten embedded soft gold flecks like creative ideas surfacing
 
 ---
 
-## 8. Image generation conventions
+## 8. Locked canonical renders
+
+These are the renders treated as canonical for each kete. Use them in product, slides, and social. Do not regenerate or substitute without updating this section.
+
+- **Waihanga** — hero image at `public/img/hero/waihanga-vessel.jpg`. Organic pounamu shell. The dark backdrop is a temporary tradeoff; swap when a cream-backdrop version exists.
+- **Manaaki** — locked render is the terracotta silk bloom on warm cream paper from the 2026-05-07 generation set. Master file: `public/img/kete/manaaki-vessel.png` (Kate to upload — task does not need to copy it in).
+- **Pīkau** — not yet locked. Kate will generate using the updated section 7 prompt.
+- **Auaha** — not yet locked. Kate will generate using the updated section 7 prompt.
+
+---
+
+## 9. Image generation conventions
 
 For Midjourney, Fal, OpenAI, and any other generator:
 
-- Always include the negative anchor: `--no dark background, forest, gemstone, organic shell, pebble`
+- Always include the negative anchor: `--no dark background, forest, gemstone, organic shell, pebble, no brass armature, no cage, no rails, no spine, no metal frame`
 - Generate the hero image first, then lock the four kete generations to that hero's `--sref` so the set reads as a single shoot
 - For Fal flux-pro v1.1 ultra-redux, the negative anchor goes inlined parenthetically at the end of the positive prompt (no `--no` flag support)
 - Cream paper backdrop is non-negotiable. Reject any generation that drifts to a dark or forest background.
@@ -141,7 +151,7 @@ For Midjourney, Fal, OpenAI, and any other generator:
 
 ---
 
-## 9. Social and web export sizes
+## 10. Social and web export sizes
 
 Canonical list. Use these dimensions verbatim — do not round or substitute.
 
@@ -178,7 +188,7 @@ Canonical list. Use these dimensions verbatim — do not round or substitute.
 
 ---
 
-## 10. AI Blueprint for Aotearoa alignment
+## 11. AI Blueprint for Aotearoa alignment
 
 Published May 2026.
 
@@ -190,7 +200,7 @@ Published May 2026.
 
 ---
 
-## 11. Tikanga compliance
+## 12. Tikanga compliance
 
 Non-negotiable.
 
@@ -201,7 +211,7 @@ Non-negotiable.
 
 ---
 
-## 12. Component naming convention
+## 13. Component naming convention
 
 The upcoming homepage refresh task should produce these components.
 
@@ -225,7 +235,7 @@ New components introduced by future tasks should match the same naming rhythm: P
 
 ---
 
-## 13. Copyright and content boundaries
+## 14. Copyright and content boundaries
 
 - Original visual designs only. Never copy existing artists' work.
 - Original prompts only. Do not reference specific named artists in Midjourney or Fal prompts.
@@ -243,3 +253,4 @@ New components introduced by future tasks should match the same naming rhythm: P
 ## Changelog
 
 - 2026-05-07 — Initial locked spec consolidated from brand decisions of 2026-04-07 (voice) and 2026-04-24 (Mārama Whenua palette).
+- 2026-05-07 — Dropped brushed-brass armature from the visual system. Forms are now self-supporting organic translucent vessels (no cage, rails, or spine). Material grammar per kete rewritten. Negative anchor extended. New "Locked canonical renders" section added (Waihanga and Manaaki locked; Pīkau and Auaha pending).
